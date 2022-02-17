@@ -60,10 +60,10 @@ need table read permissions just like the real query
 ### Things this can't catch
 
 There are certain cases where a syntactically valid query can fail due to the data in 
-the tables being wrong/too large:
+the tables:
 
 1. Queries that run but do not return intended/correct result. This is checked using [tests][dbt-tests]
-2. NULL values in ARRAY_AGG (See [IGNORE_NULLS bullet point][bq-ignore-nulls])
+2. `NULL` values in `ARRAY_AGG` (See [IGNORE_NULLS bullet point][bq-ignore-nulls])
 3. Bad query performance that makes it too complex/expensive to run
 
 ### Things still to do...
@@ -80,4 +80,4 @@ files.
 [dbt-home]: https://www.getdbt.com/
 [bq-dry-run]: https://cloud.google.com/bigquery/docs/dry-run-queries
 [dbt-tests]: https://docs.getdbt.com/docs/building-a-dbt-project/tests
-[bg-ignore-nulls]: https://cloud.google.com/bigquery/docs/reference/standard-sql/aggregate_functions#array_agg
+[bq-ignore-nulls]: https://cloud.google.com/bigquery/docs/reference/standard-sql/aggregate_functions#array_agg
