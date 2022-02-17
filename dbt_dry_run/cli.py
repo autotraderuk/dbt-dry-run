@@ -13,7 +13,11 @@ parser = argparse.ArgumentParser(description="Dry run DBT")
 parser.add_argument(
     "profile", metavar="PROFILE", type=str, help="The profile to dry run against"
 )
-parser.add_argument("--manifest-path", default="manifest.json", help="The location of the compiled manifest.json")
+parser.add_argument(
+    "--manifest-path",
+    default="manifest.json",
+    help="The location of the compiled manifest.json",
+)
 parser.add_argument("--target", type=str, help="The target to dry run against")
 parser.add_argument(
     "--profiles-dir",

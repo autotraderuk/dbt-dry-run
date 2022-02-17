@@ -22,6 +22,7 @@ class OnSchemaChange(str, Enum):
 class NodeConfig(BaseModel):
     materialized: str
     on_schema_change: Optional[OnSchemaChange]
+    sql_header: Optional[str]
 
 
 class Node(BaseModel):

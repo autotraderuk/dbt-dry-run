@@ -72,14 +72,22 @@ ON_SCHEMA_CHANGE_TABLE_HANDLER: Dict[
 class ModelRunner(NodeRunner):
     resource_type = "model"
 
+    def _modify_sql(self, node: Node, sql_statement: str) -> str:
+        if node.config.materialized == "view":
+            sql_statement = f"CREATE OR REPLACE VIEW `{node.database}`.`{node.db_schema}`.`{node.alias}` AS (\n{sql_statement}\n)"
+
+        if node.config.sql_header:
+            sql_statement = f"{node.config.sql_header}\n{sql_statement}"
+
+        return sql_statement
+
     def run(self, node: Node) -> DryRunResult:
         try:
             run_sql = self._insert_dependant_sql_literals(node)
         except UpstreamFailedException as e:
             return DryRunResult(node, None, DryRunStatus.FAILURE, e)
 
-        if node.config.materialized == "view":
-            run_sql = f"CREATE OR REPLACE VIEW `{node.database}`.`{node.db_schema}`.`{node.alias}` AS (\n{run_sql}\n)"
+        run_sql = self._modify_sql(node, run_sql)
         status, predicted_table, exception = self._sql_runner.query(run_sql)
 
         result = DryRunResult(node, predicted_table, status, exception)

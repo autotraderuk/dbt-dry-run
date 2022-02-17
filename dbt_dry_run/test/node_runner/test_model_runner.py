@@ -69,7 +69,7 @@ def test_model_as_view_runs_create_view() -> None:
     mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, A_SIMPLE_TABLE, None)
 
     node = SimpleNode(
-        unique_id="node1", depends_on=[], resource_type=ManifestScheduler.SEED
+        unique_id="node1", depends_on=[], resource_type=ManifestScheduler.MODEL
     ).to_node()
     node.depends_on.deep_nodes = []
     node.config.materialized = "view"
@@ -408,3 +408,25 @@ def assert_result_has_table(expected: Table, actual: DryRunResult) -> None:
     assert (
         actual_field_names == expected_field_names
     ), f"Actual field names: {actual_field_names} did not equal expected: {expected_field_names}"
+
+
+def test_model_with_sql_header_executes_header_first() -> None:
+    mock_sql_runner = MagicMock()
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, A_SIMPLE_TABLE, None)
+
+    pre_header_value = "DECLARE x INT64;"
+
+    node = SimpleNode(
+        unique_id="node1", depends_on=[], resource_type=ManifestScheduler.MODEL
+    ).to_node()
+    node.depends_on.deep_nodes = []
+    node.config.sql_header = pre_header_value
+
+    results = Results()
+
+    model_runner = ModelRunner(mock_sql_runner, results)
+    model_runner.run(node)
+
+    executed_sql = get_executed_sql(mock_sql_runner)
+    assert executed_sql.startswith(pre_header_value)
+    assert node.compiled_sql in executed_sql
