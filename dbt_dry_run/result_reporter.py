@@ -1,7 +1,7 @@
 import re
 from typing import List, Set, Tuple
 
-from dbt_dry_run.models import DryRunResult, DryRunStatus
+from dbt_dry_run.models import DryRunResult, DryRunStatus, Report, ReportNode
 from dbt_dry_run.results import Results
 
 QUERY_JOB_SQL_FOLLOWS = "-----Query Job SQL Follows-----"
@@ -27,6 +27,39 @@ class ResultReporter:
             print(
                 f"{index + 1}\t:\t{failure.node.unique_id}\t:\t{exception_col}\t:\t{excluded_col}"
             )
+
+    def write_results_artefact(self, output_path: str) -> None:
+        report_nodes: List[ReportNode] = []
+        success = True
+        node_count = 0
+        failure_count = 0
+        failed_node_ids: List[str] = []
+
+        for result in self._results.values():
+            new_node = ReportNode(
+                unique_id=result.node.unique_id,
+                success=result.status == DryRunStatus.SUCCESS,
+                error_message=result.exception.__class__.__name__,
+                table=result.table,
+            )
+            report_nodes.append(new_node)
+
+            node_count += 1
+            if not new_node.success:
+                success = False
+                failure_count += 1
+                failed_node_ids.append(new_node.unique_id)
+
+        report = Report(
+            success=success,
+            node_count=node_count,
+            failure_count=failure_count,
+            failed_node_ids=failed_node_ids,
+            nodes=report_nodes,
+        )
+
+        with open(output_path, "w") as f:
+            f.write(report.json(by_alias=True))
 
     def report_and_check_results(self) -> int:
         failures: List[Tuple[DryRunResult, bool]] = []

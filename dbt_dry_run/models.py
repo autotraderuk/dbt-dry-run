@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 
 from google.cloud.bigquery.schema import SchemaField
 from google.cloud.bigquery.table import Table as BigQueryTable
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, root_validator
 
 from dbt_dry_run.manifest import Node
 
@@ -95,6 +95,21 @@ class DryRunResult:
         )
 
 
+class ReportNode(BaseModel):
+    unique_id: str
+    success: bool
+    error_message: Optional[str]
+    table: Optional[Table]
+
+
+class Report(BaseModel):
+    success: bool
+    node_count: int = Field(..., ge=0)
+    failure_count: int = Field(..., ge=0)
+    failed_node_ids: List[str] = []
+    nodes: List[ReportNode]
+
+
 class BigQueryConnectionMethod(str, Enum):
     OAUTH = "oauth"
     SERVICE_ACCOUNT = "service-account"
@@ -108,7 +123,7 @@ class Output(BaseModel):
     location: str
     threads: int = Field(..., ge=1)
     timeout_seconds: int = Field(..., ge=0)
-    keyfile: Path
+    keyfile: Optional[Path] = None
     impersonate_service_account: Optional[str] = None
     scopes: List[str] = []
 
@@ -117,13 +132,13 @@ class Profile(BaseModel):
     outputs: Dict[str, Output]
     target: str
 
-    @validator("target")
-    def target_must_be_valid_output(
-        cls, target: str, values: Dict[str, Any], **kwargs: Dict[str, Any]
-    ) -> str:
+    @root_validator(pre=True)
+    def target_must_be_valid_output(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        print(values)
         output_keys = set(values["outputs"].keys())
+        target = values["target"]
         if target not in output_keys:
             raise ValueError(
                 f"target={target} but it must be valid output={output_keys}"
             )
-        return target
+        return values

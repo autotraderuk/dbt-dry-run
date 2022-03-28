@@ -37,7 +37,10 @@ jobs:
         run: poetry install --no-interaction --no-root
 
       - name: Run build
+        env:
+          DRY_RUN_SVC_JSON: ${{ secrets.DRY_RUN_SVC_JSON }}
         run: |
+          echo $DRY_RUN_SVC_JSON | base64 --decode >> $HOME/bq_svc.json
           source .venv/bin/activate
           make build
 

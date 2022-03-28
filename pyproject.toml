@@ -25,13 +25,14 @@ pyyaml = "~6"
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"
 isort = "^5.10.1"
-pytest = "^6.2.5"
+pytest = "^7.1.2"
 mypy = "^0.931"
 types-PyYAML = "^6.0.4"
 pytest-cov = "^3.0.0"
 twine = "^3.8.0"
 types-setuptools = "^57.4.9"
 pytest-mock = "^3.7.0"
+dbt-bigquery = "^1.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -41,6 +42,9 @@ build-backend = "poetry.core.masonry.api"
 testpaths = "dbt_dry_run/test"
 filterwarnings = [
     "error"
+]
+pythonpath = [
+  "."
 ]
 
 [tool.coverage.run]

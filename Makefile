@@ -11,6 +11,10 @@ testcov: test
 	@echo "building coverage html"
 	@coverage html
 
+.PHONY: integration
+integration:
+	pytest ./integration
+
 .PHONY: mypy
 mypy:
 	mypy dbt_dry_run
@@ -22,10 +26,10 @@ format:
 
 .PHONY: verify
 verify: format mypy test
-	git diff --exit-code # Exit 1 if there are changes from format
 
 .PHONY: build
-build: verify
+build: verify integration
+	git diff --exit-code # Exit 1 if there are changes from format
 	rm -r ./dist || true
 	poetry build
 
