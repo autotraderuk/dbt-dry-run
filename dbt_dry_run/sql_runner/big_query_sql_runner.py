@@ -36,9 +36,8 @@ QUERY_TIMED_OUT = "Dry run query timed out"
 class BigQuerySQLRunner(SQLRunner):
     JOB_CONFIG = QueryJobConfig(dry_run=True, use_query_cache=False)
 
-    def __init__(self, client: Client, verbose_error: bool = False):
+    def __init__(self, client: Client):
         self.client = client
-        self.verbose_error = verbose_error
 
     @classmethod
     def from_profile(cls, output: Output) -> "BigQuerySQLRunner":

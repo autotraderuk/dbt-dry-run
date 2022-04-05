@@ -74,10 +74,28 @@ implemented the methods of how we connect to our warehouse so if you don't use O
 service account JSON files then this won't be able to read `profiles.yml` correctly.
 
 The implementation of seeds is incomplete as well as we don't use them very much in our 
-own dbt projects. The dry runner will just use the datatypes that agate infers of your CSV ]
+own dbt projects. The dry runner will just use the datatypes that `agate` infers from the CSV 
 files.
+
+Snapshots are also not yet supported.
 
 [dbt-home]: https://www.getdbt.com/
 [bq-dry-run]: https://cloud.google.com/bigquery/docs/dry-run-queries
 [dbt-tests]: https://docs.getdbt.com/docs/building-a-dbt-project/tests
 [bq-ignore-nulls]: https://cloud.google.com/bigquery/docs/reference/standard-sql/aggregate_functions#array_agg
+
+## License
+
+Copyright 2022 Auto Trader Limited
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
