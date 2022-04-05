@@ -31,14 +31,14 @@ from dbt_dry_run.version import VERSION
 
 MAX_ATTEMPT_NUMBER = 5
 QUERY_TIMED_OUT = "Dry run query timed out"
-QUERY_JOB_SQL_FOLLOWS = "-----Query Job SQL Follows-----"
 
 
 class BigQuerySQLRunner(SQLRunner):
     JOB_CONFIG = QueryJobConfig(dry_run=True, use_query_cache=False)
 
-    def __init__(self, client: Client):
+    def __init__(self, client: Client, verbose_error: bool = False):
         self.client = client
+        self.verbose_error = verbose_error
 
     @classmethod
     def from_profile(cls, output: Output) -> "BigQuerySQLRunner":
@@ -87,12 +87,9 @@ class BigQuerySQLRunner(SQLRunner):
             table = self.get_schema_from_query_job(query_job)
             status = DryRunStatus.SUCCESS
         except (Forbidden, BadRequest, NotFound) as e:
+            status = DryRunStatus.FAILURE
             if QUERY_TIMED_OUT in str(e):
                 raise
-            status = DryRunStatus.FAILURE
-            query_job_slq_position = e.message.find(QUERY_JOB_SQL_FOLLOWS)
-            if query_job_slq_position:
-                e.message = e.message[:query_job_slq_position].strip()
             exception = e
         return status, table, exception
 

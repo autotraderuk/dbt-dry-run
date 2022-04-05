@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dbt-dry-run"
-version = "0.1.4"
+version = "0.1.5"
 description = "Dry run dbt projects"
 authors = ["Connor Charles <connor.charles@autotrader.co.uk>"]
 readme = "README.md"

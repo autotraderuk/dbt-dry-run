@@ -33,6 +33,9 @@ parser.add_argument(
 parser.add_argument(
     "--model", help="Only dry run this model and its upstream dependencies"
 )
+parser.add_argument(
+    "--verbose", action="store_true", help="Output verbose error messages"
+)
 
 PROFILE_FILENAME = "profiles.yml"
 
@@ -57,7 +60,9 @@ def run() -> int:
 
     dry_run_results = dry_run_manifest(manifest, output, parsed_args.model)
 
-    exit_code = ResultReporter(dry_run_results, set()).report_and_check_results()
+    exit_code = ResultReporter(
+        dry_run_results, set(), parsed_args.verbose
+    ).report_and_check_results()
     if parsed_args.ignore_result:
         exit_code = 0
     return exit_code

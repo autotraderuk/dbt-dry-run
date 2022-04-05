@@ -20,7 +20,7 @@ format:
 	black dbt_dry_run && isort dbt_dry_run
 
 .PHONE: build
-build:
+build: format mypy test
 	rm -r ./dist || true
 	poetry build
 
