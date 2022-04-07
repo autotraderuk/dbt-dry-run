@@ -5,6 +5,8 @@ executed against a target data warehouse. It doesn't check the validity of SQL q
 This dry runner uses BigQuery's [dry run][bq-dry-run] capability to allow you to check that SQL queries are valid before
 trying to execute them.
 
+See the [blog post][blog-post] for more information on how the dry runner works.
+
 ## Quickstart
 
 ### Installation
@@ -83,6 +85,7 @@ Snapshots are also not yet supported.
 [bq-dry-run]: https://cloud.google.com/bigquery/docs/dry-run-queries
 [dbt-tests]: https://docs.getdbt.com/docs/building-a-dbt-project/tests
 [bq-ignore-nulls]: https://cloud.google.com/bigquery/docs/reference/standard-sql/aggregate_functions#array_agg
+[blog-post]: https://engineering.autotrader.co.uk/2022/04/06/dry-running-our-data-warehouse-using-bigquery-and-dbt.html
 
 ## License
 
