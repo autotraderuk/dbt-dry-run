@@ -107,8 +107,9 @@ class Output(BaseModel):
     db_schema: str = Field(..., alias="schema")
     location: str
     threads: int = Field(..., ge=1)
-    timeout_seconds: float = Field(..., ge=0)
+    timeout_seconds: int = Field(..., ge=0)
     keyfile: Path
+    impersonate_service_account: Optional[str] = None
     scopes: List[str] = []
 
 

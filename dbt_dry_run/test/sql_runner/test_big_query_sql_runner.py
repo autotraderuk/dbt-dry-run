@@ -4,12 +4,74 @@ import pytest
 from google.api_core.exceptions import BadRequest
 from tenacity import RetryError, wait_none
 
-from dbt_dry_run.models import DryRunStatus
+from dbt_dry_run.models import DryRunStatus, Output
 from dbt_dry_run.sql_runner.big_query_sql_runner import (
     MAX_ATTEMPT_NUMBER,
     QUERY_TIMED_OUT,
     BigQuerySQLRunner,
 )
+
+
+def test_from_profile_with_oauth_impersonating_service_account_credentials() -> None:
+    dbt_profile_config = {
+        'type': 'bigquery',
+        'method': 'oauth',
+        'project': 'admin-project',
+        'schema': 'core',
+        'location': 'EU',
+        'threads': 8,
+        'timeout_seconds': 300,
+        'keyfile': 'some_path_to_key_file.json',
+        'impersonate_service_account': 'data-product@dbt.iam.gserviceaccount.com'
+    }
+    output = Output(**dbt_profile_config)
+    actual = BigQuerySQLRunner.from_profile(output)
+
+
+def test_from_profile_with_service_account_impersonating_service_account_credentials() -> None:
+    dbt_profile_config = {
+        'type': 'bigquery',
+        'method': 'service-account',
+        'project': 'admin-project',
+        'schema': 'core',
+        'location': 'EU',
+        'threads': 8,
+        'timeout_seconds': 300,
+        'keyfile': 'some_path_to_key_file.json',
+        'impersonate_service_account': 'data-product@dbt.iam.gserviceaccount.com'
+    }
+    output = Output(**dbt_profile_config)
+    actual = BigQuerySQLRunner.from_profile(output)
+
+
+def test_from_profile_with_oauth_credentials() -> None:
+    dbt_profile_config = {
+        'type': 'bigquery',
+        'method': 'oauth',
+        'project': 'admin-project',
+        'schema': 'core',
+        'location': 'EU',
+        'threads': 8,
+        'timeout_seconds': 300,
+        'keyfile': 'some_path_to_key_file.json'
+    }
+    output = Output(**dbt_profile_config)
+    actual = BigQuerySQLRunner.from_profile(output)
+
+
+def test_from_profile_with_service_account_credentials() -> None:
+    dbt_profile_config = {
+        'type': 'bigquery',
+        'method': 'service-account',
+        'project': 'admin-project',
+        'schema': 'core',
+        'location': 'EU',
+        'threads': 8,
+        'timeout_seconds': 300,
+        'keyfile': 'some_path_to_key_file.json'
+    }
+    output = Output(**dbt_profile_config)
+    actual = BigQuerySQLRunner.from_profile(output)
 
 
 def test_timeout_query_retries() -> None:

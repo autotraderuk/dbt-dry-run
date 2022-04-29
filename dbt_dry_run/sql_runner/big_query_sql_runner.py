@@ -2,6 +2,7 @@ from typing import Optional, Tuple
 
 import google
 from google.api_core import client_info
+from google.auth import impersonated_credentials
 from google.cloud.bigquery import (
     Client,
     DatasetReference,
@@ -41,6 +42,29 @@ class BigQuerySQLRunner(SQLRunner):
 
     @classmethod
     def from_profile(cls, output: Output) -> "BigQuerySQLRunner":
+        if output.impersonate_service_account:
+            creds = cls.get_impersonated_bigquery_credentials(output)
+        else:
+            creds = cls.get_bigquery_credentials(output)
+
+        info = client_info.ClientInfo(user_agent=f"dbt-dry-run-{VERSION}")
+        client = Client(
+            output.project, creds, location=output.location, client_info=info
+        )
+        return cls(client)
+
+    @classmethod
+    def get_impersonated_bigquery_credentials(cls, output: Output):
+        source_credentials = cls.get_bigquery_credentials(output)
+        return impersonated_credentials.Credentials(
+            source_credentials=source_credentials,
+            target_principal=output.impersonate_service_account,
+            target_scopes=output.scopes,
+            lifetime=int(output.timeout_seconds),
+        )
+
+    @classmethod
+    def get_bigquery_credentials(cls, output):
         if output.method == BigQueryConnectionMethod.OAUTH:
             creds, _ = google.auth.default(scopes=output.scopes)
         elif output.method == BigQueryConnectionMethod.SERVICE_ACCOUNT:
@@ -49,11 +73,7 @@ class BigQuerySQLRunner(SQLRunner):
             )
         else:
             raise ValueError(f"Unknown output method={output.method}")
-        info = client_info.ClientInfo(user_agent=f"dbt-dry-run-{VERSION}")
-        client = Client(
-            output.project, creds, location=output.location, client_info=info
-        )
-        return cls(client)
+        return creds
 
     def close(self) -> None:
         self.client.close()
