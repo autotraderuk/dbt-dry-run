@@ -17,10 +17,15 @@ mypy:
 
 .PHONY: format
 format:
-	black dbt_dry_run && isort dbt_dry_run
+	black dbt_dry_run
+	isort dbt_dry_run
 
-.PHONE: build
-build: format mypy test
+.PHONY: verify
+verify: format mypy test
+	git diff --exit-code # Exit 1 if there are changes from format
+
+.PHONY: build
+build: verify
 	rm -r ./dist || true
 	poetry build
 
