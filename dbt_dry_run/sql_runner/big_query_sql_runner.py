@@ -1,6 +1,7 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 import google
+import google.auth.credentials
 from google.api_core import client_info
 from google.auth import impersonated_credentials
 from google.cloud.bigquery import (
@@ -52,25 +53,31 @@ class BigQuerySQLRunner(SQLRunner):
             project=output.project,
             credentials=creds,
             location=output.location,
-            client_info=info
+            client_info=info,
         )
         return cls(client)
 
     @classmethod
-    def get_impersonated_bigquery_credentials(cls, output: Output):
+    def get_impersonated_bigquery_credentials(
+        cls, output: Output
+    ) -> impersonated_credentials.Credentials:
         source_credentials = cls.get_bigquery_credentials(output)
         return impersonated_credentials.Credentials(
             source_credentials=source_credentials,
             target_principal=output.impersonate_service_account,
             target_scopes=[
-                'https://www.googleapis.com/auth/bigquery',
-                'https://www.googleapis.com/auth/cloud-platform',
+                "https://www.googleapis.com/auth/bigquery",
+                "https://www.googleapis.com/auth/cloud-platform",
             ],
             lifetime=int(output.timeout_seconds),
         )
 
     @classmethod
-    def get_bigquery_credentials(cls, output):
+    def get_bigquery_credentials(
+        cls, output: Output
+    ) -> Union[
+        google.auth.credentials.Credentials, google.oauth2.service_account.Credentials
+    ]:
         if output.method == BigQueryConnectionMethod.OAUTH:
             creds, _ = google.auth.default(scopes=output.scopes)
         elif output.method == BigQueryConnectionMethod.SERVICE_ACCOUNT:
