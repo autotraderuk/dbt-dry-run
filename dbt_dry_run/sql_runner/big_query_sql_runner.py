@@ -49,7 +49,10 @@ class BigQuerySQLRunner(SQLRunner):
 
         info = client_info.ClientInfo(user_agent=f"dbt-dry-run-{VERSION}")
         client = Client(
-            output.project, creds, location=output.location, client_info=info
+            project=output.project,
+            credentials=creds,
+            location=output.location,
+            client_info=info
         )
         return cls(client)
 
@@ -59,7 +62,10 @@ class BigQuerySQLRunner(SQLRunner):
         return impersonated_credentials.Credentials(
             source_credentials=source_credentials,
             target_principal=output.impersonate_service_account,
-            target_scopes=output.scopes,
+            target_scopes=[
+                'https://www.googleapis.com/auth/bigquery',
+                'https://www.googleapis.com/auth/cloud-platform',
+            ],
             lifetime=int(output.timeout_seconds),
         )
 
