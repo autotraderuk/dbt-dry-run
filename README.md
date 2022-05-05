@@ -29,12 +29,12 @@ Then on the same machine (So that the dry runner has access to your dbt project 
 dbt-dry-run <PROFILE>
 ```
 
-By default it will search for `profiles.yml` in `~/.dbt/` and use the default target specified.
+By default, it will search for `profiles.yml` in `~/.dbt/` and use the default target specified.
 It will also look for the `manifest.yml` in the current working directory. 
 Just like in the dbt CLI you can override these defaults:
 
 ```
-python -m dbt_dry_run default  --profiles-dir /my_org_dbt/profiles/ --target local --manifest-path target/manifest.json
+dbt-dry-run default --profiles-dir /my_org_dbt/profiles/ --target local --manifest-path target/manifest.json
 ```
 
 ### Reporting Failures
