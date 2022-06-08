@@ -37,14 +37,20 @@ jobs:
         run: poetry install --no-interaction --no-root
 
       - name: Run build
+        run: |
+          source .venv/bin/activate
+          make build
+
+      # Only do these on push
+
+      - name: Run Integration Tests
+        if: github.event_name == 'push'
         env:
           DRY_RUN_SVC_JSON: ${{ secrets.DRY_RUN_SVC_JSON }}
         run: |
           echo $DRY_RUN_SVC_JSON | base64 --decode >> $HOME/bq_svc.json
           source .venv/bin/activate
-          make build
-
-      # Only do these on push
+          make integration
 
       - name: Publish package to TestPyPI
         if: github.event_name == 'push'

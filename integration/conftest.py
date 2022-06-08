@@ -1,4 +1,3 @@
-import base64
 import os
 import subprocess
 from dataclasses import dataclass
@@ -8,9 +7,6 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 
 from dbt_dry_run.models import Report
-
-SVC_ACCOUNT_ENV = "DRY_RUN_SVC_JSON"
-SERVICE_ACCOUNT_JSON_FILEPATH = os.environ.get("HOME", "/home") + "/bq_svc.json"
 
 
 @dataclass
@@ -23,21 +19,6 @@ def running_in_github() -> bool:
     return os.environ.get("GITHUB_ACTIONS", 'not-set') == 'true'
 
 
-def pass_through_credentials():
-    try:
-        service_account_json_b64 = os.environ[SVC_ACCOUNT_ENV]
-        if len(service_account_json_b64) == 0:
-            raise ValueError("SVC Account JSON empty")
-    except KeyError:
-        raise KeyError(f"Could not find environment variable '{SVC_ACCOUNT_ENV}' to pass through credentials")
-    try:
-        service_account_json = base64.b64decode(service_account_json_b64).decode('utf-8')
-    except Exception:
-        raise ValueError("Failed to decode service account JSON")
-    with open(SERVICE_ACCOUNT_JSON_FILEPATH, 'w') as f:
-        f.write(service_account_json)
-
-
 @pytest.fixture(scope="module")
 def dry_run_result(request: FixtureRequest) -> IntegrationTestResult:
     folder = request.fspath.dirname
@@ -45,7 +26,6 @@ def dry_run_result(request: FixtureRequest) -> IntegrationTestResult:
     report_path = os.path.join(folder, "target/dry_run_output.json")
     if running_in_github():
         target = "integration-github"
-        # pass_through_credentials()
     else:
         target = "integration-local"
     run_dbt = subprocess.run(

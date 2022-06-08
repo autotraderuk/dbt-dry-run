@@ -28,7 +28,7 @@ format:
 verify: format mypy test
 
 .PHONY: build
-build: verify integration
+build: verify
 	git diff --exit-code # Exit 1 if there are changes from format
 	rm -r ./dist || true
 	poetry build
