@@ -3,8 +3,6 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple
 
-from google.cloud.bigquery import Client
-
 from dbt_dry_run.sql_runner import SQLRunner
 
 if TYPE_CHECKING:
@@ -60,7 +58,7 @@ def create_context(
     executor: Optional[ThreadPoolExecutor] = None
     try:
         sql_runner = BigQuerySQLRunner.from_profile(output)
-        executor = ThreadPoolExecutor(max_workers=CONCURRENCY)
+        executor = ThreadPoolExecutor(max_workers=output.threads)
         yield sql_runner, executor
     finally:
         if executor:
@@ -72,7 +70,6 @@ def create_context(
 def dry_run_manifest(
     manifest: Manifest, output: Output, model: Optional[str]
 ) -> Results:
-    client: Client
     executor: ThreadPoolExecutor
     with create_context(output) as (sql_runner, executor):
         results = Results()

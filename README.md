@@ -37,9 +37,99 @@ Just like in the dbt CLI you can override these defaults:
 dbt-dry-run default --profiles-dir /my_org_dbt/profiles/ --target local --manifest-path target/manifest.json
 ```
 
-### Reporting Failures
+## Reporting Results & Failures
 
-The dry runner will exit 0 if there are no failures. If there are failures it will exit 1
+If the result is successful it will output the number of 
+models that were tested like so:
+
+```
+Dry running 3 models
+
+DRY RUN SUCCESS!
+```
+
+The process will also return exit code 0
+
+If there are failures it will print a summary table of the nodes that failed:
+
+```
+Dry running 3 models
+Node model.test_models_with_invalid_sql.second_layer failed with exception:
+400 POST https://bigquery.googleapis.com/...: Column d in USING clause not found on left side of join at [6:88]
+
+(job ID: 5e336f32-273d-480a-b8bb-cdf4fca66a98)
+
+Total 1 failures:
+1       :       model.test_models_with_invalid_sql.second_layer :       BadRequest      :       ERROR
+DRY RUN FAILURE!`
+```
+
+The process will also return exit code 1
+
+### Report Artefact
+
+If you specify `---report-path` a JSON file will be outputted regardless of dry run success/failure with detailed 
+information of each node's predicted schema or error message if it has failed:
+
+```json
+{
+  "success": false,
+  "node_count": 3,
+  "failure_count": 1,
+  "failed_node_ids": [
+    "model.test_models_with_invalid_sql.second_layer"
+  ],
+  "nodes": [
+    {
+      "unique_id": "seed.test_models_with_invalid_sql.my_seed",
+      "success": true,
+      "error_message": null,
+      "table": {
+        "fields": [
+...
+        ]
+      }
+    },
+    {
+      "unique_id": "model.test_models_with_invalid_sql.first_layer",
+      "success": true,
+      "error_message": null,
+      "table": {
+        "fields": [
+...
+        ]
+      }
+    },
+    {
+      "unique_id": "model.test_models_with_invalid_sql.second_layer",
+      "success": false,
+      "error_message": "BadRequest",
+      "table": null
+    }
+  ]
+}
+```
+
+## Contributing/Running locally
+
+To setup a dev environment you need [poetry][get-poetry], first run `poetry install` to install all dependencies. Then
+the `Makefile` contains all the commands needed to run the test suite and linting.
+
+- verify: Formats code with `black`, type checks with `mypy` and then runs the unit tests with coverage.
+- run-local: Runs one of the integration tests locally. _Requires BigQuery Instance_ (See Integration Tests)
+- integration: Runs the integration tests against BigQuery (See Integration Tests)
+
+### Running Integration Tests
+
+In order to run integration tests locally you will need access to a BigQuery project/instance in which your gcloud application 
+default credentials has the role `Big Query Data Owner`. The BigQuery instance should have an empty dataset called `dry_run`.
+
+Setting the environment variable `DBT_PROJECT=<YOUR GCP PROJECT HERE>` will tell the integration tests which GCP 
+project to run the test suite against. The test suite does not currently materialize any data into the project.
+
+The integration tests will run on any push to `main` to ensure the package's core functionality is still in place.
+
+__Auto Trader employees can request authorisation to access the `at-dry-run-integration-dev` project for this purpose__
 
 ## Capabilities and Limitations
 
@@ -86,6 +176,7 @@ Snapshots are also not yet supported.
 [dbt-tests]: https://docs.getdbt.com/docs/building-a-dbt-project/tests
 [bq-ignore-nulls]: https://cloud.google.com/bigquery/docs/reference/standard-sql/aggregate_functions#array_agg
 [blog-post]: https://engineering.autotrader.co.uk/2022/04/06/dry-running-our-data-warehouse-using-bigquery-and-dbt.html
+[get-poetry]: https://python-poetry.org/
 
 ## License
 

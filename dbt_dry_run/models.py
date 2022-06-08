@@ -134,7 +134,6 @@ class Profile(BaseModel):
 
     @root_validator(pre=True)
     def target_must_be_valid_output(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        print(values)
         output_keys = set(values["outputs"].keys())
         target = values["target"]
         if target not in output_keys:

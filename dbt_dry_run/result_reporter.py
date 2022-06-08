@@ -36,10 +36,11 @@ class ResultReporter:
         failed_node_ids: List[str] = []
 
         for result in self._results.values():
+            exception_type = result.exception.__class__.__name__ if result.exception else None
             new_node = ReportNode(
                 unique_id=result.node.unique_id,
                 success=result.status == DryRunStatus.SUCCESS,
-                error_message=result.exception.__class__.__name__,
+                error_message=exception_type,
                 table=result.table,
             )
             report_nodes.append(new_node)
