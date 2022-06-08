@@ -81,6 +81,11 @@ class BigQuerySQLRunner(SQLRunner):
         if output.method == BigQueryConnectionMethod.OAUTH:
             creds, _ = google.auth.default(scopes=output.scopes)
         elif output.method == BigQueryConnectionMethod.SERVICE_ACCOUNT:
+            if not output.keyfile:
+                raise ValueError(
+                    f"Profile output method is f{BigQueryConnectionMethod.SERVICE_ACCOUNT}"
+                    f" but 'keyfile' is not set"
+                )
             creds = service_account.Credentials.from_service_account_file(
                 output.keyfile.as_posix(), scopes=output.scopes
             )

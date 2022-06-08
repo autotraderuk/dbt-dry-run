@@ -134,3 +134,7 @@ dmypy.json
 #pytest
 htmlcov
 .DS_Store
+integration-svc.json
+
+# dbt
+logs
