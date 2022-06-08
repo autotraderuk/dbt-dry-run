@@ -39,6 +39,7 @@ class SimpleNode(BaseModel):
             resource_type=resource_type,
             original_file_path=self.original_file_path,
             root_path=self.root_path,
+            columns=dict(),
         )
 
 

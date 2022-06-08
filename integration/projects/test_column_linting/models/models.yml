@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: badly_documented_model
+    description: This model is missing some columns in its docs
+    meta:
+      dry_run.check_columns: true
+    columns:
+      - name: a
+        description: This is in the model
+
+      - name: b
+        description: This is in the model
+
+#      - name: c
+#        description: Forgot to document c
+
+      - name: d
+        description: This shouldn't be here
+
+  - name: model_linting_disabled
+    description: This model is missing some columns in its docs, but should not error as linting is disabled
+    meta:
+      dry_run.check_columns: false
+    columns:
+      - name: a
+        description: This is in the model
+
+  - name: model_linting_not_specified
+    description: This model is missing some columns in its docs, but should not error as linting shouold be skipped
+    columns:
+      - name: a
+        description: This is in the model

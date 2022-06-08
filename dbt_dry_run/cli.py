@@ -8,6 +8,7 @@ from typer import Argument, Option
 from dbt_dry_run.adapter.service import DbtArgs, ProjectService
 from dbt_dry_run.exception import ManifestValidationError
 from dbt_dry_run.execution import dry_run_manifest
+from dbt_dry_run.linting.column_linting import lint_columns
 from dbt_dry_run.result_reporter import ResultReporter
 
 app = typer.Typer()
@@ -32,15 +33,18 @@ def dry_run(
     try:
         dry_run_results = dry_run_manifest(project)
         reporter = ResultReporter(dry_run_results, set(), verbose)
-        exit_code = reporter.report_and_check_results()
+        exit_code = reporter.report_and_check_results()]
+
+        report = reporter.get_report()
+
         if report_path:
-            reporter.write_results_artefact(report_path)
+            with open(report_path, "w") as f:
+                f.write(report.json(by_alias=True))
 
     except ManifestValidationError as e:
         print("Dry run failed to validate manifest")
         print(str(e))
         exit_code = 1
-
     return exit_code
 
 

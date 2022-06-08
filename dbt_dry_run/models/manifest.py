@@ -36,6 +36,10 @@ class PartitionBy(BaseModel):
         return values
 
 
+class NodeMeta(BaseModel):
+    check_columns: bool = Field(False, alias="dry_run.check_columns")
+
+
 class NodeConfig(BaseModel):
     materialized: str
     on_schema_change: Optional[OnSchemaChange]
@@ -45,6 +49,12 @@ class NodeConfig(BaseModel):
     strategy: Union[None, Literal["timestamp", "check"]]
     check_cols: Optional[Union[Literal["all"], List[str]]]
     partition_by: Optional[PartitionBy]
+    meta: Optional[NodeMeta]
+
+
+class ManifestColumn(BaseModel):
+    name: str
+    description: Optional[str]
 
 
 class Node(BaseModel):
@@ -61,6 +71,7 @@ class Node(BaseModel):
     resource_type: str
     original_file_path: str
     root_path: str
+    columns: Dict[str, ManifestColumn]
 
     def __init__(self, **data: Any):
         super().__init__(

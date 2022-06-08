@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from threading import Lock
@@ -13,16 +13,44 @@ class DryRunStatus(str, Enum):
     FAILURE = "FAILURE"
 
 
+class LintingStatus(str, Enum):
+    SUCCESS = "SUCCESS"
+    FAILURE = "FAILURE"
+    SKIPPED = "SKIPPED"
+
+
+@dataclass(frozen=True)
+class ColumnError:
+    rule: str
+    message: str
+
+
 @dataclass(frozen=True)
 class DryRunResult:
     node: Node
     table: Optional[Table]
     status: DryRunStatus
     exception: Optional[Exception]
+    linting_status: LintingStatus = LintingStatus.SKIPPED
+    linting_errors: List[ColumnError] = field(default_factory=lambda: [])
 
     def replace_table(self, table: Table) -> "DryRunResult":
         return DryRunResult(
             node=self.node, table=table, status=self.status, exception=self.exception
+        )
+
+    def with_column_errors(self, column_errors: List[ColumnError]) -> "DryRunResult":
+        if column_errors:
+            linting_status = LintingStatus.FAILURE
+        else:
+            linting_status = LintingStatus.SUCCESS
+        return DryRunResult(
+            node=self.node,
+            table=self.table,
+            status=self.status,
+            exception=self.exception,
+            linting_errors=column_errors,
+            linting_status=linting_status,
         )
 
 
@@ -31,6 +59,7 @@ class Results:
         self._results: Dict[str, DryRunResult] = {}
         self._lock = Lock()
         self._start_time = datetime.utcnow()
+        self._end_time: Optional[datetime] = None
 
     def add_result(self, node_key: str, result: DryRunResult) -> None:
         with self._lock:
