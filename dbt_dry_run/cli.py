@@ -49,6 +49,12 @@ def profiles_get_env_var(key: str, default: str = None) -> Optional[str]:
 def read_profiles(path: str) -> Dict[str, Profile]:
     all_profiles: Dict[str, Profile] = {}
 
+    profile_filepath = os.path.join(path, PROFILE_FILENAME)
+    if not os.path.exists(profile_filepath):
+        raise FileNotFoundError(
+            f"Could not find '{PROFILE_FILENAME}' at '{profile_filepath}'"
+        )
+
     template_loader = jinja2.FileSystemLoader(searchpath=path)
     template_env = jinja2.Environment(loader=template_loader)
     template_env.globals.update(env_var=profiles_get_env_var)
@@ -65,9 +71,20 @@ def run() -> int:
     parsed_args = parser.parse_args()
     manifest = read_manifest(parsed_args.manifest_path)
     profiles = read_profiles(parsed_args.profiles_dir)
-    profile = profiles[parsed_args.profile]
+    try:
+        profile = profiles[parsed_args.profile]
+    except KeyError:
+        raise KeyError(
+            f"Could not find profile '{parsed_args.profile}' in profiles: {list(profiles.keys())}"
+        )
+
     active_output = parsed_args.target or profile.target
-    output = profile.outputs[active_output]
+    try:
+        output = profile.outputs[active_output]
+    except KeyError:
+        raise KeyError(
+            f"Could not find target `{active_output}` in outputs: {list(profile.outputs.keys())}"
+        )
 
     dry_run_results = dry_run_manifest(manifest, output, parsed_args.model)
 

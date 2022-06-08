@@ -10,7 +10,7 @@ testcov: test
 .PHONY: run-local
 run-local:
 	dbt compile --profiles-dir ./integration/profiles --target integration-local --project-dir ./integration/projects/test_models_with_invalid_sql
-	python3 -m dbt_dry_run --profiles-dir ./integration/profiles --target integration-local --manifest-path ./integration/projects/test_models_with_invalid_sql/target/manifest.json default --report-path ./integration/projects/test_models_with_invalid_sql/target/dry_run.json
+	python3 -m dbt_dry_run default --profiles-dir ./integration/profiles --target integration-local --manifest-path ./integration/projects/test_models_with_invalid_sql/target/manifest.json --report-path ./integration/projects/test_models_with_invalid_sql/target/dry_run.json
 
 .PHONY: integration
 integration:

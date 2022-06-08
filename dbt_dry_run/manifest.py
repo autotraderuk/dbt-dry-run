@@ -55,7 +55,10 @@ class Manifest(BaseModel):
 
 
 def read_manifest(path: str) -> Manifest:
-    with open(path) as fh:
-        data = json.load(fh)
+    try:
+        with open(path) as fh:
+            data = json.load(fh)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Incorrect Manifest filepath: '{path}'")
     m = Manifest(**data)
     return m
