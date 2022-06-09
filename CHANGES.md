@@ -1,0 +1,29 @@
+## Changelog
+
+## dbt-dry-run v0.2.0
+
+### Improvements & Bugfixes
+
+- Improved error messages when passing incorrect parameters to the command line such as invalid `manifest.json`
+or profile directory
+  
+- `profiles.yml` that use `env_var` templating will correctly render (See [dbt docs][dbt-env-var])
+
+- `keyfile` is now optional when using `oath` authentication method in `profiles.yml`
+
+- Added `--output-path` argument. This will produce a JSON report of project dry run with predicted schema/error 
+  message of each model and seed
+  
+- Concurrency will now respect `threads` in `profiles.yml` rather than being hardcoded to `8`
+
+### Under the hood
+
+- Integration test suite against BigQuery instance
+
+## dbt-dry-run v0.1.7
+
+### Improvements & Bugfixes
+
+- Support `impersonate_service_account` in `profiles.yml`
+
+[dbt-env-var]: https://docs.getdbt.com/reference/dbt-jinja-functions/env_var
