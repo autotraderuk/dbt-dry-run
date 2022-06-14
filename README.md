@@ -150,6 +150,8 @@ your knowledge
 6. Permission errors: The dry runner should run under the same service account your production 
 job runs under. This allows you to catch problems with table/project permissions as dry run queries
 need table read permissions just like the real query
+7. Incorrect configuration of snapshots: For example a typo in the `unique_key` config. Or `check_cols` which do not 
+exist in the snapshot
    
 ### Things this can't catch
 
@@ -170,8 +172,6 @@ service account JSON files then this won't be able to read `profiles.yml` correc
 The implementation of seeds is incomplete as well as we don't use them very much in our 
 own dbt projects. The dry runner will just use the datatypes that `agate` infers from the CSV 
 files.
-
-Snapshots are also not yet supported.
 
 [dbt-home]: https://www.getdbt.com/
 [bq-dry-run]: https://cloud.google.com/bigquery/docs/dry-run-queries

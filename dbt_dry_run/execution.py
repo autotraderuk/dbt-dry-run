@@ -3,6 +3,7 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple
 
+from dbt_dry_run.node_runner.snapshot_runner import SnapshotRunner
 from dbt_dry_run.sql_runner import SQLRunner
 
 if TYPE_CHECKING:
@@ -13,7 +14,7 @@ else:
 from dbt_dry_run.exception import NodeExecutionException, NotCompiledException
 from dbt_dry_run.models import Output
 from dbt_dry_run.models.manifest import Manifest, Node
-from dbt_dry_run.node_runner import NodeRunner
+from dbt_dry_run.node_runner import NodeRunner, get_runner_map
 from dbt_dry_run.node_runner.model_runner import ModelRunner
 from dbt_dry_run.node_runner.seed_runner import SeedRunner
 from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
@@ -22,8 +23,8 @@ from dbt_dry_run.sql_runner.big_query_sql_runner import BigQuerySQLRunner
 
 CONCURRENCY = 8
 
-_RUNNER_CLASSES: List[Any] = [ModelRunner, SeedRunner]
-_RUNNERS = {runner.resource_type: runner for runner in _RUNNER_CLASSES}
+_RUNNER_CLASSES: List[Any] = [ModelRunner, SeedRunner, SnapshotRunner]
+_RUNNERS = get_runner_map(_RUNNER_CLASSES)
 
 
 def dispatch_node(node: Node, runners: Dict[str, NodeRunner]) -> DryRunResult:

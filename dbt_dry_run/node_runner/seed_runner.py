@@ -11,7 +11,7 @@ from dbt_dry_run.results import DryRunResult, DryRunStatus
 
 
 class SeedRunner(NodeRunner):
-    resource_type = "seed"
+    resource_type = ("seed",)
 
     DEFAULT_TYPE = BigQueryFieldType.STRING
     TYPE_MAP = {

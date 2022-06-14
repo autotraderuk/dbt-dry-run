@@ -1,7 +1,7 @@
 import json
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -23,6 +23,10 @@ class NodeConfig(BaseModel):
     materialized: str
     on_schema_change: Optional[OnSchemaChange]
     sql_header: Optional[str]
+    unique_key: Optional[str]
+    updated_at: Optional[str]
+    strategy: Union[None, Literal["timestamp", "check"]]
+    check_cols: Optional[Union[Literal["all"], List[str]]]
 
 
 class Node(BaseModel):
