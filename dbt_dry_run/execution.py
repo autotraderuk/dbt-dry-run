@@ -11,12 +11,12 @@ else:
     from typing import Awaitable as Future
 
 from dbt_dry_run.exception import NodeExecutionException, NotCompiledException
-from dbt_dry_run.manifest import Manifest, Node
-from dbt_dry_run.models import DryRunResult, DryRunStatus, Output
+from dbt_dry_run.models import Output
+from dbt_dry_run.models.manifest import Manifest, Node
 from dbt_dry_run.node_runner import NodeRunner
 from dbt_dry_run.node_runner.model_runner import ModelRunner
 from dbt_dry_run.node_runner.seed_runner import SeedRunner
-from dbt_dry_run.results import Results
+from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
 from dbt_dry_run.scheduler import ManifestScheduler
 from dbt_dry_run.sql_runner.big_query_sql_runner import BigQuerySQLRunner
 

@@ -4,15 +4,10 @@ from typing import List
 import agate as ag
 from agate import data_types
 
-from dbt_dry_run.manifest import Node
-from dbt_dry_run.models import (
-    BigQueryFieldType,
-    DryRunResult,
-    DryRunStatus,
-    Table,
-    TableField,
-)
+from dbt_dry_run.models import BigQueryFieldType, Table, TableField
+from dbt_dry_run.models.manifest import Node
 from dbt_dry_run.node_runner import NodeRunner
+from dbt_dry_run.results import DryRunResult, DryRunStatus
 
 
 class SeedRunner(NodeRunner):

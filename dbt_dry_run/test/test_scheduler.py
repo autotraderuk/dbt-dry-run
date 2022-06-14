@@ -1,6 +1,6 @@
 from typing import List, Set
 
-from dbt_dry_run.manifest import Manifest, NodeConfig
+from dbt_dry_run.models.manifest import Manifest, NodeConfig
 from dbt_dry_run.scheduler import ManifestScheduler
 from dbt_dry_run.test.utils import SimpleNode
 

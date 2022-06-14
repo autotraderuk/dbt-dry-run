@@ -2,9 +2,9 @@ from typing import List
 
 import pytest
 
-from dbt_dry_run.models import DryRunResult, DryRunStatus, Table
+from dbt_dry_run.models import Table
 from dbt_dry_run.result_reporter import ResultReporter
-from dbt_dry_run.results import Results
+from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
 from dbt_dry_run.test.utils import SimpleNode
 
 

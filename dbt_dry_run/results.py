@@ -1,7 +1,28 @@
+from dataclasses import dataclass
+from enum import Enum
 from threading import Lock
-from typing import Dict, List, Set
+from typing import Dict, List, Optional, Set
 
-from dbt_dry_run.models import DryRunResult
+from dbt_dry_run.models.manifest import Node
+from dbt_dry_run.models.table import Table
+
+
+class DryRunStatus(str, Enum):
+    SUCCESS = "SUCCESS"
+    FAILURE = "FAILURE"
+
+
+@dataclass(frozen=True)
+class DryRunResult:
+    node: Node
+    table: Optional[Table]
+    status: DryRunStatus
+    exception: Optional[Exception]
+
+    def replace_table(self, table: Table) -> "DryRunResult":
+        return DryRunResult(
+            node=self.node, table=table, status=self.status, exception=self.exception
+        )
 
 
 class Results:

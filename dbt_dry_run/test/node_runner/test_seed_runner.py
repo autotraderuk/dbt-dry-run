@@ -2,9 +2,10 @@ from pathlib import Path
 from typing import Set
 from unittest.mock import MagicMock
 
-from dbt_dry_run.manifest import Node
-from dbt_dry_run.models import BigQueryFieldType, DryRunResult, DryRunStatus
+from dbt_dry_run.models import BigQueryFieldType
+from dbt_dry_run.models.manifest import Node
 from dbt_dry_run.node_runner.seed_runner import SeedRunner
+from dbt_dry_run.results import DryRunResult, DryRunStatus
 from dbt_dry_run.scheduler import ManifestScheduler
 from dbt_dry_run.test.utils import SimpleNode
 

@@ -20,14 +20,9 @@ from tenacity import (
     wait_exponential,
 )
 
-from dbt_dry_run.manifest import Node
-from dbt_dry_run.models import (
-    BigQueryConnectionMethod,
-    DryRunStatus,
-    Output,
-    Table,
-    TableField,
-)
+from dbt_dry_run.models import BigQueryConnectionMethod, Output, Table, TableField
+from dbt_dry_run.models.manifest import Node
+from dbt_dry_run.results import DryRunStatus
 from dbt_dry_run.sql_runner import SQLRunner
 from dbt_dry_run.version import VERSION
 

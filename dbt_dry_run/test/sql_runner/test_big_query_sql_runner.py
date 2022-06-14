@@ -9,7 +9,8 @@ from google.oauth2.service_account import Credentials
 from pytest_mock.plugin import MockerFixture
 from tenacity import RetryError, wait_none
 
-from dbt_dry_run.models import DryRunStatus, Output
+from dbt_dry_run.models import Output
+from dbt_dry_run.results import DryRunStatus
 from dbt_dry_run.sql_runner.big_query_sql_runner import (
     MAX_ATTEMPT_NUMBER,
     QUERY_TIMED_OUT,

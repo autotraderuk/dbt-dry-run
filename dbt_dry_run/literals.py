@@ -2,8 +2,8 @@ import re
 from typing import Callable, Dict
 from uuid import uuid4
 
-from dbt_dry_run.manifest import Node
 from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
+from dbt_dry_run.models.manifest import Node
 
 _EXAMPLE_VALUES: Dict[BigQueryFieldType, Callable[[], str]] = {
     BigQueryFieldType.STRING: lambda: f"'{uuid4()}'",

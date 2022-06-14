@@ -1,8 +1,9 @@
 from abc import ABCMeta, abstractmethod
 from typing import Optional, Tuple
 
-from dbt_dry_run.manifest import Node
-from dbt_dry_run.models import DryRunStatus, Table
+from dbt_dry_run.models import Table
+from dbt_dry_run.models.manifest import Node
+from dbt_dry_run.results import DryRunStatus
 
 
 class SQLRunner(metaclass=ABCMeta):

@@ -2,9 +2,10 @@ from typing import Callable, Dict, Optional, cast
 
 from dbt_dry_run.exception import SchemaChangeException, UpstreamFailedException
 from dbt_dry_run.literals import replace_upstream_sql
-from dbt_dry_run.manifest import Node, OnSchemaChange
-from dbt_dry_run.models import DryRunResult, DryRunStatus, Table
+from dbt_dry_run.models import Table
+from dbt_dry_run.models.manifest import Node, OnSchemaChange
 from dbt_dry_run.node_runner import NodeRunner
+from dbt_dry_run.results import DryRunResult, DryRunStatus
 
 
 def ignore_handler(dry_run_result: DryRunResult, target_table: Table) -> DryRunResult:

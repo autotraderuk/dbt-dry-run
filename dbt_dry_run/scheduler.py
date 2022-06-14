@@ -3,7 +3,7 @@ from typing import Dict, Iterator, List, Optional, Set
 
 from networkx import DiGraph, from_dict_of_lists, topological_generations
 
-from dbt_dry_run.manifest import Manifest, Node
+from dbt_dry_run.models.manifest import Manifest, Node
 
 
 class ManifestScheduler:

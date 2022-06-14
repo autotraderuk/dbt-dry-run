@@ -2,7 +2,7 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
-from dbt_dry_run.manifest import Node, NodeConfig, NodeDependsOn
+from dbt_dry_run.models.manifest import Node, NodeConfig, NodeDependsOn
 from dbt_dry_run.scheduler import ManifestScheduler
 
 A_SQL_QUERY = "SELECT * FROM `foo`"

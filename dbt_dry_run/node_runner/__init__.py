@@ -1,8 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
-from dbt_dry_run.manifest import Node
-from dbt_dry_run.models import DryRunResult
-from dbt_dry_run.results import Results
+from dbt_dry_run.models.manifest import Node
+from dbt_dry_run.results import DryRunResult, Results
 from dbt_dry_run.sql_runner import SQLRunner
 
 

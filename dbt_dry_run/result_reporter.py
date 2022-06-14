@@ -1,8 +1,8 @@
 import re
 from typing import List, Set, Tuple
 
-from dbt_dry_run.models import DryRunResult, DryRunStatus, Report, ReportNode
-from dbt_dry_run.results import Results
+from dbt_dry_run.models import Report, ReportNode
+from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
 
 QUERY_JOB_SQL_FOLLOWS = "-----Query Job SQL Follows-----"
 QUERY_JOB_HEADER = re.compile(r"|    .    ", re.MULTILINE)

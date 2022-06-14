@@ -53,12 +53,12 @@ class Manifest(BaseModel):
     nodes: Dict[str, Node]
     macros: Dict[str, Macro]
 
-
-def read_manifest(path: str) -> Manifest:
-    try:
-        with open(path) as fh:
-            data = json.load(fh)
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Incorrect Manifest filepath: '{path}'")
-    m = Manifest(**data)
-    return m
+    @classmethod
+    def from_filepath(cls, path: str) -> "Manifest":
+        try:
+            with open(path) as fh:
+                data = json.load(fh)
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Incorrect Manifest filepath: '{path}'")
+        m = Manifest(**data)
+        return m

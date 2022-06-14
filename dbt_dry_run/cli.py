@@ -6,8 +6,7 @@ import jinja2
 import yaml
 
 from dbt_dry_run.execution import dry_run_manifest
-from dbt_dry_run.manifest import read_manifest
-from dbt_dry_run.models import Profile
+from dbt_dry_run.models import Manifest, Profile
 from dbt_dry_run.result_reporter import ResultReporter
 
 parser = argparse.ArgumentParser(description="Dry run DBT")
@@ -69,7 +68,7 @@ def read_profiles(path: str) -> Dict[str, Profile]:
 
 def run() -> int:
     parsed_args = parser.parse_args()
-    manifest = read_manifest(parsed_args.manifest_path)
+    manifest = Manifest.from_filepath(parsed_args.manifest_path)
     profiles = read_profiles(parsed_args.profiles_dir)
     try:
         profile = profiles[parsed_args.profile]
