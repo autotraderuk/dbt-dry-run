@@ -7,6 +7,8 @@ trying to execute them.
 
 See the [blog post][blog-post] for more information on how the dry runner works.
 
+![Terminal Recording of failing dry run](./terminal-demo.gif)
+
 ## Quickstart
 
 ### Installation
