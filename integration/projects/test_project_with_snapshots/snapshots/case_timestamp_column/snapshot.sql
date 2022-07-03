@@ -1,4 +1,4 @@
-{% snapshot second_layer_snapshot %}
+{% snapshot case_timestamp_column_snapshot %}
 
 {{
     config(

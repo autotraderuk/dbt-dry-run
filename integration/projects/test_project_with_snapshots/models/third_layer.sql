@@ -1,4 +1,4 @@
 {{ config(alias="third_layer") }}
 
 SELECT *
-FROM {{ ref("second_layer_snapshot") }}
+FROM {{ ref("case_check_all_snapshot") }}

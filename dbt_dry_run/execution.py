@@ -29,9 +29,10 @@ _RUNNERS = get_runner_map(_RUNNER_CLASSES)
 
 def dispatch_node(node: Node, runners: Dict[str, NodeRunner]) -> DryRunResult:
     try:
-        return runners[node.resource_type].run(node)
+        runner = runners[node.resource_type]
     except KeyError:
         raise ValueError(f"Unknown resource type '{node.resource_type}'")
+    return runner.run(node)
 
 
 def dry_run_node(runners: Dict[str, NodeRunner], node: Node, results: Results) -> None:

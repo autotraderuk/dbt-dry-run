@@ -31,7 +31,15 @@ Then on the same machine (So that the dry runner has access to your dbt project 
 dbt-dry-run <PROFILE>
 ```
 
-By default, it will search for `profiles.yml` in `~/.dbt/` and use the default target specified.
+Where `PROFILE` should match the profile specified in your `dbt_project.yml`:
+
+```
+# This setting configures which "profile" dbt uses for this project.
+# This will get overridden by the root project
+profile: 'default'
+```
+
+Like dbt it will search for `profiles.yml` in `~/.dbt/` and use the default target specified.
 It will also look for the `manifest.yml` in the current working directory. 
 Just like in the dbt CLI you can override these defaults:
 
