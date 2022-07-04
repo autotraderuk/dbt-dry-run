@@ -1,5 +1,13 @@
 ## Changelog
 
+## dbt-dry-run v0.3.0 (NOT RELEASED)
+
+### Improvements & Bugfixes
+
+- Added support for `as_number` filter in `profiles.yml`
+
+- Support both `schema` and `dataset` in `profiles.yml` as in BigQuery they are used interchangeably
+
 ## dbt-dry-run v0.2.0
 
 ### Improvements & Bugfixes
