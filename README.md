@@ -31,7 +31,15 @@ Then on the same machine (So that the dry runner has access to your dbt project 
 dbt-dry-run <PROFILE>
 ```
 
-By default, it will search for `profiles.yml` in `~/.dbt/` and use the default target specified.
+Where `PROFILE` should match the profile specified in your `dbt_project.yml`:
+
+```
+# This setting configures which "profile" dbt uses for this project.
+# This will get overridden by the root project
+profile: 'default'
+```
+
+Like dbt it will search for `profiles.yml` in `~/.dbt/` and use the default target specified.
 It will also look for the `manifest.yml` in the current working directory. 
 Just like in the dbt CLI you can override these defaults:
 
@@ -150,6 +158,8 @@ your knowledge
 6. Permission errors: The dry runner should run under the same service account your production 
 job runs under. This allows you to catch problems with table/project permissions as dry run queries
 need table read permissions just like the real query
+7. Incorrect configuration of snapshots: For example a typo in the `unique_key` config. Or `check_cols` which do not 
+exist in the snapshot
    
 ### Things this can't catch
 
@@ -170,8 +180,6 @@ service account JSON files then this won't be able to read `profiles.yml` correc
 The implementation of seeds is incomplete as well as we don't use them very much in our 
 own dbt projects. The dry runner will just use the datatypes that `agate` infers from the CSV 
 files.
-
-Snapshots are also not yet supported.
 
 [dbt-home]: https://www.getdbt.com/
 [bq-dry-run]: https://cloud.google.com/bigquery/docs/dry-run-queries

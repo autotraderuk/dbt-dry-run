@@ -4,6 +4,10 @@
 
 ### Improvements & Bugfixes
 
+- Add snapshot support! The dry runner can now correctly predict the schema of your snapshots and if they will 
+  run or not. It can catch configuration errors as well such as incorrect `unique_key`, `check_cols` and
+  `updated_at` columns
+
 - Added support for `as_number` filter in `profiles.yml`
 
 - Support both `schema` and `dataset` in `profiles.yml` as in BigQuery they are used interchangeably

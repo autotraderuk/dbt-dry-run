@@ -9,8 +9,9 @@ from dbt_dry_run.models.manifest import Manifest, Node
 class ManifestScheduler:
     MODEL = "model"
     SEED = "seed"
-    RUNNABLE_RESOURCE_TYPE = (MODEL, SEED)
-    RUNNABLE_MATERIAL = ("view", "table", "incremental", "seed")
+    SNAPSHOT = "snapshot"
+    RUNNABLE_RESOURCE_TYPE = (MODEL, SEED, SNAPSHOT)
+    RUNNABLE_MATERIAL = ("view", "table", "incremental", "seed", "snapshot")
 
     def __init__(self, manifest: Manifest, model: Optional[str] = None):
         self._manifest = manifest

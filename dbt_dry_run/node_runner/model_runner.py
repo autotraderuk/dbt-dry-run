@@ -1,7 +1,7 @@
-from typing import Callable, Dict, Optional, cast
+from typing import Callable, Dict, Optional
 
 from dbt_dry_run.exception import SchemaChangeException, UpstreamFailedException
-from dbt_dry_run.literals import replace_upstream_sql
+from dbt_dry_run.literals import insert_dependant_sql_literals
 from dbt_dry_run.models import Table
 from dbt_dry_run.models.manifest import Node, OnSchemaChange
 from dbt_dry_run.node_runner import NodeRunner
@@ -71,7 +71,7 @@ ON_SCHEMA_CHANGE_TABLE_HANDLER: Dict[
 
 
 class ModelRunner(NodeRunner):
-    resource_type = "model"
+    resource_type = ("model",)
 
     def _modify_sql(self, node: Node, sql_statement: str) -> str:
         if node.config.materialized == "view":
@@ -84,7 +84,7 @@ class ModelRunner(NodeRunner):
 
     def run(self, node: Node) -> DryRunResult:
         try:
-            run_sql = self._insert_dependant_sql_literals(node)
+            run_sql = insert_dependant_sql_literals(node, self._results)
         except UpstreamFailedException as e:
             return DryRunResult(node, None, DryRunStatus.FAILURE, e)
 
@@ -104,25 +104,3 @@ class ModelRunner(NodeRunner):
                 result = handler(result, target_table)
 
         return result
-
-    def _insert_dependant_sql_literals(self, node: Node) -> str:
-        if node.depends_on.deep_nodes is not None:
-            results = [
-                self._results.get_result(n)
-                for n in node.depends_on.deep_nodes
-                if n in self._results.keys()
-            ]
-        else:
-            raise KeyError(f"deep_nodes have not been created for {node.unique_id}")
-        failed_upstreams = [r for r in results if r.status != DryRunStatus.SUCCESS]
-        if failed_upstreams:
-            msg = f"Can't insert SELECT literals for {node.unique_id} because {[f.node.unique_id for f in failed_upstreams]} failed"
-            raise UpstreamFailedException(msg)
-        completed_upstreams = [r for r in results if r.table]
-
-        node_new_sql = node.compiled_sql
-        for upstream in completed_upstreams:
-            node_new_sql = replace_upstream_sql(
-                node_new_sql, upstream.node, cast(Table, upstream.table)
-            )
-        return node_new_sql

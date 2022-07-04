@@ -12,3 +12,7 @@ class NodeExecutionException(Exception):
 
 class SchemaChangeException(Exception):
     pass
+
+
+class SnapshotConfigException(Exception):
+    pass

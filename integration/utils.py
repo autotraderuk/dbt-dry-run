@@ -10,7 +10,7 @@ def assert_report_produced(result: IntegrationTestResult) -> Report:
 
 
 def assert_report_success(result: IntegrationTestResult) -> Report:
-    assert result.report
+    assert result.report, f"Repost is missing: {result.process.stdout}"
     assert result.report.success
     return result.report
 
@@ -34,4 +34,5 @@ def assert_node_was_successful(report: Report, unique_id: str) -> None:
 
 
 def assert_report_node_has_columns(node: ReportNode, columns: Set[str]) -> None:
-    assert set(map(lambda field: field.name, node.table.fields)) == columns
+    column_names = set(map(lambda field: field.name, node.table.fields))
+    assert column_names == columns, f"Report node {node.unique_id} columns: {column_names} does not have expected columns: {columns}"

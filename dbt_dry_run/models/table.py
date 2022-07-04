@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Set
 
 from google.cloud.bigquery import SchemaField
 from google.cloud.bigquery.table import Table as BigQueryTable
@@ -52,6 +52,10 @@ class Table(BaseModel):
         schema = bigquery_table.schema
         new_fields = cls.map_fields(schema)
         return cls(fields=new_fields)
+
+    @property
+    def field_names(self) -> Set[str]:
+        return set(field.name for field in self.fields)
 
     @classmethod
     def map_fields(
