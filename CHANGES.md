@@ -1,6 +1,6 @@
 ## Changelog
 
-## dbt-dry-run v0.3.0 (NOT RELEASED)
+## dbt-dry-run v0.3.0
 
 ### Improvements & Bugfixes
 
