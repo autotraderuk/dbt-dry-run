@@ -7,6 +7,7 @@ import yaml
 
 from dbt_dry_run.execution import dry_run_manifest
 from dbt_dry_run.models import Manifest, Profile
+from dbt_dry_run.models.profile import read_profiles
 from dbt_dry_run.result_reporter import ResultReporter
 
 parser = argparse.ArgumentParser(description="Dry run DBT")
@@ -41,35 +42,21 @@ parser.add_argument("--report-path", type=str, help="Json path to dump report to
 PROFILE_FILENAME = "profiles.yml"
 
 
-def profiles_get_env_var(key: str, default: str = None) -> Optional[str]:
-    return os.environ.get(key, default)
-
-
-def read_profiles(path: str) -> Dict[str, Profile]:
-    all_profiles: Dict[str, Profile] = {}
-
+def read_profiles_file(path: str) -> Dict[str, Profile]:
     profile_filepath = os.path.join(path, PROFILE_FILENAME)
     if not os.path.exists(profile_filepath):
         raise FileNotFoundError(
             f"Could not find '{PROFILE_FILENAME}' at '{profile_filepath}'"
         )
-
-    template_loader = jinja2.FileSystemLoader(searchpath=path)
-    template_env = jinja2.Environment(loader=template_loader)
-    template_env.globals.update(env_var=profiles_get_env_var)
-    template = template_env.get_template(PROFILE_FILENAME)
-    output_text = template.render()
-    profile_data = yaml.safe_load(output_text)
-    for name, profile in profile_data.items():
-        if name != "config":
-            all_profiles[name] = Profile(**profile)
-    return all_profiles
+    with open(profile_filepath) as f:
+        file_contents = f.read()
+    return read_profiles(file_contents)
 
 
 def run() -> int:
     parsed_args = parser.parse_args()
     manifest = Manifest.from_filepath(parsed_args.manifest_path)
-    profiles = read_profiles(parsed_args.profiles_dir)
+    profiles = read_profiles_file(parsed_args.profiles_dir)
     try:
         profile = profiles[parsed_args.profile]
     except KeyError:
