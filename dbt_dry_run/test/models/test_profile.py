@@ -1,5 +1,7 @@
 import os
 
+import pytest
+
 from dbt_dry_run.models.profile import read_profiles
 
 
@@ -62,9 +64,7 @@ def test_dataset_schema_alias() -> None:
     """
 
     profiles = read_profiles(profile_string)
-    assert (
-        profiles["default"].outputs["test-output"].dataset_or_schema == "dry_run_schema"
-    )
+    assert profiles["default"].outputs["test-output"].dataset == "dry_run_schema"
 
     profile_string = """
     default:
@@ -82,7 +82,23 @@ def test_dataset_schema_alias() -> None:
     """
 
     profiles = read_profiles(profile_string)
-    assert (
-        profiles["default"].outputs["test-output"].dataset_or_schema
-        == "dry_run_dataset"
-    )
+    assert profiles["default"].outputs["test-output"].dataset == "dry_run_dataset"
+
+    profile_string = """
+    default:
+        target: test-output
+
+        outputs:
+            test-output:
+              type: bigquery
+              method: oauth
+              project:  my_project
+              dataset: dry_run_dataset
+              schema: dry_run_schema
+              location: "{{ env_var('DBT_DRY_RUN_TEST_LOCATION') }}"
+              threads: 4
+              timeout_seconds: 300
+    """
+
+    with pytest.raises(ValueError):
+        read_profiles(profile_string)

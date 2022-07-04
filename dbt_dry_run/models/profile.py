@@ -19,7 +19,6 @@ class Output(BaseModel):
     output_type: str = Field(..., alias="type")
     method: BigQueryConnectionMethod
     project: str
-    db_schema: Optional[str] = Field(None, alias="schema")
     dataset: Optional[str] = None
     location: str
     threads: int = Field(..., ge=1)
@@ -28,13 +27,14 @@ class Output(BaseModel):
     impersonate_service_account: Optional[str] = None
     scopes: List[str] = []
 
-    @property
-    def dataset_or_schema(self) -> str:
-        dataset = self.db_schema or self.dataset
-        if dataset:
-            return dataset
-        else:
-            raise ValueError(f"Must specify `schema` or `dataset` in BigQuery profile")
+    @root_validator(pre=True)
+    def validate_dataset_or_schema(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        if values.get("schema") and values.get("dataset"):
+            raise ValueError(f"Must specify one of dataset or schema")
+        elif not values.get("schema") and not values.get("dataset"):
+            raise ValueError(f"Must specify dataset or schema")
+        values["dataset"] = values.get("dataset", values.get("schema"))
+        return values
 
 
 class Profile(BaseModel):
