@@ -1,5 +1,43 @@
 ## Changelog
 
+# dbt-dry-run v0.4.0 (NOT RELEASED)
+
+## Improvements & Bugfixes
+
+- Under the hood re-write of how we create the BigQuery connection. We now directly interact with dbt and create the
+  project config and BigQuery adapter using dbt instead of reimplementing the logic that dbt uses by reading your 
+  `profiles.yml`
+  
+- Due to the re-write there is backwards incompatible changes with the CLI where you should now run the dry runner in 
+  the same way use run `dbt compile` as it will search for the `dbt_project.yml` in the same directory as you run the
+  dry runner (By default). This can be overridden in the same way as in dbt using the `--project-dir` option
+  
+- The CLI now also uses [Typer][get-typer] so the CLI help is now improved. Typing `dbt-dry-run --help` outputs:
+
+  ```
+  ❯ dbt-dry-run --help
+  Usage: dbt-dry-run [OPTIONS]
+  
+  Options:
+    --profiles-dir TEXT             [dbt] Where to search for `profiles.yml`
+                                    [default: ~/.dbt]
+    --project-dir TEXT              [dbt] Where to search for `dbt_project.yml`
+                                    [default: <CWD>]
+    --target TEXT                   [dbt] Target profile
+    --verbose / --no-verbose        Output verbose error messages  [default: no-
+                                    verbose]
+    --report-path TEXT              Json path to dump report to
+    --install-completion [bash|zsh|fish|powershell|pwsh]
+                                    Install completion for the specified shell.
+    --show-completion [bash|zsh|fish|powershell|pwsh]
+                                    Show completion for the specified shell, to
+                                    copy it or customize the installation.
+    --help                          Show this message and exit.
+  
+  ```
+  
+  Where any option description prefixed with `[dbt]` should work in the same way as it does in the dbt CLI
+
 # dbt-dry-run v0.3.1
 
 ## Improvements & Bugfixes
@@ -48,3 +86,4 @@ or profile directory
 - Support `impersonate_service_account` in `profiles.yml`
 
 [dbt-env-var]: https://docs.getdbt.com/reference/dbt-jinja-functions/env_var
+[get-typer]: https://typer.tiangolo.com/

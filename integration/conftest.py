@@ -1,3 +1,4 @@
+import glob
 import os
 import subprocess
 from dataclasses import dataclass
@@ -23,7 +24,10 @@ def running_in_github() -> bool:
 def dry_run_result(request: FixtureRequest) -> IntegrationTestResult:
     folder = request.fspath.dirname
     profiles_dir = os.path.join(request.config.rootdir, "integration/profiles")
-    report_path = os.path.join(folder, "target/dry_run_output.json")
+    target_dir = os.path.join(folder, "target")
+    report_path = os.path.join(target_dir, "dry_run_output.json")
+    if os.path.exists(report_path):
+        os.remove(report_path)
     if running_in_github():
         target = "integration-github"
     else:
@@ -44,11 +48,10 @@ def dry_run_result(request: FixtureRequest) -> IntegrationTestResult:
     manifest_path = os.path.join(folder, "target/manifest.json")
     run_dry_run = subprocess.run(
         ["python3", "-m", "dbt_dry_run",
-         "--manifest-path", f"{manifest_path}",
+         "--project-dir", f"{folder}",
          "--profiles-dir", profiles_dir,
          "--target", target,
-         '--report-path', report_path,
-         "default"], capture_output=True)
+         '--report-path', report_path], capture_output=True)
 
     if os.path.exists(report_path):
         dry_run_report = Report.parse_file(report_path)

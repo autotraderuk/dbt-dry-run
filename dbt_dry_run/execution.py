@@ -3,6 +3,7 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple
 
+from dbt_dry_run.adapter.service import ProjectService
 from dbt_dry_run.node_runner.snapshot_runner import SnapshotRunner
 from dbt_dry_run.sql_runner import SQLRunner
 
@@ -12,8 +13,7 @@ else:
     from typing import Awaitable as Future
 
 from dbt_dry_run.exception import NodeExecutionException, NotCompiledException
-from dbt_dry_run.models import Output
-from dbt_dry_run.models.manifest import Manifest, Node
+from dbt_dry_run.models.manifest import Node
 from dbt_dry_run.node_runner import NodeRunner, get_runner_map
 from dbt_dry_run.node_runner.model_runner import ModelRunner
 from dbt_dry_run.node_runner.seed_runner import SeedRunner
@@ -54,29 +54,25 @@ def dry_run_node(runners: Dict[str, NodeRunner], node: Node, results: Results) -
 
 @contextmanager
 def create_context(
-    output: Output,
+    project: ProjectService,
 ) -> Generator[Tuple[SQLRunner, ThreadPoolExecutor], None, None]:
     sql_runner: Optional[SQLRunner] = None
     executor: Optional[ThreadPoolExecutor] = None
     try:
-        sql_runner = BigQuerySQLRunner.from_profile(output)
-        executor = ThreadPoolExecutor(max_workers=output.threads)
+        sql_runner = BigQuerySQLRunner(project)
+        executor = ThreadPoolExecutor(max_workers=1)  # TODO: Set this from something
         yield sql_runner, executor
     finally:
         if executor:
             executor.shutdown()
-        if sql_runner:
-            sql_runner.close()
 
 
-def dry_run_manifest(
-    manifest: Manifest, output: Output, model: Optional[str]
-) -> Results:
+def dry_run_manifest(project: ProjectService) -> Results:
     executor: ThreadPoolExecutor
-    with create_context(output) as (sql_runner, executor):
+    with create_context(project) as (sql_runner, executor):
         results = Results()
         runners = {t: runner(sql_runner, results) for t, runner in _RUNNERS.items()}
-        scheduler = ManifestScheduler(manifest, model)
+        scheduler = ManifestScheduler(project.get_dbt_manifest())
 
         print(f"Dry running {len(scheduler)} models")
         for generation_id, generation in enumerate(scheduler):

@@ -10,7 +10,7 @@ def assert_report_produced(result: IntegrationTestResult) -> Report:
 
 
 def assert_report_success(result: IntegrationTestResult) -> Report:
-    assert result.report, f"Repost is missing: {result.process.stdout}"
+    assert result.report, f"Report is missing: {result.process.stdout}"
     assert result.report.success
     return result.report
 

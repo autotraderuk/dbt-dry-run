@@ -1,0 +1,2 @@
+[run]
+omit = dbt_dry_run/test/*

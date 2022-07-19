@@ -12,10 +12,6 @@ class SQLRunner(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def close(self) -> None:
-        ...
-
-    @abstractmethod
     def node_exists(self, node: Node) -> bool:
         ...
 

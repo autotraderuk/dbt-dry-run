@@ -7,11 +7,6 @@ testcov: test
 	@echo "building coverage html"
 	@coverage html
 
-.PHONY: run-local
-run-local:
-	dbt compile --profiles-dir ./integration/profiles --target integration-local --project-dir ./integration/projects/test_models_with_invalid_sql
-	python3 -m dbt_dry_run default --profiles-dir ./integration/profiles --target integration-local --manifest-path ./integration/projects/test_models_with_invalid_sql/target/manifest.json --report-path ./integration/projects/test_models_with_invalid_sql/target/dry_run.json
-
 .PHONY: integration
 integration:
 	pytest ./integration
@@ -36,5 +31,6 @@ build: verify
 
 .PHONY: release
 release:
+	git diff HEAD main --quiet || (echo 'Must release in main' && false)
 	twine upload ./dist/*.whl
 	twine upload ./dist/*.tar.gz

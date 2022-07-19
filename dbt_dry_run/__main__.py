@@ -1,8 +1,8 @@
-from dbt_dry_run import cli
+from dbt_dry_run.cli import app
 
 
 def main() -> None:
-    exit(cli.run())
+    exit(app())
 
 
 if __name__ == "__main__":

@@ -1,164 +1,107 @@
-from typing import Optional, Tuple, cast
+from contextlib import contextmanager
+from typing import Generator, cast
 from unittest.mock import MagicMock
 
-import google
-import google.auth.credentials
 import pytest
 from google.api_core.exceptions import BadRequest
-from google.oauth2.service_account import Credentials
-from pytest_mock.plugin import MockerFixture
+from google.cloud.bigquery import DatasetReference, SchemaField, Table, TableReference
+from google.cloud.exceptions import NotFound
 from tenacity import RetryError, wait_none
 
-from dbt_dry_run.models import Output
+from dbt_dry_run.adapter.service import ProjectService
 from dbt_dry_run.results import DryRunStatus
 from dbt_dry_run.sql_runner.big_query_sql_runner import (
     MAX_ATTEMPT_NUMBER,
     QUERY_TIMED_OUT,
     BigQuerySQLRunner,
 )
+from dbt_dry_run.test.utils import SimpleNode
 
 
-def _oauth_creds() -> Tuple[google.auth.credentials.Credentials, Optional[str]]:
-    return cast(MagicMock, google.auth.credentials.Credentials), "project_id"
+class MockProject:
+    def __init__(self) -> None:
+        self._connection_mock = MagicMock()
+        self.mock_client = MagicMock()
+        self._connection_mock.handle = self.mock_client
 
+    @contextmanager
+    def get_connection(self) -> Generator[MagicMock, None, None]:
+        yield self._connection_mock
 
-def _service_account_creds() -> google.oauth2.service_account.Credentials:
-    return cast(MagicMock, google.oauth2.service_account.Credentials)
-
-
-def test_from_profile_with_oauth_impersonating_service_account_credentials(
-    mocker: MockerFixture,
-) -> None:
-    mock = mocker.patch("google.auth.default")
-    mock.return_value = _oauth_creds()
-
-    dbt_profile_config = {
-        "type": "bigquery",
-        "method": "oauth",
-        "project": "admin-project",
-        "schema": "core",
-        "location": "EU",
-        "threads": 8,
-        "timeout_seconds": 300,
-        "keyfile": "some_path_to_key_file.json",
-        "impersonate_service_account": "data-product@dbt.iam.gserviceaccount.com",
-    }
-    output = Output(**dbt_profile_config)
-
-    actual = BigQuerySQLRunner.from_profile(output)
-
-    assert actual.client.project == "admin-project"
-    assert (
-        actual.client._credentials.service_account_email
-        == "data-product@dbt.iam.gserviceaccount.com"
-    )
-
-
-def test_from_profile_with_service_account_impersonating_service_account_credentials(
-    mocker: MockerFixture,
-) -> None:
-    mock = mocker.patch(
-        "google.oauth2.service_account.Credentials.from_service_account_file"
-    )
-    mock.return_value = _service_account_creds()
-
-    dbt_profile_config = {
-        "type": "bigquery",
-        "method": "service-account",
-        "project": "admin-project",
-        "schema": "core",
-        "location": "EU",
-        "threads": 8,
-        "timeout_seconds": 300,
-        "keyfile": "some_path_to_key_file.json",
-        "impersonate_service_account": "data-product@dbt.iam.gserviceaccount.com",
-    }
-    output = Output(**dbt_profile_config)
-    actual = BigQuerySQLRunner.from_profile(output)
-
-    assert actual.client.project == "admin-project"
-    assert (
-        actual.client._credentials.service_account_email
-        == "data-product@dbt.iam.gserviceaccount.com"
-    )
-
-
-def test_from_profile_with_oauth_credentials(mocker: MockerFixture) -> None:
-    mock_creds = _oauth_creds()
-    mock = mocker.patch("google.auth.default")
-    mock.return_value = mock_creds
-    mock_client = mocker.patch("dbt_dry_run.sql_runner.big_query_sql_runner.Client")
-
-    dbt_profile_config = {
-        "type": "bigquery",
-        "method": "oauth",
-        "project": "admin-project",
-        "schema": "core",
-        "location": "EU",
-        "threads": 8,
-        "timeout_seconds": 300,
-        "keyfile": "some_path_to_key_file.json",
-    }
-    output = Output(**dbt_profile_config)
-
-    BigQuerySQLRunner.from_profile(output)
-
-    name, args, kwargs = mock_client.mock_calls[0]
-    assert kwargs["project"] == "admin-project"
-    assert kwargs["location"] == "EU"
-    assert kwargs["credentials"] == mock_creds[0]
-
-
-def test_from_profile_with_service_account_credentials(mocker: MockerFixture) -> None:
-    mock_creds = _service_account_creds()
-    mock = mocker.patch(
-        "google.oauth2.service_account.Credentials.from_service_account_file"
-    )
-    mock.return_value = mock_creds
-    mock_client = mocker.patch("dbt_dry_run.sql_runner.big_query_sql_runner.Client")
-
-    dbt_profile_config = {
-        "type": "bigquery",
-        "method": "service-account",
-        "project": "admin-project",
-        "schema": "core",
-        "location": "EU",
-        "threads": 8,
-        "timeout_seconds": 300,
-        "keyfile": "some_path_to_key_file.json",
-    }
-    output = Output(**dbt_profile_config)
-    BigQuerySQLRunner.from_profile(output)
-
-    name, args, kwargs = mock_client.mock_calls[0]
-    assert kwargs["project"] == "admin-project"
-    assert kwargs["location"] == "EU"
-    assert kwargs["credentials"] == mock_creds
+    def assert_query_called_with_sql(self, sql: str, num_calls: int = 1) -> None:
+        assert len(self.mock_client.query.mock_calls) == num_calls
+        assert all(call.args[0] == sql for call in self.mock_client.query.mock_calls)
 
 
 def test_timeout_query_retries() -> None:
-    mock_client = MagicMock()
+    mock_project = MockProject()
     bad_request: BadRequest = BadRequest(message=QUERY_TIMED_OUT)
-    mock_client.query.side_effect = bad_request
-    sql_runner = BigQuerySQLRunner(mock_client)
+    mock_project.mock_client.query.side_effect = bad_request
+    sql_runner = BigQuerySQLRunner(cast(ProjectService, mock_project))
+
     # Disable wait to make test run faster
     sql_runner.query.retry.wait = wait_none()  # type: ignore
 
+    expected_sql = "SELECT * FROM foo"
     with pytest.raises(RetryError):
-        sql_runner.query("SELECT * FROM foo")
+        sql_runner.query(expected_sql)
 
-    assert len(mock_client.query.mock_calls) == MAX_ATTEMPT_NUMBER
+    mock_project.assert_query_called_with_sql(expected_sql, MAX_ATTEMPT_NUMBER)
 
 
 def test_error_query_does_not_retry() -> None:
-    mock_client = MagicMock()
+    mock_project = MockProject()
     raised_exception = BadRequest(message="FOO")
-    mock_client.query.side_effect = raised_exception
-    sql_runner = BigQuerySQLRunner(mock_client)
+    mock_project.mock_client.query.side_effect = raised_exception
+    sql_runner = BigQuerySQLRunner(cast(ProjectService, mock_project))
 
-    status, _, exc = sql_runner.query("SELECT * FROM foo")
+    expected_sql = "SELECT * FROM foo"
+    status, _, exc = sql_runner.query(expected_sql)
 
     assert status == DryRunStatus.FAILURE
     assert exc is raised_exception
 
-    assert len(mock_client.query.mock_calls) == 1
+    mock_project.assert_query_called_with_sql(expected_sql)
+
+
+def test_get_node_schema_returns_none_if_not_found() -> None:
+    mock_project = MockProject()
+    raised_exception = NotFound("not_found")
+    mock_project.mock_client.get_table.side_effect = raised_exception
+    sql_runner = BigQuerySQLRunner(cast(ProjectService, mock_project))
+
+    example_node = SimpleNode(unique_id="a", depends_on=[]).to_node()
+    table = sql_runner.get_node_schema(example_node)
+
+    assert table is None
+    assert len(mock_project.mock_client.get_table.mock_calls) == 1
+
+    actual_table_ref = mock_project.mock_client.get_table.mock_calls[0].args[0]
+    expected_table_ref = TableReference(
+        DatasetReference(example_node.database, example_node.db_schema),
+        example_node.alias,
+    )
+    assert actual_table_ref == expected_table_ref
+
+
+def test_get_node_schema_returns_table_schema() -> None:
+    mock_project = MockProject()
+    example_node = SimpleNode(unique_id="a", depends_on=[]).to_node()
+    expected_table_ref = TableReference(
+        DatasetReference(example_node.database, example_node.db_schema),
+        example_node.alias,
+    )
+
+    a_schema_field = SchemaField(name="a", field_type="NUMERIC")
+    mock_project.mock_client.get_table.return_value = Table(
+        table_ref=expected_table_ref, schema=[a_schema_field]
+    )
+    sql_runner = BigQuerySQLRunner(cast(ProjectService, mock_project))
+
+    table = sql_runner.get_node_schema(example_node)
+
+    assert table is not None
+    assert len(mock_project.mock_client.get_table.mock_calls) == 1
+
+    table_column_names = set(field.name for field in table.fields)
+    assert table_column_names == set("a")
