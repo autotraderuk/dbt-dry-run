@@ -144,7 +144,7 @@ def test_model_with_dependency_inserts_sql_literal() -> None:
 
     executed_sql = get_executed_sql(mock_sql_runner)
     assert result.status == DryRunStatus.SUCCESS
-    assert executed_sql == "SELECT * FROM (SELECT 'foo' as `a`)"
+    assert executed_sql == "SELECT * FROM (SELECT 'foo' as `a`) AS upstream"
 
 
 def test_incremental_model_that_does_not_exist_returns_dry_run_schema() -> None:

@@ -104,7 +104,7 @@ def test_replace_upstream_sql_replaces_from() -> None:
         new_sql
         == """
     SELECT foo
-    FROM (SELECT 'foo' as `foo`)
+    FROM (SELECT 'foo' as `foo`) AS A
     """
     )
 
@@ -124,7 +124,7 @@ def test_replace_upstream_sql_replaces_join() -> None:
         == """
     SELECT foo
     FROM `a`.`b`.`c`
-    JOIN (SELECT 'foo' as `foo`)
+    JOIN (SELECT 'foo' as `foo`) AS A
     """
     )
 
@@ -144,7 +144,7 @@ def test_replace_upstream_sql_replaces_from_newline() -> None:
         == """
     SELECT foo
     FROM
-        (SELECT 'foo' as `foo`)
+        (SELECT 'foo' as `foo`) AS A
     """
     )
 
@@ -164,7 +164,7 @@ def test_ignores_quoted_literals() -> None:
         == f"""
     SELECT foo,
            '{node.to_table_ref_literal()}' AS original_table
-    FROM (SELECT 'foo' as `foo`)
+    FROM (SELECT 'foo' as `foo`) AS A
     """
     )
 
@@ -184,7 +184,7 @@ def test_handles_comments() -> None:
         == """
     SELECT foo
     FROM -- test
-        (SELECT 'foo' as `foo`)
+        (SELECT 'foo' as `foo`) AS A
     """
     )
 
@@ -207,6 +207,6 @@ def test_handles_multiple_comments() -> None:
     SELECT foo
     FROM -- test
          -- test2
-        (SELECT 'foo' as `foo`)
+        (SELECT 'foo' as `foo`) AS A
     """
     )

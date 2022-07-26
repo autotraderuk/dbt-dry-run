@@ -21,8 +21,8 @@ _EXAMPLE_VALUES: Dict[BigQueryFieldType, Callable[[], str]] = {
     BigQueryFieldType.TIME: lambda: "TIME(12,0,0)",
     BigQueryFieldType.DATETIME: lambda: "DATETIME(2021,1,1,12,0,0)",
     BigQueryFieldType.GEOGRAPHY: lambda: "ST_GeogPoint(0.0, 0.0)",
-    BigQueryFieldType.NUMERIC: lambda: "1",
-    BigQueryFieldType.BIGNUMERIC: lambda: "2",
+    BigQueryFieldType.NUMERIC: lambda: "CAST(1 AS NUMERIC)",
+    BigQueryFieldType.BIGNUMERIC: lambda: "CAST(2 AS BIGNUMERIC)",
 }
 
 _EXAMPLE_VALUES_TEST: Dict[BigQueryFieldType, Callable[[], str]] = {
@@ -39,8 +39,8 @@ _EXAMPLE_VALUES_TEST: Dict[BigQueryFieldType, Callable[[], str]] = {
     BigQueryFieldType.TIME: lambda: "TIME(12,0,0)",
     BigQueryFieldType.DATETIME: lambda: "DATETIME(2021,1,1,12,0,0)",
     BigQueryFieldType.GEOGRAPHY: lambda: "ST_GeogPoint(0.0, 0.0)",
-    BigQueryFieldType.NUMERIC: lambda: "1",
-    BigQueryFieldType.BIGNUMERIC: lambda: "2",
+    BigQueryFieldType.NUMERIC: lambda: "CAST(1 AS NUMERIC)",
+    BigQueryFieldType.BIGNUMERIC: lambda: "CAST(2 AS BIGNUMERIC)",
 }
 
 _ACTIVE_EXAMPLE_VALUES = _EXAMPLE_VALUES
@@ -86,7 +86,10 @@ def replace_upstream_sql(node_sql: str, node: Node, table: Table) -> str:
         rf"((?:from|join)(?:\s--.*)?[\r\n\s]*)({escaped_upstream_table_ref})",
         flags=re.IGNORECASE | re.MULTILINE,
     )
-    select_literal = get_sql_literal_from_table(table)
+    select_literal = (
+        get_sql_literal_from_table(table)
+        + f" AS {escaped_upstream_table_ref.split('.')[2].strip('`')}"
+    )
     new_node_sql = regex.sub(r"\1" + select_literal, node_sql)
     return new_node_sql
 
