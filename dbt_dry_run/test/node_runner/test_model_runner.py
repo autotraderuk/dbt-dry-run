@@ -127,6 +127,7 @@ def test_model_with_dependency_inserts_sql_literal() -> None:
         compiled_sql=compiled_sql,
     ).to_node()
     node.depends_on.deep_nodes = ["upstream"]
+    alias_literals = True
 
     results = Results()
     results.add_result(
@@ -140,7 +141,7 @@ def test_model_with_dependency_inserts_sql_literal() -> None:
     )
 
     model_runner = ModelRunner(mock_sql_runner, results)
-    result = model_runner.run(node)
+    result = model_runner.run(node, alias_literals)
 
     executed_sql = get_executed_sql(mock_sql_runner)
     assert result.status == DryRunStatus.SUCCESS

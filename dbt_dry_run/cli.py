@@ -1,9 +1,6 @@
 import argparse
 import os
-from typing import Dict, Optional
-
-import jinja2
-import yaml
+from typing import Dict
 
 from dbt_dry_run.execution import dry_run_manifest
 from dbt_dry_run.models import Manifest, Profile
@@ -38,6 +35,11 @@ parser.add_argument(
     "--verbose", action="store_true", help="Output verbose error messages"
 )
 parser.add_argument("--report-path", type=str, help="Json path to dump report to")
+parser.add_argument(
+    "--alias-literals",
+    action="store_true",
+    help="Alias literal SELECT statements with the upstream table name",
+)
 
 PROFILE_FILENAME = "profiles.yml"
 
@@ -72,7 +74,9 @@ def run() -> int:
             f"Could not find target `{active_output}` in outputs: {list(profile.outputs.keys())}"
         )
 
-    dry_run_results = dry_run_manifest(manifest, output, parsed_args.model)
+    dry_run_results = dry_run_manifest(
+        manifest, output, parsed_args.model, parsed_args.alias_literals
+    )
 
     reporter = ResultReporter(dry_run_results, set(), parsed_args.verbose)
     exit_code = reporter.report_and_check_results()

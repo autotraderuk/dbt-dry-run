@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Optional
 
 import agate as ag
 from agate import data_types
@@ -22,7 +22,7 @@ class SeedRunner(NodeRunner):
         data_types.DateTime: BigQueryFieldType.DATETIME,
     }
 
-    def run(self, node: Node) -> DryRunResult:
+    def run(self, node: Node, alias_literals: Optional[bool] = None) -> DryRunResult:
         full_path = os.path.join(node.root_path, node.original_file_path)
         with open(full_path, "r", encoding="utf-8-sig") as f:
             csv_table = ag.Table.from_csv(f)

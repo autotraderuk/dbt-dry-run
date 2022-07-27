@@ -1,4 +1,4 @@
-from typing import cast
+from typing import Optional, cast
 from unittest.mock import MagicMock
 
 from dbt_dry_run.models import Node
@@ -10,14 +10,14 @@ from dbt_dry_run.sql_runner.big_query_sql_runner import BigQuerySQLRunner
 class SingleNodeRunner(NodeRunner):
     resource_type = ("single",)
 
-    def run(self, node: Node) -> DryRunResult:
+    def run(self, node: Node, alias_literals: Optional[bool] = None) -> DryRunResult:
         return cast(DryRunResult, None)
 
 
 class MultiNodeRunner(NodeRunner):
     resource_type = ("first", "second")
 
-    def run(self, node: Node) -> DryRunResult:
+    def run(self, node: Node, alias_literals: Optional[bool] = None) -> DryRunResult:
         return cast(DryRunResult, None)
 
 

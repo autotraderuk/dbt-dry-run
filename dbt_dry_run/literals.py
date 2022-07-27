@@ -1,5 +1,5 @@
 import re
-from typing import Callable, Dict, cast
+from typing import Callable, Dict, Optional, cast
 from uuid import uuid4
 
 from dbt_dry_run.exception import UpstreamFailedException
@@ -79,22 +79,28 @@ def get_sql_literal_from_table(table: Table) -> str:
     return select_literal
 
 
-def replace_upstream_sql(node_sql: str, node: Node, table: Table) -> str:
+def replace_upstream_sql(
+    node_sql: str, node: Node, table: Table, alias_literals: Optional[bool] = None
+) -> str:
     upstream_table_ref = node.to_table_ref_literal()
     escaped_upstream_table_ref = upstream_table_ref
+    literal_alias = (
+        f" AS {escaped_upstream_table_ref.split('.')[2].strip('`')}"
+        if alias_literals
+        else ""
+    )
     regex = re.compile(
         rf"((?:from|join)(?:\s--.*)?[\r\n\s]*)({escaped_upstream_table_ref})",
         flags=re.IGNORECASE | re.MULTILINE,
     )
-    select_literal = (
-        get_sql_literal_from_table(table)
-        + f" AS {escaped_upstream_table_ref.split('.')[2].strip('`')}"
-    )
+    select_literal = get_sql_literal_from_table(table) + literal_alias
     new_node_sql = regex.sub(r"\1" + select_literal, node_sql)
     return new_node_sql
 
 
-def insert_dependant_sql_literals(node: Node, results: Results) -> str:
+def insert_dependant_sql_literals(
+    node: Node, results: Results, alias_literals: Optional[bool] = None
+) -> str:
     if node.depends_on.deep_nodes is not None:
         upstream_results = [
             results.get_result(n)
@@ -112,6 +118,6 @@ def insert_dependant_sql_literals(node: Node, results: Results) -> str:
     node_new_sql = node.compiled_sql
     for upstream in completed_upstreams:
         node_new_sql = replace_upstream_sql(
-            node_new_sql, upstream.node, cast(Table, upstream.table)
+            node_new_sql, upstream.node, cast(Table, upstream.table), alias_literals
         )
     return node_new_sql

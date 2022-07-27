@@ -27,20 +27,27 @@ _RUNNER_CLASSES: List[Any] = [ModelRunner, SeedRunner, SnapshotRunner]
 _RUNNERS = get_runner_map(_RUNNER_CLASSES)
 
 
-def dispatch_node(node: Node, runners: Dict[str, NodeRunner]) -> DryRunResult:
+def dispatch_node(
+    node: Node, runners: Dict[str, NodeRunner], alias_literals: Optional[bool] = None
+) -> DryRunResult:
     try:
         runner = runners[node.resource_type]
     except KeyError:
         raise ValueError(f"Unknown resource type '{node.resource_type}'")
-    return runner.run(node)
+    return runner.run(node, alias_literals)
 
 
-def dry_run_node(runners: Dict[str, NodeRunner], node: Node, results: Results) -> None:
+def dry_run_node(
+    runners: Dict[str, NodeRunner],
+    node: Node,
+    results: Results,
+    alias_literals: Optional[bool] = None,
+) -> None:
     """
     This method must be thread safe
     """
     if node.compiled:
-        dry_run_result = dispatch_node(node, runners)
+        dry_run_result = dispatch_node(node, runners, alias_literals)
         results.add_result(node.unique_id, dry_run_result)
     else:
         not_compiled_result = DryRunResult(
@@ -70,7 +77,10 @@ def create_context(
 
 
 def dry_run_manifest(
-    manifest: Manifest, output: Output, model: Optional[str]
+    manifest: Manifest,
+    output: Output,
+    model: Optional[str],
+    alias_literals: Optional[bool] = None,
 ) -> Results:
     executor: ThreadPoolExecutor
     with create_context(output) as (sql_runner, executor):
@@ -83,7 +93,7 @@ def dry_run_manifest(
             gen_futures: Dict[str, Future[None]] = {}
             for node in generation:
                 task_future: Future[None] = executor.submit(
-                    dry_run_node, runners, node, results
+                    dry_run_node, runners, node, results, alias_literals
                 )
                 gen_futures[node.unique_id] = task_future
             _wait_for_generation(gen_futures)

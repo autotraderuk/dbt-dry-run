@@ -98,7 +98,8 @@ def test_replace_upstream_sql_replaces_from() -> None:
     FROM {node.to_table_ref_literal()}
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
-    new_sql = replace_upstream_sql(original_sql, node, table)
+    alias_literals = True
+    new_sql = replace_upstream_sql(original_sql, node, table, alias_literals)
 
     assert (
         new_sql
@@ -117,7 +118,8 @@ def test_replace_upstream_sql_replaces_join() -> None:
     JOIN {node.to_table_ref_literal()}
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
-    new_sql = replace_upstream_sql(original_sql, node, table)
+    alias_literals = True
+    new_sql = replace_upstream_sql(original_sql, node, table, alias_literals)
 
     assert (
         new_sql
@@ -137,7 +139,8 @@ def test_replace_upstream_sql_replaces_from_newline() -> None:
         {node.to_table_ref_literal()}
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
-    new_sql = replace_upstream_sql(original_sql, node, table)
+    alias_literals = True
+    new_sql = replace_upstream_sql(original_sql, node, table, alias_literals)
 
     assert (
         new_sql
@@ -164,7 +167,7 @@ def test_ignores_quoted_literals() -> None:
         == f"""
     SELECT foo,
            '{node.to_table_ref_literal()}' AS original_table
-    FROM (SELECT 'foo' as `foo`) AS A
+    FROM (SELECT 'foo' as `foo`)
     """
     )
 
@@ -184,7 +187,7 @@ def test_handles_comments() -> None:
         == """
     SELECT foo
     FROM -- test
-        (SELECT 'foo' as `foo`) AS A
+        (SELECT 'foo' as `foo`)
     """
     )
 
@@ -207,6 +210,6 @@ def test_handles_multiple_comments() -> None:
     SELECT foo
     FROM -- test
          -- test2
-        (SELECT 'foo' as `foo`) AS A
+        (SELECT 'foo' as `foo`)
     """
     )
