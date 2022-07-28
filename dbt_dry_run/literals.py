@@ -21,8 +21,8 @@ _EXAMPLE_VALUES: Dict[BigQueryFieldType, Callable[[], str]] = {
     BigQueryFieldType.TIME: lambda: "TIME(12,0,0)",
     BigQueryFieldType.DATETIME: lambda: "DATETIME(2021,1,1,12,0,0)",
     BigQueryFieldType.GEOGRAPHY: lambda: "ST_GeogPoint(0.0, 0.0)",
-    BigQueryFieldType.NUMERIC: lambda: "1",
-    BigQueryFieldType.BIGNUMERIC: lambda: "2",
+    BigQueryFieldType.NUMERIC: lambda: "CAST(1 AS NUMERIC)",
+    BigQueryFieldType.BIGNUMERIC: lambda: "CAST(2 AS BIGNUMERIC)",
 }
 
 _EXAMPLE_VALUES_TEST: Dict[BigQueryFieldType, Callable[[], str]] = {
@@ -39,8 +39,8 @@ _EXAMPLE_VALUES_TEST: Dict[BigQueryFieldType, Callable[[], str]] = {
     BigQueryFieldType.TIME: lambda: "TIME(12,0,0)",
     BigQueryFieldType.DATETIME: lambda: "DATETIME(2021,1,1,12,0,0)",
     BigQueryFieldType.GEOGRAPHY: lambda: "ST_GeogPoint(0.0, 0.0)",
-    BigQueryFieldType.NUMERIC: lambda: "1",
-    BigQueryFieldType.BIGNUMERIC: lambda: "2",
+    BigQueryFieldType.NUMERIC: lambda: "CAST(1 AS NUMERIC)",
+    BigQueryFieldType.BIGNUMERIC: lambda: "CAST(2 AS BIGNUMERIC)",
 }
 
 _ACTIVE_EXAMPLE_VALUES = _EXAMPLE_VALUES
