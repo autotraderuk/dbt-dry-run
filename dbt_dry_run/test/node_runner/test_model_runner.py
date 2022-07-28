@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 from dbt_dry_run.exception import SchemaChangeException, UpstreamFailedException
 from dbt_dry_run.literals import enable_test_example_values
 from dbt_dry_run.models import BigQueryFieldType, Table, TableField
-from dbt_dry_run.models.manifest import NodeConfig
+from dbt_dry_run.models.manifest import NodeConfig, PartitionBy
 from dbt_dry_run.node_runner.model_runner import ModelRunner
 from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
 from dbt_dry_run.scheduler import ManifestScheduler
@@ -12,6 +12,10 @@ from dbt_dry_run.test.utils import SimpleNode
 enable_test_example_values(True)
 
 VIEW_CREATION_SQL = "CREATE OR REPLACE VIEW"
+
+DBT_MAX_PARTITION_DECLARATION = (
+    "declare _dbt_max_partition timestamp default CURRENT_TIMESTAMP();"
+)
 
 A_SIMPLE_TABLE = Table(
     fields=[
@@ -75,6 +79,29 @@ def test_model_as_view_runs_create_view() -> None:
 
     executed_sql = get_executed_sql(mock_sql_runner)
     assert executed_sql.startswith(VIEW_CREATION_SQL)
+    assert node.compiled_sql in executed_sql
+
+
+def test_model_with_dbt_max_partition_variable_replaces_it() -> None:
+    mock_sql_runner = MagicMock()
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, A_SIMPLE_TABLE, None)
+
+    node = SimpleNode(
+        unique_id="node1", depends_on=[], resource_type=ManifestScheduler.MODEL
+    ).to_node()
+    node.depends_on.deep_nodes = []
+    node.config.materialized = "incremental"
+    node.config.partition_by = PartitionBy(
+        **{"field": "loader_ingestion_time", "data_type": "timestamp"}
+    )
+
+    results = Results()
+
+    model_runner = ModelRunner(mock_sql_runner, results)
+    model_runner.run(node)
+
+    executed_sql = get_executed_sql(mock_sql_runner)
+    assert executed_sql.startswith(DBT_MAX_PARTITION_DECLARATION)
     assert node.compiled_sql in executed_sql
 
 

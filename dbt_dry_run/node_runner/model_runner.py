@@ -69,6 +69,13 @@ ON_SCHEMA_CHANGE_TABLE_HANDLER: Dict[
     OnSchemaChange.FAIL: fail_handler,
 }
 
+PARTITION_DATA_TYPES_VALUES_MAPPING: Dict[str, str] = {
+    "timestamp": "CURRENT_TIMESTAMP()",
+    "datetime": "CURRENT_DATETIME()",
+    "date": "CURRENT_DATE()",
+    "int64": "100",
+}
+
 
 class ModelRunner(NodeRunner):
     resource_type = ("model",)
@@ -76,6 +83,13 @@ class ModelRunner(NodeRunner):
     def _modify_sql(self, node: Node, sql_statement: str) -> str:
         if node.config.materialized == "view":
             sql_statement = f"CREATE OR REPLACE VIEW `{node.database}`.`{node.db_schema}`.`{node.alias}` AS (\n{sql_statement}\n)"
+
+        if node.config.materialized == "incremental" and node.config.partition_by:
+            dbt_max_partition_declaration = (
+                f"declare _dbt_max_partition {node.config.partition_by.data_type} default"
+                f" {PARTITION_DATA_TYPES_VALUES_MAPPING[node.config.partition_by.data_type]};"
+            )
+            sql_statement = f"{dbt_max_partition_declaration}\n{sql_statement}"
 
         if node.config.sql_header:
             sql_statement = f"{node.config.sql_header}\n{sql_statement}"

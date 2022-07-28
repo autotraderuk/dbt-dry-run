@@ -19,6 +19,18 @@ class OnSchemaChange(str, Enum):
     SYNC_ALL_COLUMNS = "sync_all_columns"
 
 
+class BqPartitionRange(BaseModel):
+    start: int
+    end: int
+    interval: int
+
+
+class PartitionBy(BaseModel):
+    field: str
+    data_type: Literal["timestamp", "date", "datetime", "int64"]
+    range: Optional[BqPartitionRange]
+
+
 class NodeConfig(BaseModel):
     materialized: str
     on_schema_change: Optional[OnSchemaChange]
@@ -27,6 +39,7 @@ class NodeConfig(BaseModel):
     updated_at: Optional[str]
     strategy: Union[None, Literal["timestamp", "check"]]
     check_cols: Optional[Union[Literal["all"], List[str]]]
+    partition_by: Optional[PartitionBy]
 
 
 class Node(BaseModel):
