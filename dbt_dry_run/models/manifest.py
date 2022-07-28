@@ -19,7 +19,7 @@ class OnSchemaChange(str, Enum):
     SYNC_ALL_COLUMNS = "sync_all_columns"
 
 
-class BqPartitionRange(BaseModel):
+class IntPartitionRange(BaseModel):
     start: int
     end: int
     interval: int
@@ -28,7 +28,7 @@ class BqPartitionRange(BaseModel):
 class PartitionBy(BaseModel):
     field: str
     data_type: Literal["timestamp", "date", "datetime", "int64"]
-    range: Optional[BqPartitionRange]
+    range: Optional[IntPartitionRange]
 
 
 class NodeConfig(BaseModel):
