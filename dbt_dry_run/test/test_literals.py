@@ -98,13 +98,14 @@ def test_replace_upstream_sql_replaces_from() -> None:
     FROM {node.to_table_ref_literal()}
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
-    new_sql = replace_upstream_sql(original_sql, node, table)
+    alias_literals = True
+    new_sql = replace_upstream_sql(original_sql, node, table, alias_literals)
 
     assert (
         new_sql
         == """
     SELECT foo
-    FROM (SELECT 'foo' as `foo`)
+    FROM (SELECT 'foo' as `foo`) AS A
     """
     )
 
@@ -117,14 +118,15 @@ def test_replace_upstream_sql_replaces_join() -> None:
     JOIN {node.to_table_ref_literal()}
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
-    new_sql = replace_upstream_sql(original_sql, node, table)
+    alias_literals = True
+    new_sql = replace_upstream_sql(original_sql, node, table, alias_literals)
 
     assert (
         new_sql
         == """
     SELECT foo
     FROM `a`.`b`.`c`
-    JOIN (SELECT 'foo' as `foo`)
+    JOIN (SELECT 'foo' as `foo`) AS A
     """
     )
 
@@ -137,14 +139,15 @@ def test_replace_upstream_sql_replaces_from_newline() -> None:
         {node.to_table_ref_literal()}
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
-    new_sql = replace_upstream_sql(original_sql, node, table)
+    alias_literals = True
+    new_sql = replace_upstream_sql(original_sql, node, table, alias_literals)
 
     assert (
         new_sql
         == """
     SELECT foo
     FROM
-        (SELECT 'foo' as `foo`)
+        (SELECT 'foo' as `foo`) AS A
     """
     )
 

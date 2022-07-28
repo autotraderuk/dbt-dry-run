@@ -1,4 +1,4 @@
-from typing import Set
+from typing import Optional, Set
 
 from dbt_dry_run.exception import SnapshotConfigException, UpstreamFailedException
 from dbt_dry_run.literals import insert_dependant_sql_literals
@@ -81,7 +81,7 @@ class SnapshotRunner(NodeRunner):
             raise ValueError(f"Unknown snapshot strategy: '{node.config.strategy}'")
         return result
 
-    def run(self, node: Node) -> DryRunResult:
+    def run(self, node: Node, alias_literals: Optional[bool] = None) -> DryRunResult:
         try:
             run_sql = insert_dependant_sql_literals(node, self._results)
         except UpstreamFailedException as e:

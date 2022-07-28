@@ -1,6 +1,6 @@
 import itertools
 from abc import ABCMeta, abstractmethod
-from typing import Dict, List, Tuple, Type
+from typing import Dict, List, Optional, Tuple, Type
 
 from dbt_dry_run.models.manifest import Node
 from dbt_dry_run.results import DryRunResult, Results
@@ -19,7 +19,7 @@ class NodeRunner(metaclass=ABCMeta):
         self._results = results
 
     @abstractmethod
-    def run(self, node: Node) -> DryRunResult:
+    def run(self, node: Node, alias_literals: Optional[bool] = None) -> DryRunResult:
         ...
 
 
