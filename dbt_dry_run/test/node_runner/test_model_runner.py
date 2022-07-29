@@ -79,7 +79,7 @@ def test_model_as_view_runs_create_view() -> None:
 
 
 def test_partitioned_incremental_model_declares_dbt_max_partition_variable() -> None:
-    DBT_MAX_PARTITION_DECLARATION = (
+    dbt_max_partition_declaration = (
         "declare _dbt_max_partition timestamp default CURRENT_TIMESTAMP();"
     )
     mock_sql_runner = MagicMock()
@@ -110,7 +110,7 @@ def test_partitioned_incremental_model_declares_dbt_max_partition_variable() -> 
     model_runner.run(node)
 
     executed_sql = get_executed_sql(mock_sql_runner)
-    assert executed_sql.startswith(DBT_MAX_PARTITION_DECLARATION)
+    assert executed_sql.startswith(dbt_max_partition_declaration)
     assert node.compiled_sql in executed_sql
 
 
