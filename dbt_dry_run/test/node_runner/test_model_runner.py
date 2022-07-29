@@ -13,10 +13,6 @@ enable_test_example_values(True)
 
 VIEW_CREATION_SQL = "CREATE OR REPLACE VIEW"
 
-DBT_MAX_PARTITION_DECLARATION = (
-    "declare _dbt_max_partition timestamp default CURRENT_TIMESTAMP();"
-)
-
 A_SIMPLE_TABLE = Table(
     fields=[
         TableField(
@@ -82,18 +78,31 @@ def test_model_as_view_runs_create_view() -> None:
     assert node.compiled_sql in executed_sql
 
 
-def test_model_with_dbt_max_partition_variable_replaces_it() -> None:
+def test_partitioned_incremental_model_declares_dbt_max_partition_variable() -> None:
+    DBT_MAX_PARTITION_DECLARATION = (
+        "declare _dbt_max_partition timestamp default CURRENT_TIMESTAMP();"
+    )
     mock_sql_runner = MagicMock()
     mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, A_SIMPLE_TABLE, None)
 
     node = SimpleNode(
-        unique_id="node1", depends_on=[], resource_type=ManifestScheduler.MODEL
+        unique_id="node1",
+        depends_on=[],
+        resource_type=ManifestScheduler.MODEL,
+        table_config=NodeConfig(
+            materialized="incremental",
+            partition_by=PartitionBy(
+                field="loader_ingestion_time", data_type="timestamp"
+            ),
+        ),
+        compiled_sql="""
+            SELECT 
+                * 
+            FROM `foo` 
+            WHERE loader_ingestion_time >= DATE_SUB(DATE(_dbt_max_partition), INTERVAL 2 DAY)
+        """,
     ).to_node()
     node.depends_on.deep_nodes = []
-    node.config.materialized = "incremental"
-    node.config.partition_by = PartitionBy(
-        **{"field": "loader_ingestion_time", "data_type": "timestamp"}
-    )
 
     results = Results()
 
