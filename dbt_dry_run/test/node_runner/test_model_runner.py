@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 from dbt_dry_run.exception import SchemaChangeException, UpstreamFailedException
 from dbt_dry_run.literals import enable_test_example_values
 from dbt_dry_run.models import BigQueryFieldType, Table, TableField
-from dbt_dry_run.models.manifest import NodeConfig
+from dbt_dry_run.models.manifest import NodeConfig, PartitionBy
 from dbt_dry_run.node_runner.model_runner import ModelRunner
 from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
 from dbt_dry_run.scheduler import ManifestScheduler
@@ -75,6 +75,42 @@ def test_model_as_view_runs_create_view() -> None:
 
     executed_sql = get_executed_sql(mock_sql_runner)
     assert executed_sql.startswith(VIEW_CREATION_SQL)
+    assert node.compiled_sql in executed_sql
+
+
+def test_partitioned_incremental_model_declares_dbt_max_partition_variable() -> None:
+    dbt_max_partition_declaration = (
+        "declare _dbt_max_partition timestamp default CURRENT_TIMESTAMP();"
+    )
+    mock_sql_runner = MagicMock()
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, A_SIMPLE_TABLE, None)
+
+    node = SimpleNode(
+        unique_id="node1",
+        depends_on=[],
+        resource_type=ManifestScheduler.MODEL,
+        table_config=NodeConfig(
+            materialized="incremental",
+            partition_by=PartitionBy(
+                field="loader_ingestion_time", data_type="timestamp"
+            ),
+        ),
+        compiled_sql="""
+            SELECT 
+                * 
+            FROM `foo` 
+            WHERE loader_ingestion_time >= DATE_SUB(DATE(_dbt_max_partition), INTERVAL 2 DAY)
+        """,
+    ).to_node()
+    node.depends_on.deep_nodes = []
+
+    results = Results()
+
+    model_runner = ModelRunner(mock_sql_runner, results)
+    model_runner.run(node)
+
+    executed_sql = get_executed_sql(mock_sql_runner)
+    assert executed_sql.startswith(dbt_max_partition_declaration)
     assert node.compiled_sql in executed_sql
 
 
