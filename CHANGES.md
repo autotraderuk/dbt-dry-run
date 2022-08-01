@@ -1,5 +1,14 @@
 ## Changelog
 
+# dbt-dry-run v0.3.1
+
+## Improvements & Bugfixes
+
+- Fixed incremental models that used `_dbt_max_partition` variable failing as the dry runner was not
+  declaring this variable
+
+- Fixed select literals for numeric types not explicitly casting to BigNumeric or Numeric
+
 ## dbt-dry-run v0.3.0
 
 ### Improvements & Bugfixes
