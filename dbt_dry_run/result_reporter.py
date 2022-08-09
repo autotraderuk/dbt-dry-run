@@ -55,6 +55,7 @@ class ResultReporter:
 
         report = Report(
             success=success,
+            execution_time=self._results.execution_time_in_seconds,
             node_count=node_count,
             failure_count=failure_count,
             failed_node_ids=failed_node_ids,

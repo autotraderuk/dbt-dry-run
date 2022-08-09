@@ -88,6 +88,7 @@ def dry_run_manifest(
                 gen_futures[node.unique_id] = task_future
             _wait_for_generation(gen_futures)
 
+        results.finish()
     return results
 
 

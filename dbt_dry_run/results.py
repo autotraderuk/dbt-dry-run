@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
 from threading import Lock
 from typing import Dict, List, Optional, Set
@@ -29,6 +30,7 @@ class Results:
     def __init__(self) -> None:
         self._results: Dict[str, DryRunResult] = {}
         self._lock = Lock()
+        self._start_time = datetime.utcnow()
 
     def add_result(self, node_key: str, result: DryRunResult) -> None:
         with self._lock:
@@ -45,3 +47,12 @@ class Results:
     def values(self) -> List[DryRunResult]:
         with self._lock:
             return list(self._results.values())
+
+    def finish(self) -> None:
+        self._end_time = datetime.utcnow()
+
+    @property
+    def execution_time_in_seconds(self) -> Optional[float]:
+        if self._end_time:
+            return (self._end_time - self._start_time).seconds
+        return None

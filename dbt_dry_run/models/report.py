@@ -15,6 +15,7 @@ class ReportNode(BaseModel):
 
 class Report(BaseModel):
     success: bool
+    execution_time: float
     node_count: int = Field(..., ge=0)
     failure_count: int = Field(..., ge=0)
     failed_node_ids: List[str] = []
