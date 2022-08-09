@@ -16,24 +16,26 @@
 
   ```
   ❯ dbt-dry-run --help
-  Usage: dbt-dry-run [OPTIONS]
-  
-  Options:
-    --profiles-dir TEXT             [dbt] Where to search for `profiles.yml`
-                                    [default: ~/.dbt]
-    --project-dir TEXT              [dbt] Where to search for `dbt_project.yml`
-                                    [default: <CWD>]
-    --target TEXT                   [dbt] Target profile
-    --verbose / --no-verbose        Output verbose error messages  [default: no-
-                                    verbose]
-    --report-path TEXT              Json path to dump report to
-    --install-completion [bash|zsh|fish|powershell|pwsh]
-                                    Install completion for the specified shell.
-    --show-completion [bash|zsh|fish|powershell|pwsh]
-                                    Show completion for the specified shell, to
-                                    copy it or customize the installation.
-    --help                          Show this message and exit.
-  
+    Usage: dbt-dry-run [OPTIONS] [PROFILE]
+    
+    Options:
+      --profiles-dir TEXT             [dbt] Where to search for `profiles.yml`
+                                      [default: /Users/connor.charles/.dbt]
+      --project-dir TEXT              [dbt] Where to search for `dbt_project.yml`
+                                      [default: /Users/connor.charles/Code/dbt-
+                                      dry-run]
+      --vars TEXT                     [dbt] CLI Variables to pass to dbt
+      --target TEXT                   [dbt] Target profile
+      --verbose / --no-verbose        Output verbose error messages  [default: no-
+                                      verbose]
+      --report-path TEXT              Json path to dump report to
+      --install-completion [bash|zsh|fish|powershell|pwsh]
+                                      Install completion for the specified shell.
+      --show-completion [bash|zsh|fish|powershell|pwsh]
+                                      Show completion for the specified shell, to
+                                      copy it or customize the installation.
+      --help                          Show this message and exit.
+
   ```
   
   Where any option description prefixed with `[dbt]` should work in the same way as it does in the dbt CLI

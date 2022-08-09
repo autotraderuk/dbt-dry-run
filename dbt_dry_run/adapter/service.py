@@ -17,6 +17,7 @@ class DbtArgs:
     project_dir: str = os.getcwd()
     profile: Optional[str] = None
     target: Optional[str] = None
+    vars: str = "{}"
 
 
 def set_dbt_args(args: DbtArgs) -> None:
