@@ -60,7 +60,7 @@ def create_context(
     executor: Optional[ThreadPoolExecutor] = None
     try:
         sql_runner = BigQuerySQLRunner(project)
-        executor = ThreadPoolExecutor(max_workers=1)  # TODO: Set this from something
+        executor = ThreadPoolExecutor(max_workers=project.threads)
         yield sql_runner, executor
     finally:
         if executor:

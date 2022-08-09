@@ -36,20 +36,19 @@ class BigQuerySQLRunner(SQLRunner):
         return self.get_node_schema(node) is not None
 
     def get_node_schema(self, node: Node) -> Optional[Table]:
-        with self.get_client() as client:
-            try:
-                dataset = DatasetReference(node.database, node.db_schema)
-                table_ref = TableReference(dataset, node.alias)
-                bigquery_table = client.get_table(table_ref)
+        client = self.get_client()
+        try:
+            dataset = DatasetReference(node.database, node.db_schema)
+            table_ref = TableReference(dataset, node.alias)
+            bigquery_table = client.get_table(table_ref)
 
-                return Table.from_bigquery_table(bigquery_table)
-            except NotFound:
-                return None
+            return Table.from_bigquery_table(bigquery_table)
+        except NotFound:
+            return None
 
-    @contextmanager
     def get_client(self) -> Client:
-        with self._project.get_connection() as con:
-            yield con.handle
+        connection = self._project.get_connection()
+        return connection.handle
 
     @retry(
         retry=retry_if_exception_type(BadRequest),
@@ -61,16 +60,16 @@ class BigQuerySQLRunner(SQLRunner):
     ) -> Tuple[DryRunStatus, Optional[Table], Optional[Exception]]:
         exception = None
         table = None
-        with self.get_client() as client:
-            try:
-                query_job = client.query(sql, job_config=self.JOB_CONFIG)
-                table = self.get_schema_from_query_job(query_job)
-                status = DryRunStatus.SUCCESS
-            except (Forbidden, BadRequest, NotFound) as e:
-                status = DryRunStatus.FAILURE
-                if QUERY_TIMED_OUT in str(e):
-                    raise
-                exception = e
+        client = self.get_client()
+        try:
+            query_job = client.query(sql, job_config=self.JOB_CONFIG)
+            table = self.get_schema_from_query_job(query_job)
+            status = DryRunStatus.SUCCESS
+        except (Forbidden, BadRequest, NotFound) as e:
+            status = DryRunStatus.FAILURE
+            if QUERY_TIMED_OUT in str(e):
+                raise
+            exception = e
         return status, table, exception
 
     @staticmethod

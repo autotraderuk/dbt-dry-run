@@ -24,9 +24,8 @@ class MockProject:
         self.mock_client = MagicMock()
         self._connection_mock.handle = self.mock_client
 
-    @contextmanager
-    def get_connection(self) -> Generator[MagicMock, None, None]:
-        yield self._connection_mock
+    def get_connection(self) -> MagicMock:
+        return self._connection_mock
 
     def assert_query_called_with_sql(self, sql: str, num_calls: int = 1) -> None:
         assert len(self.mock_client.query.mock_calls) == num_calls

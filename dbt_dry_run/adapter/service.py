@@ -29,15 +29,15 @@ class ProjectService:
         self._args = args
         set_dbt_args(self._args)
         dbt_project, dbt_profile = RuntimeConfig.collect_parts(self._args)
+        self._profile = dbt_profile
         self._config = RuntimeConfig.from_parts(dbt_project, dbt_profile, self._args)
         reset_adapters()
         register_adapter(self._config)
         self._adapter = get_adapter(self._config)
 
-    @contextmanager
     def get_connection(self) -> Connection:
-        with self._adapter.connection_named("dbt-dry-run"):
-            yield self._adapter.connections.get_thread_connection()
+        connection = self._adapter.connections.set_connection_name("dbt-dry-run")
+        return connection
 
     @property
     def manifest_filepath(self) -> str:
@@ -48,3 +48,7 @@ class ProjectService:
     def get_dbt_manifest(self) -> Manifest:
         manifest = Manifest.from_filepath(self.manifest_filepath)
         return manifest
+
+    @property
+    def threads(self) -> int:
+        return self._profile.threads
