@@ -1,9 +1,9 @@
 import json
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Literal, Optional, Union
+from typing import Dict, List, Literal, Optional, Union, Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, root_validator
 
 
 class NodeDependsOn(BaseModel):
@@ -29,6 +29,11 @@ class PartitionBy(BaseModel):
     field: str
     data_type: Literal["timestamp", "date", "datetime", "int64"]
     range: Optional[IntPartitionRange]
+
+    @root_validator(pre=True)
+    def lower_data_type(cls, values: Dict[str, Any]):
+        values["data_type"] = values["data_type"].lower()
+        return values
 
 
 class NodeConfig(BaseModel):
