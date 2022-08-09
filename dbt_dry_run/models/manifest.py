@@ -1,7 +1,7 @@
 import json
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Literal, Optional, Union, Any
+from typing import Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field, root_validator
 
@@ -31,7 +31,7 @@ class PartitionBy(BaseModel):
     range: Optional[IntPartitionRange]
 
     @root_validator(pre=True)
-    def lower_data_type(cls, values: Dict[str, Any]):
+    def lower_data_type(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         values["data_type"] = values["data_type"].lower()
         return values
 
