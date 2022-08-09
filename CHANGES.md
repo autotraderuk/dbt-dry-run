@@ -1,6 +1,6 @@
 ## Changelog
 
-# dbt-dry-run v0.4.0 (NOT RELEASED)
+# dbt-dry-run v0.4.0rc1
 
 ## Improvements & Bugfixes
 
