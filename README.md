@@ -25,26 +25,42 @@ The dry runner has a single command called `dbt-dry-run` in order for it to run 
 first compile a dbt manifest using `dbt compile` as you normally would.
 
 Then on the same machine (So that the dry runner has access to your dbt project source and the 
-`manifest.yml`) you can run the dry-runner with:
+`manifest.yml`) you can run the dry-runner in the same directory as our `dbt_project.yml`:
 
 ```
-dbt-dry-run <PROFILE>
-```
-
-Where `PROFILE` should match the profile specified in your `dbt_project.yml`:
-
-```
-# This setting configures which "profile" dbt uses for this project.
-# This will get overridden by the root project
-profile: 'default'
+dbt-dry-run
 ```
 
 Like dbt it will search for `profiles.yml` in `~/.dbt/` and use the default target specified.
-It will also look for the `manifest.yml` in the current working directory. 
 Just like in the dbt CLI you can override these defaults:
 
 ```
-dbt-dry-run default --profiles-dir /my_org_dbt/profiles/ --target local --manifest-path target/manifest.json
+dbt-dry-run default --project-dir /my_org_dbt/ --profiles-dir /my_org_dbt/profiles/ --target local
+```
+
+The full CLI help is shown below, anything prefixed with [dbt] can be used in the same way as a normal dbt parameter:
+
+```
+  ❯ dbt-dry-run --help
+    Usage: dbt-dry-run [OPTIONS] [PROFILE]
+    
+    Options:
+      --profiles-dir TEXT             [dbt] Where to search for `profiles.yml`
+                                      [default: /Users/<user>/.dbt]
+      --project-dir TEXT              [dbt] Where to search for `dbt_project.yml`
+                                      [default: /Users/<user>/Code/dbt-
+                                      dry-run]
+      --vars TEXT                     [dbt] CLI Variables to pass to dbt
+      --target TEXT                   [dbt] Target profile
+      --verbose / --no-verbose        Output verbose error messages  [default: no-
+                                      verbose]
+      --report-path TEXT              Json path to dump report to
+      --install-completion [bash|zsh|fish|powershell|pwsh]
+                                      Install completion for the specified shell.
+      --show-completion [bash|zsh|fish|powershell|pwsh]
+                                      Show completion for the specified shell, to
+                                      copy it or customize the installation.
+      --help                          Show this message and exit.
 ```
 
 ## Reporting Results & Failures
@@ -126,8 +142,10 @@ To setup a dev environment you need [poetry][get-poetry], first run `poetry inst
 the `Makefile` contains all the commands needed to run the test suite and linting.
 
 - verify: Formats code with `black`, type checks with `mypy` and then runs the unit tests with coverage.
-- run-local: Runs one of the integration tests locally. _Requires BigQuery Instance_ (See Integration Tests)
 - integration: Runs the integration tests against BigQuery (See Integration Tests)
+
+There is also a shell script `./run-integration.sh <PROJECT_DIR>` which will run one of the integration tests locally.
+Where `<PROJECT_DIR>` is one of the directory names in `/integration/projects/`. (See Integration Tests)
 
 ### Running Integration Tests
 

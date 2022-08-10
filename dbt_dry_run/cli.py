@@ -1,84 +1,67 @@
-import argparse
 import os
-from typing import Dict, Optional
+from typing import Optional
 
-import jinja2
-import yaml
+import typer
+from dbt.flags import DEFAULT_PROFILES_DIR
+from typer import Argument, Option
 
+from dbt_dry_run.adapter.service import DbtArgs, ProjectService
 from dbt_dry_run.execution import dry_run_manifest
-from dbt_dry_run.models import Manifest, Profile
-from dbt_dry_run.models.profile import read_profiles
 from dbt_dry_run.result_reporter import ResultReporter
 
-parser = argparse.ArgumentParser(description="Dry run DBT")
-parser.add_argument(
-    "profile", metavar="PROFILE", type=str, help="The profile to dry run against"
-)
-parser.add_argument(
-    "--manifest-path",
-    default="manifest.json",
-    help="The location of the compiled manifest.json",
-)
-parser.add_argument("--target", type=str, help="The target to dry run against")
-parser.add_argument(
-    "--profiles-dir",
-    type=str,
-    default="~/.dbt/",
-    help="Override default profiles directory from ~/.dbt",
-)
-parser.add_argument(
-    "--ignore-result",
-    action="store_true",
-    help="Always exit 0 even if there are failures",
-)
-parser.add_argument(
-    "--model", help="Only dry run this model and its upstream dependencies"
-)
-parser.add_argument(
-    "--verbose", action="store_true", help="Output verbose error messages"
-)
-parser.add_argument("--report-path", type=str, help="Json path to dump report to")
-
-PROFILE_FILENAME = "profiles.yml"
+app = typer.Typer()
 
 
-def read_profiles_file(path: str) -> Dict[str, Profile]:
-    profile_filepath = os.path.join(path, PROFILE_FILENAME)
-    if not os.path.exists(profile_filepath):
-        raise FileNotFoundError(
-            f"Could not find '{PROFILE_FILENAME}' at '{profile_filepath}'"
-        )
-    with open(profile_filepath) as f:
-        file_contents = f.read()
-    return read_profiles(file_contents)
-
-
-def run() -> int:
-    parsed_args = parser.parse_args()
-    manifest = Manifest.from_filepath(parsed_args.manifest_path)
-    profiles = read_profiles_file(parsed_args.profiles_dir)
-    try:
-        profile = profiles[parsed_args.profile]
-    except KeyError:
-        raise KeyError(
-            f"Could not find profile '{parsed_args.profile}' in profiles: {list(profiles.keys())}"
-        )
-
-    active_output = parsed_args.target or profile.target
-    try:
-        output = profile.outputs[active_output]
-    except KeyError:
-        raise KeyError(
-            f"Could not find target `{active_output}` in outputs: {list(profile.outputs.keys())}"
-        )
-
-    dry_run_results = dry_run_manifest(manifest, output, parsed_args.model)
-
-    reporter = ResultReporter(dry_run_results, set(), parsed_args.verbose)
+def dry_run(
+    project_dir: str,
+    profiles_dir: str,
+    target: Optional[str],
+    verbose: bool = False,
+    report_path: Optional[str] = None,
+    cli_vars: str = "{}",
+) -> int:
+    args = DbtArgs(
+        project_dir=project_dir,
+        profiles_dir=os.path.abspath(profiles_dir),
+        target=target,
+        vars=cli_vars,
+    )
+    project = ProjectService(args)
+    dry_run_results = dry_run_manifest(project)
+    reporter = ResultReporter(dry_run_results, set(), verbose)
     exit_code = reporter.report_and_check_results()
-    if parsed_args.report_path:
-        reporter.write_results_artefact(parsed_args.report_path)
-
-    if parsed_args.ignore_result:
-        exit_code = 0
+    if report_path:
+        reporter.write_results_artefact(report_path)
     return exit_code
+
+
+@app.command()
+def run(
+    profile: Optional[str] = Argument(
+        None,
+        hidden=True,
+        help="Legacy parameter. You should not use this anymore see CHANGES.md in the github repo for how to migrate",
+    ),
+    profiles_dir: str = Option(
+        DEFAULT_PROFILES_DIR, help="[dbt] Where to search for `profiles.yml`"
+    ),
+    project_dir: str = Option(
+        os.getcwd(), help="[dbt] Where to search for `dbt_project.yml`"
+    ),
+    vars: str = Option("{}", help="[dbt] CLI Variables to pass to dbt"),
+    target: Optional[str] = Option(None, help="[dbt] Target profile"),
+    verbose: bool = Option(False, help="Output verbose error messages"),
+    report_path: Optional[str] = Option(None, help="Json path to dump report to"),
+) -> None:
+    if profile is not None:
+        print(
+            "CLI format has changed see CHANGES.md v0.4.0 for instructions on how to migrate"
+        )
+        raise typer.Exit(1)
+    exit_code = dry_run(project_dir, profiles_dir, target, verbose, report_path, vars)
+    if exit_code > 0:
+        raise typer.Exit(exit_code)
+
+
+if __name__ == "__main__":
+    app()
