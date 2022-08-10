@@ -20,9 +20,9 @@
     
     Options:
       --profiles-dir TEXT             [dbt] Where to search for `profiles.yml`
-                                      [default: /Users/connor.charles/.dbt]
+                                      [default: /Users/<user>/.dbt]
       --project-dir TEXT              [dbt] Where to search for `dbt_project.yml`
-                                      [default: /Users/connor.charles/Code/dbt-
+                                      [default: /Users/<user>/Code/dbt-
                                       dry-run]
       --vars TEXT                     [dbt] CLI Variables to pass to dbt
       --target TEXT                   [dbt] Target profile

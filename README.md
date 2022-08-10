@@ -38,6 +38,31 @@ Just like in the dbt CLI you can override these defaults:
 dbt-dry-run default --project-dir /my_org_dbt/ --profiles-dir /my_org_dbt/profiles/ --target local
 ```
 
+The full CLI help is shown below, anything prefixed with [dbt] can be used in the same way as a normal dbt parameter:
+
+```
+  ❯ dbt-dry-run --help
+    Usage: dbt-dry-run [OPTIONS] [PROFILE]
+    
+    Options:
+      --profiles-dir TEXT             [dbt] Where to search for `profiles.yml`
+                                      [default: /Users/<user>/.dbt]
+      --project-dir TEXT              [dbt] Where to search for `dbt_project.yml`
+                                      [default: /Users/<user>/Code/dbt-
+                                      dry-run]
+      --vars TEXT                     [dbt] CLI Variables to pass to dbt
+      --target TEXT                   [dbt] Target profile
+      --verbose / --no-verbose        Output verbose error messages  [default: no-
+                                      verbose]
+      --report-path TEXT              Json path to dump report to
+      --install-completion [bash|zsh|fish|powershell|pwsh]
+                                      Install completion for the specified shell.
+      --show-completion [bash|zsh|fish|powershell|pwsh]
+                                      Show completion for the specified shell, to
+                                      copy it or customize the installation.
+      --help                          Show this message and exit.
+```
+
 ## Reporting Results & Failures
 
 If the result is successful it will output the number of 
