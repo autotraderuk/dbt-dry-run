@@ -1,6 +1,6 @@
 ## Changelog
 
-# dbt-dry-run v0.4.0rc1
+# dbt-dry-run v0.4.0
 
 ## Improvements & Bugfixes
 
@@ -39,6 +39,9 @@
   ```
   
   Where any option description prefixed with `[dbt]` should work in the same way as it does in the dbt CLI
+
+- Fixed issue where `partition_by` `data_type` was case-sensitive so a value of `DATE` would not be accepted by the 
+  dry runner but would be accepted by dbt when parsing the manifest
 
 # dbt-dry-run v0.3.1
 
