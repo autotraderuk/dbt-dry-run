@@ -109,6 +109,109 @@ def test_replace_upstream_sql_replaces_from() -> None:
     )
 
 
+@pytest.mark.xfail(reason="Need to implement implicit alias. See Issue #11")
+def test_replace_upstream_sql_replaces_from_and_aliases_literal_if_none_provided() -> None:
+    node = SimpleNode(unique_id="A", depends_on=[]).to_node()
+    original_sql = f"""
+    SELECT {node.alias}.foo
+    FROM {node.to_table_ref_literal()}
+    """
+    table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
+    new_sql = replace_upstream_sql(original_sql, node, table)
+
+    assert (
+        new_sql
+        == f"""
+    SELECT foo
+    FROM (SELECT 'foo' as `foo`) {node.alias}
+    """
+    )
+
+
+def test_replace_upstream_sql_does_not_replace_alias_in_string() -> None:
+    node = SimpleNode(unique_id="A", depends_on=[]).to_node()
+    original_sql = f"""
+    SELECT bar.foo,
+           '{node.to_table_ref_literal()}' as the_table
+    FROM {node.to_table_ref_literal()} as bar
+    """
+    table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
+    new_sql = replace_upstream_sql(original_sql, node, table)
+
+    assert (
+        new_sql
+        == f"""
+    SELECT bar.foo,
+           '{node.to_table_ref_literal()}' as the_table
+    FROM (SELECT 'foo' as `foo`) as bar
+    """
+    )
+
+
+def test_replace_upstream_sql_replaces_from_with_as_alias() -> None:
+    node = SimpleNode(unique_id="A", depends_on=[]).to_node()
+    original_sql = f"""
+    SELECT bar.foo
+    FROM {node.to_table_ref_literal()} as bar
+    """
+    table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
+    new_sql = replace_upstream_sql(original_sql, node, table)
+
+    assert (
+        new_sql
+        == """
+    SELECT bar.foo
+    FROM (SELECT 'foo' as `foo`) as bar
+    """
+    )
+
+
+def test_replace_upstream_sql_replaces_from_with_cte_and_from() -> None:
+    node = SimpleNode(unique_id="A", depends_on=[]).to_node()
+    original_sql = f"""
+    WITH a_cte AS (
+        SELECT cte1.*
+        FROM {node.to_table_ref_literal()} as cte1
+    )
+    
+    SELECT bar.foo
+    FROM {node.to_table_ref_literal()} as bar
+    """
+    table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
+    new_sql = replace_upstream_sql(original_sql, node, table)
+
+    assert (
+        new_sql
+        == """
+    WITH a_cte AS (
+        SELECT cte1.*
+        FROM (SELECT 'foo' as `foo`) as cte1
+    )
+    
+    SELECT bar.foo
+    FROM (SELECT 'foo' as `foo`) as bar
+    """
+    )
+
+
+def test_replace_upstream_sql_replaces_from_with_alias() -> None:
+    node = SimpleNode(unique_id="A", depends_on=[]).to_node()
+    original_sql = f"""
+    SELECT bar.foo
+    FROM {node.to_table_ref_literal()} bar
+    """
+    table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
+    new_sql = replace_upstream_sql(original_sql, node, table)
+
+    assert (
+        new_sql
+        == """
+    SELECT bar.foo
+    FROM (SELECT 'foo' as `foo`) bar
+    """
+    )
+
+
 def test_replace_upstream_sql_replaces_join() -> None:
     node = SimpleNode(unique_id="A", depends_on=[]).to_node()
     original_sql = f"""

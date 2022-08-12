@@ -81,9 +81,8 @@ def get_sql_literal_from_table(table: Table) -> str:
 
 def replace_upstream_sql(node_sql: str, node: Node, table: Table) -> str:
     upstream_table_ref = node.to_table_ref_literal()
-    escaped_upstream_table_ref = upstream_table_ref
     regex = re.compile(
-        rf"((?:from|join)(?:\s--.*)?[\r\n\s]*)({escaped_upstream_table_ref})",
+        rf"((?:from|join)(?:\s--.*)?[\r\n\s]*)({upstream_table_ref})",
         flags=re.IGNORECASE | re.MULTILINE,
     )
     select_literal = get_sql_literal_from_table(table)
