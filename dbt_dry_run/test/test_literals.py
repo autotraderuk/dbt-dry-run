@@ -4,6 +4,8 @@ from typing import List
 import pytest
 
 from dbt_dry_run.literals import (
+    SQLToken,
+    _tokenize,
     enable_test_example_values,
     get_sql_literal_from_table,
     replace_upstream_sql,
@@ -89,6 +91,21 @@ def test_repeated_complex_field() -> None:
     assert_fields_result_in_literal(
         fields, "(SELECT [STRUCT('foo' as `bar`)] as `foo`)"
     )
+
+
+def test_tokenize_classifies_whitespace() -> None:
+    sql = "SELECT * FROM my_table"
+    actual_tokens = _tokenize(sql)
+    expected_tokens = [
+        SQLToken("SELECT", False),
+        SQLToken(" ", True),
+        SQLToken("*", False),
+        SQLToken(" ", True),
+        SQLToken("FROM", False),
+        SQLToken(" ", True),
+        SQLToken("my_table", False),
+    ]
+    assert actual_tokens == expected_tokens
 
 
 def test_replace_upstream_sql_replaces_from() -> None:

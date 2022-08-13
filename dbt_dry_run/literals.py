@@ -1,5 +1,6 @@
 import re
-from typing import Callable, Dict, cast
+from dataclasses import dataclass
+from typing import Callable, Dict, Iterable, List, cast
 from uuid import uuid4
 
 from dbt_dry_run.exception import UpstreamFailedException
@@ -46,6 +47,15 @@ _EXAMPLE_VALUES_TEST: Dict[BigQueryFieldType, Callable[[], str]] = {
 _ACTIVE_EXAMPLE_VALUES = _EXAMPLE_VALUES
 
 
+@dataclass
+class SQLToken:
+    value: str
+    is_whitespace: bool
+
+    def value_is(self, other: str) -> bool:
+        return self.value == other
+
+
 def enable_test_example_values(enabled: bool) -> None:
     global _ACTIVE_EXAMPLE_VALUES
     if enabled:
@@ -79,14 +89,35 @@ def get_sql_literal_from_table(table: Table) -> str:
     return select_literal
 
 
+def _should_replace_table_ref(split_sql: List[SQLToken], index: int) -> bool:
+    reversed_tokens = reversed(split_sql[:index])
+    for token in reversed_tokens:
+        if token.value.lower() in {"from", "join"}:
+            return True
+    return False
+
+
+def _tokenize(sql: str) -> List[SQLToken]:
+    split_sql = re.split(r"(\s+)", sql)
+    is_whitespace = map(lambda token: not token or token.isspace(), split_sql)
+    return list(
+        map(lambda a_b: SQLToken(a_b[0], a_b[1]), zip(split_sql, is_whitespace))
+    )
+
+
 def replace_upstream_sql(node_sql: str, node: Node, table: Table) -> str:
     upstream_table_ref = node.to_table_ref_literal()
-    regex = re.compile(
-        rf"((?:from|join)(?:\s--.*)?[\r\n\s]*)({upstream_table_ref})",
-        flags=re.IGNORECASE | re.MULTILINE,
-    )
+
+    processed_tokens = _tokenize(node_sql)
     select_literal = get_sql_literal_from_table(table)
-    new_node_sql = regex.sub(r"\1" + select_literal, node_sql)
+
+    for index, token in enumerate(processed_tokens):
+        if token.value_is(upstream_table_ref):
+            needs_replacing = _should_replace_table_ref(processed_tokens, index)
+            if needs_replacing:
+                processed_tokens[index] = SQLToken(select_literal, is_whitespace=False)
+
+    new_node_sql = "".join(map(lambda cur_token: cur_token.value, processed_tokens))
     return new_node_sql
 
 
