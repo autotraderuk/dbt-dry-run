@@ -91,10 +91,36 @@ def get_sql_literal_from_table(table: Table) -> str:
 
 def _should_replace_table_ref(split_sql: List[SQLToken], index: int) -> bool:
     reversed_tokens = reversed(split_sql[:index])
+    has_seen_new_line = False
+    has_seen_end_of_multiline_comment = None
     for token in reversed_tokens:
+        if not has_seen_new_line and token.value.lower() == "--":
+            return False
+        if token.value.lower() in {"'", "'"}:
+            return False
+        if "\n" in token.value.lower():
+            has_seen_new_line = True
+        if "*/" in token.value.lower():
+            has_seen_end_of_multiline_comment = True
+        if not has_seen_end_of_multiline_comment and "/*" in token.value.lower():
+            return False
         if token.value.lower() in {"from", "join"}:
             return True
     return False
+
+
+def _should_append_implicit_alias(split_sql: List[SQLToken], index: int) -> bool:
+    remaining_tokens = split_sql[index:]
+    for token in remaining_tokens:
+        if token.value.lower() == "as":
+            return False
+        if token.value.lower() == ",":
+            return True
+        if token.value.lower() == ")":
+            return False
+        if re.match("[a-zA-Z0-9_]+", token.value):
+            return False
+    return True
 
 
 def _tokenize(sql: str) -> List[SQLToken]:
@@ -114,7 +140,12 @@ def replace_upstream_sql(node_sql: str, node: Node, table: Table) -> str:
     for index, token in enumerate(processed_tokens):
         if token.value_is(upstream_table_ref):
             needs_replacing = _should_replace_table_ref(processed_tokens, index)
+            needs_implicit_alias = _should_append_implicit_alias(
+                processed_tokens, index
+            )
             if needs_replacing:
+                if needs_implicit_alias:
+                    select_literal = select_literal + f" {node.alias}"
                 processed_tokens[index] = SQLToken(select_literal, is_whitespace=False)
 
     new_node_sql = "".join(map(lambda cur_token: cur_token.value, processed_tokens))
