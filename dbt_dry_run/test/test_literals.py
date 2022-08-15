@@ -414,3 +414,32 @@ def test_handles_multiple_comments() -> None:
         (SELECT 'foo' as `foo`) {node.alias}
     """
     )
+
+def test_handles_from_in_multi_line_comment() -> None:
+    node = SimpleNode(unique_id="A", depends_on=[]).to_node()
+    original_sql = f"""
+    /*
+    FROM
+    This is a comment
+    {node.to_table_ref_literal()}
+    */
+    
+    SELECT foo
+    FROM {node.to_table_ref_literal()}
+    """
+    table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
+    new_sql = replace_upstream_sql(original_sql, node, table)
+
+    assert (
+        new_sql
+        == f"""
+    /*
+    FROM
+    This is a comment
+    {node.to_table_ref_literal()}
+    */
+    
+    SELECT foo
+    FROM (SELECT 'foo' as `foo`) {node.alias}
+    """
+    )
