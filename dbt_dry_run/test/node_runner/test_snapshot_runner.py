@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock
 
+import pytest
+
 from dbt_dry_run.literals import enable_test_example_values
 from dbt_dry_run.models import BigQueryFieldType, Table, TableField
 from dbt_dry_run.models.manifest import NodeConfig
@@ -240,3 +242,41 @@ def test_snapshot_with_timestamp_strategy_with_missing_updated_at_column() -> No
     result = model_runner.run(node)
     mock_sql_runner.query.assert_called_with(node.compiled_sql)
     assert result.status == DryRunStatus.FAILURE
+
+
+def test_snapshot_with_list_of_unique_key_columns_raises_error() -> None:
+    """
+    This isn't currently supported by dbt-core but this could change given it was added for incremental here:
+    https://github.com/dbt-labs/dbt-core/pull/4618
+    """
+    mock_sql_runner = MagicMock()
+    expected_table = Table(
+        fields=[
+            TableField(
+                name="a",
+                type=BigQueryFieldType.STRING,
+            ),
+            TableField(name="last_updated_col", type=BigQueryFieldType.TIMESTAMP),
+        ]
+    )
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, None)
+
+    node = SimpleNode(
+        unique_id="node1",
+        depends_on=[],
+        resource_type=ManifestScheduler.SNAPSHOT,
+        table_config=NodeConfig(
+            unique_key=["a", "b"],
+            strategy="timestamp",
+            materialized="snapshot",
+            updated_at="wrong_last_updated_col",
+        ),
+    ).to_node()
+    node.depends_on.deep_nodes = []
+
+    results = Results()
+
+    model_runner = SnapshotRunner(mock_sql_runner, results)
+
+    with pytest.raises(RuntimeError, match="Cannot dry run node"):
+        model_runner.run(node)

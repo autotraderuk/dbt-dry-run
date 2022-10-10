@@ -40,7 +40,7 @@ class NodeConfig(BaseModel):
     materialized: str
     on_schema_change: Optional[OnSchemaChange]
     sql_header: Optional[str]
-    unique_key: Optional[str]
+    unique_key: Optional[Union[str, List[str]]]
     updated_at: Optional[str]
     strategy: Union[None, Literal["timestamp", "check"]]
     check_cols: Optional[Union[Literal["all"], List[str]]]

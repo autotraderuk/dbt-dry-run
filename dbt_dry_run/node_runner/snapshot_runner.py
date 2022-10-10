@@ -45,6 +45,11 @@ class SnapshotRunner(NodeRunner):
     def _validate_snapshot_config(node: Node, result: DryRunResult) -> DryRunResult:
         if not result.table:
             raise ValueError("Can't validate result without table")
+        if isinstance(node.config.unique_key, list):
+            raise RuntimeError(
+                f"Cannot dry run node '{node.unique_id}' because it is a snapshot"
+                f" with a list of unique keys '{node.config.unique_key}'"
+            )
         if node.config.unique_key not in result.table.field_names:
             exception = SnapshotConfigException(
                 f"Missing `unique_key` column '{node.config.unique_key}'"
