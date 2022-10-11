@@ -1,5 +1,11 @@
 ## Changelog
 
+# dbt-dry-run v0.4.1
+
+## Improvements & Bugfixes
+
+- Allow `unique_key` to be a list of strings for incremental models which was added in `dbt v1.1`
+
 # dbt-dry-run v0.4.0
 
 ## Improvements & Bugfixes
