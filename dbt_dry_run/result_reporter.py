@@ -37,6 +37,8 @@ class ResultReporter:
         for index, (failure, excluded) in enumerate(failures):
             if failure.exception:
                 exception_col = failure.exception.__class__.__name__
+            elif failure.linting_status == LintingStatus.FAILURE:
+                exception_col = "LINTING"
             else:
                 exception_col = "UNKNOWN"
             excluded_col = "EXCLUDED" if excluded else "ERROR"
