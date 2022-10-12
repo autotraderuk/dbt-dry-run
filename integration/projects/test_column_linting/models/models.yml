@@ -31,3 +31,17 @@ models:
     columns:
       - name: a
         description: This is in the model
+
+  - name: model_with_struct
+    description: This model is correctly documented as a struct
+    meta:
+      dry_run.check_columns: true
+    columns:
+      - name: a
+        description: This is in the model
+
+      - name: s.s1
+        description: Struct field called s1
+
+      - name: s.s2
+        descipriont: Struct field called s2
