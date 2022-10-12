@@ -1,14 +1,34 @@
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Optional, Set
 
-from dbt_dry_run.models import Table
+from dbt_dry_run.models import Table, TableField
 from dbt_dry_run.models.manifest import ManifestColumn, Node
 from dbt_dry_run.results import ColumnError, DryRunResult
+
+
+def _extract_fields(table_fields: List[TableField], prefix: str = "") -> List[str]:
+    field_names = []
+    for field in table_fields:
+        field_names.append(f"{prefix}{field.name}")
+        if field.fields:
+            new_prefix = f"{prefix}{field.name}."
+            field_names.extend(_extract_fields(field.fields, prefix=new_prefix))
+    return field_names
+
+
+def expand_table_fields(table: Table) -> Set[str]:
+    """
+    Expand table fields to dot notation (like in dbt metadata)
+
+    Eg: TableField(name="a", fields=[TableField(name="a1")])
+    Returns: ["a", "a.a1"]
+    """
+    return set(_extract_fields(table.fields))
 
 
 def get_extra_documented_columns(
     manifest: Dict[str, ManifestColumn], dry_run: Table
 ) -> List[str]:
-    dry_run_column_names = list(map(lambda field: field.name, dry_run.fields))
+    dry_run_column_names = expand_table_fields(dry_run)
     extra_columns_in_manifest = set(manifest.keys()) - set(dry_run_column_names)
     errors = []
 
@@ -22,7 +42,7 @@ def get_extra_documented_columns(
 def get_undocumented_columns(
     manifest: Dict[str, ManifestColumn], dry_run: Table
 ) -> List[str]:
-    dry_run_column_names = list(map(lambda field: field.name, dry_run.fields))
+    dry_run_column_names = expand_table_fields(dry_run)
     missing_columns_in_manifest = set(dry_run_column_names) - set(manifest.keys())
 
     errors = []

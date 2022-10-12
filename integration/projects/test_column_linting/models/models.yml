@@ -40,8 +40,17 @@ models:
       - name: a
         description: This is in the model
 
+      - name: s
+        description: Struct root
+
       - name: s.s1
         description: Struct field called s1
 
       - name: s.s2
         descipriont: Struct field called s2
+
+      - name: s.s3
+        description: Nested struct root
+
+      - name: s.s3.ss1
+        description: Nested field

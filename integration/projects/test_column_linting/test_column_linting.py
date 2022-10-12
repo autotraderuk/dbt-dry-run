@@ -27,3 +27,9 @@ def test_linting_not_defined_model_skipped(dry_run_result: IntegrationTestResult
 
     assert node.linting_status == LintingStatus.SKIPPED
     assert len(node.linting_errors) == 0
+
+
+def test_linting_model_with_structs_success(dry_run_result: IntegrationTestResult):
+    node = get_report_node_by_id(dry_run_result.report,
+                                 "model.test_column_linting.model_with_struct")
+    assert node.linting_status == LintingStatus.SUCCESS
