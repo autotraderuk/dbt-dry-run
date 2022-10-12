@@ -8,7 +8,6 @@ from typer import Argument, Option
 from dbt_dry_run.adapter.service import DbtArgs, ProjectService
 from dbt_dry_run.exception import ManifestValidationError
 from dbt_dry_run.execution import dry_run_manifest
-from dbt_dry_run.linting.column_linting import lint_columns
 from dbt_dry_run.result_reporter import ResultReporter
 
 app = typer.Typer()

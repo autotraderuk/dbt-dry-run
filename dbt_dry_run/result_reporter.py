@@ -4,9 +4,9 @@ from typing import List, Set, Tuple
 from dbt_dry_run.models import Report, ReportNode
 from dbt_dry_run.models.report import ReportLintingError
 from dbt_dry_run.results import (
-    ColumnError,
     DryRunResult,
     DryRunStatus,
+    LintingError,
     LintingStatus,
     Results,
 )
@@ -15,7 +15,7 @@ QUERY_JOB_SQL_FOLLOWS = "-----Query Job SQL Follows-----"
 QUERY_JOB_HEADER = re.compile(r"|    .    ", re.MULTILINE)
 
 
-def _map_column_errors(column_errors: List[ColumnError]) -> List[ReportLintingError]:
+def _map_column_errors(column_errors: List[LintingError]) -> List[ReportLintingError]:
     return list(
         map(
             lambda err: ReportLintingError(rule=err.rule, message=err.message),

@@ -5,9 +5,9 @@ import pytest
 from dbt_dry_run.models import Table
 from dbt_dry_run.result_reporter import ResultReporter
 from dbt_dry_run.results import (
-    ColumnError,
     DryRunResult,
     DryRunStatus,
+    LintingError,
     LintingStatus,
     Results,
 )
@@ -44,7 +44,9 @@ def failed_linting_result() -> DryRunResult:
         status=DryRunStatus.SUCCESS,
         exception=None,
         linting_status=LintingStatus.FAILURE,
-        linting_errors=[ColumnError(rule="TEST_LINTING_RULE", message="Linting wrong")],
+        linting_errors=[
+            LintingError(rule="TEST_LINTING_RULE", message="Linting wrong")
+        ],
     )
 
 

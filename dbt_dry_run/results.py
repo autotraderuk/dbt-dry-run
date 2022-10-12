@@ -20,7 +20,7 @@ class LintingStatus(str, Enum):
 
 
 @dataclass(frozen=True)
-class ColumnError:
+class LintingError:
     rule: str
     message: str
 
@@ -32,15 +32,15 @@ class DryRunResult:
     status: DryRunStatus
     exception: Optional[Exception]
     linting_status: LintingStatus = LintingStatus.SKIPPED
-    linting_errors: List[ColumnError] = field(default_factory=lambda: [])
+    linting_errors: List[LintingError] = field(default_factory=lambda: [])
 
     def replace_table(self, table: Table) -> "DryRunResult":
         return DryRunResult(
             node=self.node, table=table, status=self.status, exception=self.exception
         )
 
-    def with_column_errors(self, column_errors: List[ColumnError]) -> "DryRunResult":
-        if column_errors:
+    def with_linting_errors(self, linting_errors: List[LintingError]) -> "DryRunResult":
+        if linting_errors:
             linting_status = LintingStatus.FAILURE
         else:
             linting_status = LintingStatus.SUCCESS
@@ -49,7 +49,7 @@ class DryRunResult:
             table=self.table,
             status=self.status,
             exception=self.exception,
-            linting_errors=column_errors,
+            linting_errors=linting_errors,
             linting_status=linting_status,
         )
 

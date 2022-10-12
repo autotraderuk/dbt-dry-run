@@ -1,8 +1,8 @@
-from typing import Callable, Dict, List, Optional, Set
+from typing import Callable, Dict, List, Set
 
 from dbt_dry_run.models import Table, TableField
 from dbt_dry_run.models.manifest import ManifestColumn, Node
-from dbt_dry_run.results import ColumnError, DryRunResult
+from dbt_dry_run.results import DryRunResult, LintingError
 
 
 def _extract_fields(table_fields: List[TableField], prefix: str = "") -> List[str]:
@@ -68,7 +68,7 @@ def lint_columns(node: Node, result: DryRunResult) -> DryRunResult:
     for rule_name, rule_func in RULES.items():
         error_messages = rule_func(node.columns, result.table)
         errors = list(
-            map(lambda err: ColumnError(rule=rule_name, message=err), error_messages)
+            map(lambda err: LintingError(rule=rule_name, message=err), error_messages)
         )
         all_errors.extend(errors)
-    return result.with_column_errors(all_errors)
+    return result.with_linting_errors(all_errors)
