@@ -105,7 +105,7 @@ def insert_dependant_sql_literals(node: Node, results: Results) -> str:
         raise UpstreamFailedException(msg)
     completed_upstreams = [r for r in upstream_results if r.table]
 
-    node_new_sql = node.compiled_sql
+    node_new_sql = node.compiled_code
     for upstream in completed_upstreams:
         node_new_sql = replace_upstream_sql(
             node_new_sql, upstream.node, cast(Table, upstream.table)

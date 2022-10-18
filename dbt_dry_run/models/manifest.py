@@ -53,13 +53,20 @@ class Node(BaseModel):
     unique_id: str
     depends_on: NodeDependsOn
     compiled: bool = False
-    compiled_sql: str = ""
+    compiled_code: str = ""
     database: str
     db_schema: str = Field(..., alias="schema")
     alias: str
+    language: Optional[str] = None
     resource_type: str
     original_file_path: str
     root_path: str
+
+    def __init__(self, **data: Any):
+        super().__init__(
+            compiled_code=data.pop("compiled_code", "") or data.pop("compiled_sql", ""),
+            **data,
+        )
 
     def to_table_ref_literal(self) -> str:
         sql = f"`{self.database}`.`{self.db_schema}`.`{self.alias}`"

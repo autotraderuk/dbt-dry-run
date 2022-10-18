@@ -16,3 +16,7 @@ class SchemaChangeException(Exception):
 
 class SnapshotConfigException(Exception):
     pass
+
+
+class ManifestValidationError(Exception):
+    pass

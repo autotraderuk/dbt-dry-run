@@ -12,8 +12,12 @@ if TYPE_CHECKING:
 else:
     from typing import Awaitable as Future
 
-from dbt_dry_run.exception import NodeExecutionException, NotCompiledException
-from dbt_dry_run.models.manifest import Node
+from dbt_dry_run.exception import (
+    ManifestValidationError,
+    NodeExecutionException,
+    NotCompiledException,
+)
+from dbt_dry_run.models.manifest import Manifest, Node
 from dbt_dry_run.node_runner import NodeRunner, get_runner_map
 from dbt_dry_run.node_runner.model_runner import ModelRunner
 from dbt_dry_run.node_runner.seed_runner import SeedRunner
@@ -67,12 +71,36 @@ def create_context(
             executor.shutdown()
 
 
+def validate_manifest_compatibility(manifest: Manifest) -> None:
+    failing_nodes: List[Tuple[str, str]] = []
+    for key, node in manifest.nodes.items():
+        if node.language is not None and node.language != "sql":
+            failing_nodes.append(
+                (
+                    "NODE_NOT_SQL : Only SQL language models are supported",
+                    node.unique_id,
+                )
+            )
+
+    if failing_nodes:
+        formatted_errors = "\n".join(
+            map(lambda failure: f"{failure[0]} : {failure[1]}", failing_nodes)
+        )
+        raise ManifestValidationError(
+            f"Manifest nodes failed validation due to:\n{formatted_errors}"
+        )
+
+
 def dry_run_manifest(project: ProjectService) -> Results:
     executor: ThreadPoolExecutor
     with create_context(project) as (sql_runner, executor):
         results = Results()
         runners = {t: runner(sql_runner, results) for t, runner in _RUNNERS.items()}
-        scheduler = ManifestScheduler(project.get_dbt_manifest())
+        manifest = project.get_dbt_manifest()
+
+        validate_manifest_compatibility(manifest)
+
+        scheduler = ManifestScheduler(manifest)
 
         print(f"Dry running {len(scheduler)} models")
         for generation_id, generation in enumerate(scheduler):

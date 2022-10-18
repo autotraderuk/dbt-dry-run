@@ -1,5 +1,14 @@
 ## Changelog
 
+# dbt-dry-run v0.4.2
+
+## Improvements & Bugfixes
+
+- Add support for dbt v1.3.0
+
+- Throw error if dbt project uses python models as these cannot be used with the dry run as we cannot currently predict
+  their schemas
+
 # dbt-dry-run v0.4.1
 
 ## Improvements & Bugfixes

@@ -6,6 +6,7 @@ from dbt.flags import DEFAULT_PROFILES_DIR
 from typer import Argument, Option
 
 from dbt_dry_run.adapter.service import DbtArgs, ProjectService
+from dbt_dry_run.exception import ManifestValidationError
 from dbt_dry_run.execution import dry_run_manifest
 from dbt_dry_run.result_reporter import ResultReporter
 
@@ -27,11 +28,19 @@ def dry_run(
         vars=cli_vars,
     )
     project = ProjectService(args)
-    dry_run_results = dry_run_manifest(project)
-    reporter = ResultReporter(dry_run_results, set(), verbose)
-    exit_code = reporter.report_and_check_results()
-    if report_path:
-        reporter.write_results_artefact(report_path)
+    exit_code: int
+    try:
+        dry_run_results = dry_run_manifest(project)
+        reporter = ResultReporter(dry_run_results, set(), verbose)
+        exit_code = reporter.report_and_check_results()
+        if report_path:
+            reporter.write_results_artefact(report_path)
+
+    except ManifestValidationError as e:
+        print("Dry run failed to validate manifest")
+        print(str(e))
+        exit_code = 1
+
     return exit_code
 
 

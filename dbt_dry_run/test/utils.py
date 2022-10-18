@@ -17,7 +17,7 @@ class SimpleNode(BaseModel):
     )
     database: str = "my_db"
     db_schema: str = Field("my_schema", alias="schema")
-    compiled_sql: str = A_SQL_QUERY
+    compiled_code: str = A_SQL_QUERY
     original_file_path: str = f"test123.sql"
     root_path: str = "/home/"
 
@@ -32,7 +32,7 @@ class SimpleNode(BaseModel):
             unique_id=self.unique_id,
             depends_on=depends_on,
             compiled=True,
-            compiled_sql=self.compiled_sql,
+            compiled_code=self.compiled_code,
             database=self.database,
             schema=self.db_schema,
             alias=self.unique_id,

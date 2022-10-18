@@ -56,7 +56,7 @@ def test_snapshot_with_check_all_strategy_runs_sql_with_id() -> None:
     model_runner = SnapshotRunner(mock_sql_runner, results)
 
     result = model_runner.run(node)
-    mock_sql_runner.query.assert_called_with(node.compiled_sql)
+    mock_sql_runner.query.assert_called_with(node.compiled_code)
     assert (
         result.status == DryRunStatus.SUCCESS
     ), f"Failed with error: {result.exception}"
@@ -94,7 +94,7 @@ def test_snapshot_with_check_all_strategy_fails_without_id() -> None:
     model_runner = SnapshotRunner(mock_sql_runner, results)
 
     result = model_runner.run(node)
-    mock_sql_runner.query.assert_called_with(node.compiled_sql)
+    mock_sql_runner.query.assert_called_with(node.compiled_code)
     assert result.status == DryRunStatus.FAILURE
 
 
@@ -132,7 +132,7 @@ def test_snapshot_with_check_all_strategy_runs_sql_with_matching_columns() -> No
     model_runner = SnapshotRunner(mock_sql_runner, results)
 
     result = model_runner.run(node)
-    mock_sql_runner.query.assert_called_with(node.compiled_sql)
+    mock_sql_runner.query.assert_called_with(node.compiled_code)
     assert (
         result.status == DryRunStatus.SUCCESS
     ), f"Failed with error: {result.exception}"
@@ -170,7 +170,7 @@ def test_snapshot_with_check_cols_strategy_fails_with_missing_column() -> None:
     model_runner = SnapshotRunner(mock_sql_runner, results)
 
     result = model_runner.run(node)
-    mock_sql_runner.query.assert_called_with(node.compiled_sql)
+    mock_sql_runner.query.assert_called_with(node.compiled_code)
     assert result.status == DryRunStatus.FAILURE
 
 
@@ -205,7 +205,7 @@ def test_snapshot_with_timestamp_strategy_with_updated_at_column() -> None:
     model_runner = SnapshotRunner(mock_sql_runner, results)
 
     result = model_runner.run(node)
-    mock_sql_runner.query.assert_called_with(node.compiled_sql)
+    mock_sql_runner.query.assert_called_with(node.compiled_code)
     assert result.status == DryRunStatus.SUCCESS
 
 
@@ -240,7 +240,7 @@ def test_snapshot_with_timestamp_strategy_with_missing_updated_at_column() -> No
     model_runner = SnapshotRunner(mock_sql_runner, results)
 
     result = model_runner.run(node)
-    mock_sql_runner.query.assert_called_with(node.compiled_sql)
+    mock_sql_runner.query.assert_called_with(node.compiled_code)
     assert result.status == DryRunStatus.FAILURE
 
 

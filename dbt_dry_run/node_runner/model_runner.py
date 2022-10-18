@@ -87,7 +87,7 @@ class ModelRunner(NodeRunner):
         if (
             node.config.materialized == "incremental"
             and node.config.partition_by
-            and "_dbt_max_partition" in node.compiled_sql
+            and "_dbt_max_partition" in node.compiled_code
         ):
             dbt_max_partition_declaration = (
                 f"declare _dbt_max_partition {node.config.partition_by.data_type} default"

@@ -52,7 +52,7 @@ def test_model_with_no_dependencies_runs_sql() -> None:
     model_runner = ModelRunner(mock_sql_runner, results)
 
     result = model_runner.run(node)
-    mock_sql_runner.query.assert_called_with(node.compiled_sql)
+    mock_sql_runner.query.assert_called_with(node.compiled_code)
     assert result.status == DryRunStatus.SUCCESS
     assert result.table
     assert result.table.fields[0].name == expected_table.fields[0].name
@@ -75,7 +75,7 @@ def test_model_as_view_runs_create_view() -> None:
 
     executed_sql = get_executed_sql(mock_sql_runner)
     assert executed_sql.startswith(VIEW_CREATION_SQL)
-    assert node.compiled_sql in executed_sql
+    assert node.compiled_code in executed_sql
 
 
 def test_partitioned_incremental_model_declares_dbt_max_partition_variable() -> None:
@@ -95,7 +95,7 @@ def test_partitioned_incremental_model_declares_dbt_max_partition_variable() -> 
                 field="loader_ingestion_time", data_type="timestamp"
             ),
         ),
-        compiled_sql="""
+        compiled_code="""
             SELECT 
                 * 
             FROM `foo` 
@@ -111,7 +111,7 @@ def test_partitioned_incremental_model_declares_dbt_max_partition_variable() -> 
 
     executed_sql = get_executed_sql(mock_sql_runner)
     assert executed_sql.startswith(dbt_max_partition_declaration)
-    assert node.compiled_sql in executed_sql
+    assert node.compiled_code in executed_sql
 
 
 def test_model_with_failed_dependency_raises_upstream_failed_exception() -> None:
@@ -154,13 +154,13 @@ def test_model_with_dependency_inserts_sql_literal() -> None:
     upstream_node = upstream_simple_node.to_node()
     upstream_node.depends_on.deep_nodes = []
 
-    compiled_sql = f"""SELECT * FROM {upstream_node.to_table_ref_literal()}"""
+    compiled_code = f"""SELECT * FROM {upstream_node.to_table_ref_literal()}"""
 
     node = SimpleNode(
         unique_id="node1",
         depends_on=[upstream_simple_node],
         resource_type=ManifestScheduler.MODEL,
-        compiled_sql=compiled_sql,
+        compiled_code=compiled_code,
     ).to_node()
     node.depends_on.deep_nodes = ["upstream"]
 
@@ -209,7 +209,7 @@ def test_incremental_model_that_does_not_exist_returns_dry_run_schema() -> None:
     model_runner = ModelRunner(mock_sql_runner, results)
 
     result = model_runner.run(node)
-    mock_sql_runner.query.assert_called_with(node.compiled_sql)
+    mock_sql_runner.query.assert_called_with(node.compiled_code)
     assert_result_has_table(predicted_table, result)
 
 
@@ -259,7 +259,7 @@ def test_incremental_model_that_exists_and_has_a_column_removed_and_readded_with
     model_runner = ModelRunner(mock_sql_runner, results)
 
     result = model_runner.run(node)
-    mock_sql_runner.query.assert_called_with(node.compiled_sql)
+    mock_sql_runner.query.assert_called_with(node.compiled_code)
     assert_result_has_table(expected_table, result)
 
 
@@ -296,7 +296,7 @@ def test_incremental_model_that_exists_and_has_a_column_added_does_nothing() -> 
     model_runner = ModelRunner(mock_sql_runner, results)
 
     result = model_runner.run(node)
-    mock_sql_runner.query.assert_called_with(node.compiled_sql)
+    mock_sql_runner.query.assert_called_with(node.compiled_code)
     assert_result_has_table(expected_table, result)
 
 
@@ -341,7 +341,7 @@ def test_incremental_model_that_exists_and_syncs_all_columns() -> None:
     model_runner = ModelRunner(mock_sql_runner, results)
 
     result = model_runner.run(node)
-    mock_sql_runner.query.assert_called_with(node.compiled_sql)
+    mock_sql_runner.query.assert_called_with(node.compiled_code)
     assert_result_has_table(expected_table, result)
 
 
@@ -382,7 +382,7 @@ def test_incremental_model_that_exists_and_fails_when_schema_changed() -> None:
     model_runner = ModelRunner(mock_sql_runner, results)
 
     result = model_runner.run(node)
-    mock_sql_runner.query.assert_called_with(node.compiled_sql)
+    mock_sql_runner.query.assert_called_with(node.compiled_code)
     assert result.status == DryRunStatus.FAILURE
     assert isinstance(result.exception, SchemaChangeException)
 
@@ -424,7 +424,7 @@ def test_incremental_model_that_exists_and_success_when_schema_not_changed() -> 
     model_runner = ModelRunner(mock_sql_runner, results)
 
     result = model_runner.run(node)
-    mock_sql_runner.query.assert_called_with(node.compiled_sql)
+    mock_sql_runner.query.assert_called_with(node.compiled_code)
     assert result.status == DryRunStatus.SUCCESS
 
 
@@ -459,4 +459,4 @@ def test_model_with_sql_header_executes_header_first() -> None:
 
     executed_sql = get_executed_sql(mock_sql_runner)
     assert executed_sql.startswith(pre_header_value)
-    assert node.compiled_sql in executed_sql
+    assert node.compiled_code in executed_sql
