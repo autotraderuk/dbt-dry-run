@@ -39,6 +39,9 @@ class PartitionBy(BaseModel):
 class NodeMeta(BaseModel):
     check_columns: bool = Field(False, alias="dry_run.check_columns")
 
+    class Config:
+        allow_population_by_field_name = True
+
 
 class NodeConfig(BaseModel):
     materialized: str
@@ -72,6 +75,7 @@ class Node(BaseModel):
     original_file_path: str
     root_path: str
     columns: Dict[str, ManifestColumn]
+    meta: Optional[NodeMeta]
 
     def __init__(self, **data: Any):
         super().__init__(
@@ -82,6 +86,18 @@ class Node(BaseModel):
     def to_table_ref_literal(self) -> str:
         sql = f"`{self.database}`.`{self.db_schema}`.`{self.alias}`"
         return sql
+
+    def get_should_check_columns(self) -> bool:
+        node_check_columns: bool = self.meta.check_columns if self.meta else False
+        config_check_columns: Optional[bool] = (
+            self.config.meta.check_columns if self.config.meta else None
+        )
+        merged_check_columns = (
+            config_check_columns
+            if config_check_columns is not None
+            else node_check_columns
+        )
+        return merged_check_columns
 
 
 class Macro(BaseModel):

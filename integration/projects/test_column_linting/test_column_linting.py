@@ -33,3 +33,9 @@ def test_linting_model_with_structs_success(dry_run_result: IntegrationTestResul
     node = get_report_node_by_id(dry_run_result.report,
                                  "model.test_column_linting.model_with_struct")
     assert node.linting_status == LintingStatus.SUCCESS
+
+
+def test_linting_enabled_in_model_in_sub_dir(dry_run_result: IntegrationTestResult):
+    node = get_report_node_by_id(dry_run_result.report,
+                                 "model.test_column_linting.badly_documented_model_in_sub_dir")
+    assert node.linting_status == LintingStatus.FAILURE

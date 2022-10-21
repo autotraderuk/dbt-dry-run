@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: badly_documented_model_in_sub_dir
+    description: This model is missing some columns in its docs
+    # Should inherit meta from dbt_project.yml
+    columns:
+      - name: a
+        description: This is in the model
+
+      - name: b
+        description: This is in the model
+
+#      - name: c
+#        description: Forgot to document c
+
+      - name: d
+        description: This shouldn't be here

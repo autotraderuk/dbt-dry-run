@@ -1,5 +1,4 @@
 import os
-from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Optional
 
@@ -47,6 +46,7 @@ class ProjectService:
 
     def get_dbt_manifest(self) -> Manifest:
         manifest = Manifest.from_filepath(self.manifest_filepath)
+
         return manifest
 
     @property

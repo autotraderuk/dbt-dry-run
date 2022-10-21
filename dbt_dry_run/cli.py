@@ -32,7 +32,7 @@ def dry_run(
     try:
         dry_run_results = dry_run_manifest(project)
         reporter = ResultReporter(dry_run_results, set(), verbose)
-        exit_code = reporter.report_and_check_results()]
+        exit_code = reporter.report_and_check_results()
 
         report = reporter.get_report()
 

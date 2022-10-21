@@ -20,8 +20,8 @@ models:
 
   - name: model_linting_disabled
     description: This model is missing some columns in its docs, but should not error as linting is disabled
-    meta:
-      dry_run.check_columns: false
+#    meta:
+#      dry_run.check_columns: false
     columns:
       - name: a
         description: This is in the model

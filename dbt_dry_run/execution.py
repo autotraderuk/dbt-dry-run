@@ -46,7 +46,7 @@ def dry_run_node(runners: Dict[str, NodeRunner], node: Node, results: Results) -
     """
     if node.compiled:
         dry_run_result = dispatch_node(node, runners)
-        if node.config.meta and node.config.meta.check_columns:
+        if node.get_should_check_columns():
             dry_run_result = lint_columns(node, dry_run_result)
         results.add_result(node.unique_id, dry_run_result)
     else:

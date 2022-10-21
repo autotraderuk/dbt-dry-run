@@ -25,3 +25,7 @@ models:
   test_column_linting:
     +enabled: true
     +materialized: view
+
+    sub_dir:
+      +meta:
+         dry_run.check_columns: true
