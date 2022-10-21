@@ -1,5 +1,24 @@
 ## Changelog
 
+# dbt-dry-run v0.5.0
+
+## Improvements & Bugfixes
+
+- Add support for column metadata linting/validation. Mark a model in its metadata with `dry_run.check_columns: true`
+  to enable checks that ensure that column names in the predicted dbt project schema match the columns in the metadata
+  see the `README.md` for more info, failure will be reporting as a `LINTING` error:
+  
+  ```text
+  Dry running X models
+  Node model.test_column_linting.badly_documented_model failed linting with rule violations:
+          UNDOCUMENTED_COLUMNS : Column not documented in metadata: 'c'
+          EXTRA_DOCUMENTED_COLUMNS : Extra column in metadata: 'd'
+  
+  Total 1 failures:
+  1       :       model.test_column_linting.badly_documented_model        :       LINTING :       ERROR
+  DRY RUN FAILURE!
+  ```
+
 # dbt-dry-run v0.4.2
 
 ## Improvements & Bugfixes
