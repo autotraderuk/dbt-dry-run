@@ -92,6 +92,55 @@ DRY RUN FAILURE!`
 
 The process will also return exit code 1
 
+### Column and Metadata Linting (Experimental!)
+
+The dry runner can also be configured to inspect your metadata YAML and assert that the predicted schema of your dbt 
+projects data warehouse matches what is documented in the metadata. To enable this for your models specify the key 
+`dry_run.check_columns: true`. The dry runner will then fail if the model's documentation does not match. For example 
+the full metadata for this model:
+
+```yaml
+models:
+  - name: badly_documented_model
+    description: This model is missing some columns in its docs
+    meta:
+      dry_run.check_columns: true
+    columns:
+      - name: a
+        description: This is in the model
+
+      - name: b
+        description: This is in the model
+
+#      - name: c
+#        description: Forgot to document c
+
+      - name: d
+        description: This shouldn't be here
+```
+
+This model is badly documented as the predicted schema is 3 columns `a,b,c` the dry runner will therefore output the 
+following error and fail your CI/CD checks:
+
+```text
+Dry running X models
+Node model.test_column_linting.badly_documented_model failed linting with rule violations:
+        UNDOCUMENTED_COLUMNS : Column not documented in metadata: 'c'
+        EXTRA_DOCUMENTED_COLUMNS : Extra column in metadata: 'd'
+
+Total 1 failures:
+1       :       model.test_column_linting.badly_documented_model        :       LINTING :       ERROR
+DRY RUN FAILURE!
+```
+
+Currently, these rules can cause linting failures:
+
+1. UNDOCUMENTED_COLUMNS: The predicted schema of the model will have extra columns that have not been documented in the YAML
+2. EXTRA_DOCUMENTED_COLUMNS: The predicted schema of the model does not have this column that was specified in the metadata
+
+This could be extended to verify that datatype has been set correctly as well or other linting rules such as naming conventions 
+based on datatype.
+
 ### Report Artefact
 
 If you specify `---report-path` a JSON file will be outputted regardless of dry run success/failure with detailed 

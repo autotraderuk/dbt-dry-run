@@ -36,6 +36,13 @@ class PartitionBy(BaseModel):
         return values
 
 
+class NodeMeta(BaseModel):
+    check_columns: bool = Field(False, alias="dry_run.check_columns")
+
+    class Config:
+        allow_population_by_field_name = True
+
+
 class NodeConfig(BaseModel):
     materialized: str
     on_schema_change: Optional[OnSchemaChange]
@@ -45,6 +52,12 @@ class NodeConfig(BaseModel):
     strategy: Union[None, Literal["timestamp", "check"]]
     check_cols: Optional[Union[Literal["all"], List[str]]]
     partition_by: Optional[PartitionBy]
+    meta: Optional[NodeMeta]
+
+
+class ManifestColumn(BaseModel):
+    name: str
+    description: Optional[str]
 
 
 class Node(BaseModel):
@@ -61,6 +74,8 @@ class Node(BaseModel):
     resource_type: str
     original_file_path: str
     root_path: str
+    columns: Dict[str, ManifestColumn]
+    meta: Optional[NodeMeta]
 
     def __init__(self, **data: Any):
         super().__init__(
@@ -71,6 +86,18 @@ class Node(BaseModel):
     def to_table_ref_literal(self) -> str:
         sql = f"`{self.database}`.`{self.db_schema}`.`{self.alias}`"
         return sql
+
+    def get_should_check_columns(self) -> bool:
+        node_check_columns: bool = self.meta.check_columns if self.meta else False
+        config_check_columns: Optional[bool] = (
+            self.config.meta.check_columns if self.config.meta else None
+        )
+        merged_check_columns = (
+            config_check_columns
+            if config_check_columns is not None
+            else node_check_columns
+        )
+        return merged_check_columns
 
 
 class Macro(BaseModel):

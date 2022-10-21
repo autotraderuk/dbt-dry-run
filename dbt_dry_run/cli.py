@@ -33,14 +33,17 @@ def dry_run(
         dry_run_results = dry_run_manifest(project)
         reporter = ResultReporter(dry_run_results, set(), verbose)
         exit_code = reporter.report_and_check_results()
+
+        report = reporter.get_report()
+
         if report_path:
-            reporter.write_results_artefact(report_path)
+            with open(report_path, "w") as f:
+                f.write(report.json(by_alias=True))
 
     except ManifestValidationError as e:
         print("Dry run failed to validate manifest")
         print(str(e))
         exit_code = 1
-
     return exit_code
 
 

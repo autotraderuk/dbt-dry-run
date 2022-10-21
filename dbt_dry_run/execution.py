@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple
 
 from dbt_dry_run.adapter.service import ProjectService
+from dbt_dry_run.linting.column_linting import lint_columns
 from dbt_dry_run.node_runner.snapshot_runner import SnapshotRunner
 from dbt_dry_run.sql_runner import SQLRunner
 
@@ -45,6 +46,8 @@ def dry_run_node(runners: Dict[str, NodeRunner], node: Node, results: Results) -
     """
     if node.compiled:
         dry_run_result = dispatch_node(node, runners)
+        if node.get_should_check_columns():
+            dry_run_result = lint_columns(node, dry_run_result)
         results.add_result(node.unique_id, dry_run_result)
     else:
         not_compiled_result = DryRunResult(

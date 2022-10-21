@@ -2,10 +2,26 @@ import re
 from typing import List, Set, Tuple
 
 from dbt_dry_run.models import Report, ReportNode
-from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
+from dbt_dry_run.models.report import ReportLintingError
+from dbt_dry_run.results import (
+    DryRunResult,
+    DryRunStatus,
+    LintingError,
+    LintingStatus,
+    Results,
+)
 
 QUERY_JOB_SQL_FOLLOWS = "-----Query Job SQL Follows-----"
 QUERY_JOB_HEADER = re.compile(r"|    .    ", re.MULTILINE)
+
+
+def _map_column_errors(column_errors: List[LintingError]) -> List[ReportLintingError]:
+    return list(
+        map(
+            lambda err: ReportLintingError(rule=err.rule, message=err.message),
+            column_errors,
+        )
+    )
 
 
 class ResultReporter:
@@ -21,6 +37,8 @@ class ResultReporter:
         for index, (failure, excluded) in enumerate(failures):
             if failure.exception:
                 exception_col = failure.exception.__class__.__name__
+            elif failure.linting_status == LintingStatus.FAILURE:
+                exception_col = "LINTING"
             else:
                 exception_col = "UNKNOWN"
             excluded_col = "EXCLUDED" if excluded else "ERROR"
@@ -28,7 +46,7 @@ class ResultReporter:
                 f"{index + 1}\t:\t{failure.node.unique_id}\t:\t{exception_col}\t:\t{excluded_col}"
             )
 
-    def write_results_artefact(self, output_path: str) -> None:
+    def get_report(self) -> Report:
         report_nodes: List[ReportNode] = []
         success = True
         node_count = 0
@@ -44,11 +62,13 @@ class ResultReporter:
                 success=result.status == DryRunStatus.SUCCESS,
                 error_message=exception_type,
                 table=result.table,
+                linting_status=result.linting_status,
+                linting_errors=_map_column_errors(result.linting_errors),
             )
             report_nodes.append(new_node)
 
             node_count += 1
-            if not new_node.success:
+            if not new_node.success or new_node.linting_status == LintingStatus.FAILURE:
                 success = False
                 failure_count += 1
                 failed_node_ids.append(new_node.unique_id)
@@ -62,8 +82,7 @@ class ResultReporter:
             nodes=report_nodes,
         )
 
-        with open(output_path, "w") as f:
-            f.write(report.json(by_alias=True))
+        return report
 
     def report_and_check_results(self) -> int:
         failures: List[Tuple[DryRunResult, bool]] = []
@@ -72,8 +91,16 @@ class ResultReporter:
                 print(f"Node {result.node.unique_id} failed with exception:")
                 self._print_full_exception(result.exception)
                 failures.append((result, result.node.unique_id in self._exclude))
-        print("")
+            elif result.linting_status == LintingStatus.FAILURE:
+                print(
+                    f"Node {result.node.unique_id} failed linting with rule violations:"
+                )
+                for err in result.linting_errors:
+                    print(f"\t{err.rule} : {err.message}")
+                failures.append((result, False))
+
         if failures:
+            print("")
             self._report_failure_summary(failures)
         included_failures = [f for f in failures if not f[1]]
 
