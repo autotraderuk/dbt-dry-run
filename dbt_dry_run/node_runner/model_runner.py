@@ -84,6 +84,9 @@ class ModelRunner(NodeRunner):
         if node.config.materialized == "view":
             sql_statement = f"CREATE OR REPLACE VIEW `{node.database}`.`{node.db_schema}`.`{node.alias}` AS (\n{sql_statement}\n)"
 
+        if node.config.sql_header:
+            sql_statement = f"{node.config.sql_header}\n{sql_statement}"
+
         if (
             node.config.materialized == "incremental"
             and node.config.partition_by
@@ -94,9 +97,6 @@ class ModelRunner(NodeRunner):
                 f" {PARTITION_DATA_TYPES_VALUES_MAPPING[node.config.partition_by.data_type]};"
             )
             sql_statement = f"{dbt_max_partition_declaration}\n{sql_statement}"
-
-        if node.config.sql_header:
-            sql_statement = f"{node.config.sql_header}\n{sql_statement}"
 
         return sql_statement
 

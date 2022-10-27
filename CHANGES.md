@@ -1,5 +1,12 @@
 ## Changelog
 
+# dbt-dry-run v0.5.1
+
+## Bugfixes
+
+- Fixed issue where using a SQL header and `_dbt_max_partition` in an incremental would cause a false positive dry run
+  failure due to `Variable declarations are allowed only at the start of a block or script`
+
 # dbt-dry-run v0.5.0
 
 ## Improvements & Bugfixes
