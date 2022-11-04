@@ -1,0 +1,14 @@
+version: '3.6'
+
+services:
+  postgres:
+    image: postgres:11
+    restart: always
+    expose:
+      - "5432"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: "dry_run"
+      POSTGRES_USER: "dry_run"
+      POSTGRES_PASSWORD: "password"

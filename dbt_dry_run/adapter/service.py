@@ -61,3 +61,7 @@ class ProjectService:
     @property
     def threads(self) -> int:
         return self._profile.threads
+
+    @property
+    def adapter_type(self) -> str:
+        return self._adapter.type()

@@ -28,3 +28,17 @@ default:
       threads: 8
       timeout_seconds: 300
       keyfile: "{{ env_var('HOME', '/home') }}/bq_svc.json"
+
+postgres:
+  target: integration-local
+
+  outputs:
+    integration-local:
+      type: postgres
+      host: localhost
+      user: dry_run
+      pass: password
+      port: 5432
+      dbname: dry_run
+      schema: dry_run
+      threads: 8
