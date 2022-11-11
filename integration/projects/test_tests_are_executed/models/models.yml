@@ -1,0 +1,11 @@
+version: 2
+
+models:
+  - name: first_layer
+    description: This model has a custom and generic test
+    columns:
+      - name: a
+        tests:
+          - not_null
+
+      - name: b
