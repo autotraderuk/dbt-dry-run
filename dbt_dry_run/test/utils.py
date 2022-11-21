@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -10,7 +10,7 @@ A_SQL_QUERY = "SELECT * FROM `foo`"
 
 class SimpleNode(BaseModel):
     unique_id: str
-    depends_on: List["SimpleNode"]
+    depends_on: List[Union["SimpleNode", Node]]
     resource_type: str = ManifestScheduler.MODEL
     table_config: NodeConfig = NodeConfig(
         materialized="table", on_schema_change="ignore"

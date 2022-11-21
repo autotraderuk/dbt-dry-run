@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple
 from dbt_dry_run.adapter.service import ProjectService
 from dbt_dry_run.linting.column_linting import lint_columns
 from dbt_dry_run.node_runner.snapshot_runner import SnapshotRunner
+from dbt_dry_run.node_runner.source_runner import SourceRunner
 from dbt_dry_run.sql_runner import SQLRunner
 
 if TYPE_CHECKING:
@@ -28,7 +29,7 @@ from dbt_dry_run.sql_runner.big_query_sql_runner import BigQuerySQLRunner
 
 CONCURRENCY = 8
 
-_RUNNER_CLASSES: List[Any] = [ModelRunner, SeedRunner, SnapshotRunner]
+_RUNNER_CLASSES: List[Any] = [ModelRunner, SeedRunner, SnapshotRunner, SourceRunner]
 _RUNNERS = get_runner_map(_RUNNER_CLASSES)
 
 
@@ -44,7 +45,7 @@ def dry_run_node(runners: Dict[str, NodeRunner], node: Node, results: Results) -
     """
     This method must be thread safe
     """
-    if node.compiled:
+    if node.compiled or node.is_external_source():
         dry_run_result = dispatch_node(node, runners)
         if node.get_should_check_columns():
             dry_run_result = lint_columns(node, dry_run_result)

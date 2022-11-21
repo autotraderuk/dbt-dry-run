@@ -10,21 +10,22 @@ class ManifestScheduler:
     MODEL = "model"
     SEED = "seed"
     SNAPSHOT = "snapshot"
-    RUNNABLE_RESOURCE_TYPE = (MODEL, SEED, SNAPSHOT)
-    RUNNABLE_MATERIAL = ("view", "table", "incremental", "seed", "snapshot")
+    SOURCE = "source"
+    RUNNABLE_RESOURCE_TYPE = (MODEL, SEED, SNAPSHOT, SOURCE)
+    RUNNABLE_MATERIAL = ("view", "table", "incremental", "seed", "snapshot", "source")
 
     def __init__(self, manifest: Manifest, model: Optional[str] = None):
         self._manifest = manifest
         self._model_filter = model
         self._status: Dict[str, bool] = {
-            node_key: False for node_key in self._manifest.nodes.keys()
+            node_key: False for node_key in self._manifest.all_nodes.keys()
         }
 
     def _filter_manifest(self) -> Set[str]:
         if self._model_filter is None:
-            return set(self._manifest.nodes.keys())
+            return set(self._manifest.all_nodes.keys())
         try:
-            leaf_node = self._manifest.nodes[self._model_filter]
+            leaf_node = self._manifest.all_nodes[self._model_filter]
         except KeyError:
             raise KeyError(f"Model {self._model_filter} does not exist in manifest")
         upstream_node_keys = leaf_node.depends_on.nodes
@@ -33,12 +34,12 @@ class ManifestScheduler:
             upstream_nodes = list(
                 filter(
                     lambda val: val is not None,
-                    [self._manifest.nodes.get(k) for k in upstream_node_keys],
+                    [self._manifest.all_nodes.get(k) for k in upstream_node_keys],
                 )
             )
             upstream_node_keys = list(
                 filter(
-                    lambda n: n in self._manifest.nodes.keys(),
+                    lambda n: n in self._manifest.all_nodes.keys(),
                     chain.from_iterable(
                         [n.depends_on.nodes for n in upstream_nodes if n]
                     ),
@@ -49,13 +50,15 @@ class ManifestScheduler:
 
     def _get_runnable_keys(self) -> Set[str]:
         remaining_nodes = set(
-            filter(self._node_key_is_runnable, self._manifest.nodes.keys())
+            filter(self._node_key_is_runnable, self._manifest.all_nodes.keys())
         )
 
         if self._model_filter:
             remaining_nodes = remaining_nodes.intersection(self._filter_manifest())
             if self._model_filter not in remaining_nodes:
-                model_filter_config = self._manifest.nodes[self._model_filter].config
+                model_filter_config = self._manifest.all_nodes[
+                    self._model_filter
+                ].config
                 model_message = (
                     f"Model {self._model_filter} is not runnable: {model_filter_config}"
                 )
@@ -66,7 +69,9 @@ class ManifestScheduler:
         generation: List[str]
         for gen_id, generation in enumerate(self._calculate_depths()):
             nodes = [
-                self._manifest.nodes[k] for k in generation if k in self._manifest.nodes
+                self._manifest.all_nodes[k]
+                for k in generation
+                if k in self._manifest.all_nodes
             ]
             yield nodes  # list(filter(self._node_is_runnable, nodes))
 
@@ -75,13 +80,13 @@ class ManifestScheduler:
 
     def _node_is_runnable(self, node: Node) -> bool:
         return (
-            node.config.materialized in self.RUNNABLE_MATERIAL
-            and node.resource_type in self.RUNNABLE_RESOURCE_TYPE
-        )
+            node.resource_type in self.RUNNABLE_RESOURCE_TYPE
+            and node.config.materialized in self.RUNNABLE_MATERIAL
+        ) or (node.is_external_source())
 
     def _node_key_is_runnable(self, node_key: str, default: bool = False) -> bool:
         try:
-            return self._node_is_runnable(self._manifest.nodes[node_key])
+            return self._node_is_runnable(self._manifest.all_nodes[node_key])
         except KeyError:
             return default
 
@@ -89,7 +94,7 @@ class ManifestScheduler:
         # Deeply traverse 'depends_on' so we catch nodes that depend on ephemerals that depends on nodes
         upstream_deps: List[str] = []
         for upstream_node_key in node.depends_on.nodes:
-            up_node = self._manifest.nodes.get(upstream_node_key)
+            up_node = self._manifest.all_nodes.get(upstream_node_key)
             if up_node is None:
                 continue
             if self._node_is_runnable(up_node):
@@ -105,7 +110,7 @@ class ManifestScheduler:
         remaining_nodes = self._get_runnable_keys()
         graph_data = {
             node_id: self._get_runnable_dependencies(node)
-            for node_id, node in self._manifest.nodes.items()
+            for node_id, node in self._manifest.all_nodes.items()
             if node_id in remaining_nodes
         }
         graph = from_dict_of_lists(graph_data, create_using=DiGraph).reverse()

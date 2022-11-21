@@ -7,8 +7,8 @@ from pydantic import BaseModel, Field, root_validator
 
 
 class NodeDependsOn(BaseModel):
-    macros: List[str]
-    nodes: List[str]
+    macros: List[str] = []
+    nodes: List[str] = []
     deep_nodes: Optional[List[str]] = None
 
 
@@ -44,7 +44,7 @@ class NodeMeta(BaseModel):
 
 
 class NodeConfig(BaseModel):
-    materialized: str
+    materialized: Optional[str]
     on_schema_change: Optional[OnSchemaChange]
     sql_header: Optional[str]
     unique_key: Optional[Union[str, List[str]]]
@@ -58,24 +58,26 @@ class NodeConfig(BaseModel):
 class ManifestColumn(BaseModel):
     name: str
     description: Optional[str]
+    data_type: Optional[str]
 
 
 class Node(BaseModel):
     name: str
     config: NodeConfig
     unique_id: str
-    depends_on: NodeDependsOn
+    depends_on: NodeDependsOn = NodeDependsOn()
     compiled: bool = False
     compiled_code: str = ""
     database: str
     db_schema: str = Field(..., alias="schema")
-    alias: str
+    alias: Optional[str]
     language: Optional[str] = None
     resource_type: str
     original_file_path: str
     root_path: str
     columns: Dict[str, ManifestColumn]
     meta: Optional[NodeMeta]
+    external: Optional[Dict[str, Any]]
 
     def __init__(self, **data: Any):
         super().__init__(
@@ -84,7 +86,10 @@ class Node(BaseModel):
         )
 
     def to_table_ref_literal(self) -> str:
-        sql = f"`{self.database}`.`{self.db_schema}`.`{self.alias}`"
+        if self.alias:
+            sql = f"`{self.database}`.`{self.db_schema}`.`{self.alias}`"
+        else:
+            sql = f"`{self.database}`.`{self.db_schema}`.`{self.name}`"
         return sql
 
     def get_should_check_columns(self) -> bool:
@@ -99,6 +104,9 @@ class Node(BaseModel):
         )
         return merged_check_columns
 
+    def is_external_source(self) -> bool:
+        return self.external is not None and self.resource_type == "source"
+
 
 class Macro(BaseModel):
     root_path: Path
@@ -107,7 +115,12 @@ class Macro(BaseModel):
 
 class Manifest(BaseModel):
     nodes: Dict[str, Node]
+    sources: Dict[str, Node]
     macros: Dict[str, Macro]
+
+    @property
+    def all_nodes(self) -> Dict[str, Node]:
+        return dict(self.nodes, **self.sources)
 
     @classmethod
     def from_filepath(cls, path: str) -> "Manifest":

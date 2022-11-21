@@ -1,28 +1,9 @@
-from typing import Callable, Dict, List, Set
+from typing import Callable, Dict, List
 
-from dbt_dry_run.models import Table, TableField
+from dbt_dry_run.columns_metadata import expand_table_fields
+from dbt_dry_run.models import Table
 from dbt_dry_run.models.manifest import ManifestColumn, Node
 from dbt_dry_run.results import DryRunResult, LintingError
-
-
-def _extract_fields(table_fields: List[TableField], prefix: str = "") -> List[str]:
-    field_names = []
-    for field in table_fields:
-        field_names.append(f"{prefix}{field.name}")
-        if field.fields:
-            new_prefix = f"{prefix}{field.name}."
-            field_names.extend(_extract_fields(field.fields, prefix=new_prefix))
-    return field_names
-
-
-def expand_table_fields(table: Table) -> Set[str]:
-    """
-    Expand table fields to dot notation (like in dbt metadata)
-
-    Eg: TableField(name="a", fields=[TableField(name="a1")])
-    Returns: ["a", "a.a1"]
-    """
-    return set(_extract_fields(table.fields))
 
 
 def get_extra_documented_columns(

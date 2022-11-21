@@ -6,6 +6,10 @@ class UpstreamFailedException(Exception):
     pass
 
 
+class SourceMissingException(Exception):
+    pass
+
+
 class NodeExecutionException(Exception):
     pass
 
