@@ -12,7 +12,7 @@ class ManifestScheduler:
     SNAPSHOT = "snapshot"
     SOURCE = "source"
     RUNNABLE_RESOURCE_TYPE = (MODEL, SEED, SNAPSHOT, SOURCE)
-    RUNNABLE_MATERIAL = ("view", "table", "incremental", "seed", "snapshot", "source")
+    RUNNABLE_MATERIAL = ("view", "table", "incremental", "seed", "snapshot")
 
     def __init__(self, manifest: Manifest, model: Optional[str] = None):
         self._manifest = manifest
