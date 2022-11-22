@@ -1,6 +1,7 @@
 from itertools import groupby
 from typing import Dict, List, Set, Tuple
 
+from dbt_dry_run.exception import UnknownDataTypeException, InvalidColumnSpecification
 from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
 from dbt_dry_run.models.manifest import ManifestColumn
 
@@ -45,7 +46,11 @@ def _split_column_data_type_and_mode(
         clean_data_type = data_type[: -len(REPEATED_SUFFIX)]
     else:
         clean_data_type = data_type
-    return BigQueryFieldType(clean_data_type), mode
+
+    try:
+        return BigQueryFieldType(clean_data_type), mode
+    except ValueError:
+        raise UnknownDataTypeException(f"Could not parse data_type `{clean_data_type}` from manifest")
 
 
 def _get_sub_field_map(
@@ -73,12 +78,12 @@ def _to_fields(cols: Dict[str, ManifestColumn]) -> List[TableField]:
     for root_name, group_cols_iterator in grouped_columns:
         group_cols = list(group_cols_iterator)
         if group_cols[0] != root_name:
-            raise ValueError(
+            raise InvalidColumnSpecification(
                 f"Could not find root record '{root_name}' for struct fields in metadata '{group_cols}'"
             )
         column = cols[root_name]
         if not column.data_type:
-            raise ValueError(
+            raise UnknownDataTypeException(
                 f"Can't determine schema of column '{root_name}' without 'data_type' in metadata"
             )
         sub_field_map = _get_sub_field_map(cols, group_cols, root_name)
