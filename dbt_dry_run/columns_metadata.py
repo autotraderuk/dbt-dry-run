@@ -1,7 +1,7 @@
 from itertools import groupby
 from typing import Dict, List, Set, Tuple
 
-from dbt_dry_run.exception import UnknownDataTypeException, InvalidColumnSpecification
+from dbt_dry_run.exception import InvalidColumnSpecification, UnknownDataTypeException
 from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
 from dbt_dry_run.models.manifest import ManifestColumn
 
@@ -50,7 +50,9 @@ def _split_column_data_type_and_mode(
     try:
         return BigQueryFieldType(clean_data_type), mode
     except ValueError:
-        raise UnknownDataTypeException(f"Could not parse data_type `{clean_data_type}` from manifest")
+        raise UnknownDataTypeException(
+            f"Could not parse data_type `{clean_data_type}` from manifest"
+        )
 
 
 def _get_sub_field_map(

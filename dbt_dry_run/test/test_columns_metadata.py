@@ -3,7 +3,7 @@ from typing import Dict, List
 import pytest
 
 from dbt_dry_run.columns_metadata import REPEATED_SUFFIX, map_columns_to_table
-from dbt_dry_run.exception import UnknownDataTypeException, InvalidColumnSpecification
+from dbt_dry_run.exception import InvalidColumnSpecification, UnknownDataTypeException
 from dbt_dry_run.literals import enable_test_example_values
 from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
 from dbt_dry_run.models.manifest import ManifestColumn
@@ -16,11 +16,11 @@ def get_column_map(columns: List[ManifestColumn]) -> Dict[str, ManifestColumn]:
 
 
 def assert_columns_result_in_table(
-        columns: List[ManifestColumn], expected: Table
+    columns: List[ManifestColumn], expected: Table
 ) -> None:
     actual = map_columns_to_table(get_column_map(columns))
     assert (
-            actual == expected
+        actual == expected
     ), f"SQL Literal:\n {actual} does not equal expected:\n {expected}"
 
 
