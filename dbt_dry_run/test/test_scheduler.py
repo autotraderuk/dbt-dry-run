@@ -1,13 +1,18 @@
-from typing import List, Set
+from typing import Iterable, List, Optional, Set, Union
 
-from dbt_dry_run.models.manifest import Manifest, NodeConfig
+from dbt_dry_run.models.manifest import Manifest, Node, NodeConfig
 from dbt_dry_run.scheduler import ManifestScheduler
 from dbt_dry_run.test.utils import SimpleNode
 
 
-def build_manifest(nodes: List[SimpleNode]) -> Manifest:
-    real_nodes = {n.unique_id: n.to_node() for n in nodes}
-    return Manifest(nodes=real_nodes, macros={})
+def build_manifest(
+    nodes: List[Union[Node, SimpleNode]], sources: Optional[Iterable[Node]] = None
+) -> Manifest:
+    real_nodes = {
+        n.unique_id: n.to_node() if isinstance(n, SimpleNode) else n for n in nodes
+    }
+    source_map = {s.unique_id for s in sources} if sources else {}
+    return Manifest(nodes=real_nodes, macros={}, sources=source_map)
 
 
 def assert_node_order(routes: List[Set[str]], manifest: Manifest) -> None:
@@ -57,3 +62,42 @@ def test_ephemeral_lineage() -> None:
     manifest = build_manifest([A, B, C, D])
 
     assert_node_order([{"A"}, {"B"}, {"D"}], manifest)
+
+
+def test_manifest_with_external_sources_includes_source_in_schedule() -> None:
+    S = Node(
+        unique_id="S",
+        resource_type="source",
+        config=NodeConfig(),
+        name="s",
+        database="db1",
+        schema="schema1",
+        original_file_path="/filepath1.yaml",
+        root_path="/filepath1",
+        columns={},
+        external={},
+    )
+    A = SimpleNode(unique_id="A", depends_on=[S])
+    B = SimpleNode(unique_id="B", depends_on=[A])
+    manifest = build_manifest([S, A, B])
+
+    assert_node_order([{"S"}, {"A"}, {"B"}], manifest)
+
+
+def test_manifest_with_normal_sources_excludes_source_in_schedule() -> None:
+    S = Node(
+        unique_id="S",
+        resource_type="source",
+        config=NodeConfig(),
+        name="s",
+        database="db1",
+        schema="schema1",
+        original_file_path="/filepath1.yaml",
+        root_path="/filepath1",
+        columns={},
+    )
+    A = SimpleNode(unique_id="A", depends_on=[S])
+    B = SimpleNode(unique_id="B", depends_on=[A])
+    manifest = build_manifest([S, A, B])
+
+    assert_node_order([{"A"}, {"B"}], manifest)

@@ -1,0 +1,26 @@
+version: 2
+
+sources:
+  - name: external
+    tables:
+      - name: src_external1
+        external:
+          location: this is still a required property, but it will be ignored
+
+        columns:
+          - name: rowkey
+            data_type: STRING
+          - name: events
+            data_type: RECORD[]
+          - name: events.column
+            data_type: RECORD[]
+          - name: events.column.name
+            data_type: STRING
+          - name: events.column.cell
+            data_type: RECORD[]
+          - name: events.column.cell.value
+            data_type: STRING
+
+      - name: src_external_no_schema
+        external:
+          location: this is still a required property, but it will be ignored

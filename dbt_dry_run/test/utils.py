@@ -1,7 +1,8 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from pydantic import BaseModel, Field
 
+from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, TableField
 from dbt_dry_run.models.manifest import Node, NodeConfig, NodeDependsOn, NodeMeta
 from dbt_dry_run.scheduler import ManifestScheduler
 
@@ -10,7 +11,7 @@ A_SQL_QUERY = "SELECT * FROM `foo`"
 
 class SimpleNode(BaseModel):
     unique_id: str
-    depends_on: List["SimpleNode"]
+    depends_on: List[Union["SimpleNode", Node]]
     resource_type: str = ManifestScheduler.MODEL
     table_config: NodeConfig = NodeConfig(
         materialized="table", on_schema_change="ignore"
@@ -46,3 +47,12 @@ class SimpleNode(BaseModel):
 
 
 SimpleNode.update_forward_refs()
+
+
+def field_with_name(
+    name: str,
+    type_: BigQueryFieldType = BigQueryFieldType.STRING,
+    mode: BigQueryFieldMode = BigQueryFieldMode.NULLABLE,
+    fields: Optional[List[TableField]] = None,
+) -> TableField:
+    return TableField(name=name, type=type_, mode=mode, fields=fields)
