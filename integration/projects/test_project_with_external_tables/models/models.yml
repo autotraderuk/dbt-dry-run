@@ -20,3 +20,7 @@ sources:
             data_type: RECORD[]
           - name: events.column.cell.value
             data_type: STRING
+
+      - name: src_external_no_schema
+        external:
+          location: this is still a required property, but it will be ignored

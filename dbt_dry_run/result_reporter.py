@@ -119,7 +119,7 @@ class ResultReporter:
         error_message = str(exception)
         if not self._verbose:
             query_job_slq_position = error_message.find(QUERY_JOB_SQL_FOLLOWS)
-            if query_job_slq_position:
+            if query_job_slq_position >= 0:
                 error_message = error_message[:query_job_slq_position].strip()
         else:
             error_message = QUERY_JOB_HEADER.sub(error_message, "")

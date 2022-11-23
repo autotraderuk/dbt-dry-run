@@ -72,6 +72,10 @@ def _get_sub_field_map(
 
 
 def _to_fields(cols: Dict[str, ManifestColumn]) -> List[TableField]:
+    if not cols:
+        raise InvalidColumnSpecification(
+            "Schema not specified in `columns` attribute in metadata"
+        )
     sorted_columns = sorted(cols.keys())
     grouped_columns = groupby(
         sorted_columns, lambda val: val.split(STRUCT_SEPERATOR)[0]

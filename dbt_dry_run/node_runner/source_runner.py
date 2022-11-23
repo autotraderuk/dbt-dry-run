@@ -1,7 +1,11 @@
 from typing import Optional
 
 from dbt_dry_run.columns_metadata import map_columns_to_table
-from dbt_dry_run.exception import SourceMissingException
+from dbt_dry_run.exception import (
+    InvalidColumnSpecification,
+    SourceMissingException,
+    UnknownDataTypeException,
+)
 from dbt_dry_run.models import Table
 from dbt_dry_run.models.manifest import Node
 from dbt_dry_run.node_runner import NodeRunner
@@ -18,7 +22,7 @@ class SourceRunner(NodeRunner):
         if node.is_external_source():
             try:
                 predicted_table = map_columns_to_table(node.columns)
-            except ValueError as e:
+            except (InvalidColumnSpecification, UnknownDataTypeException) as e:
                 status = DryRunStatus.FAILURE
                 exception = e
         else:
