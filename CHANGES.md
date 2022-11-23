@@ -1,6 +1,6 @@
 ## Changelog
 
-# dbt-dry-run v0.6.x (Unreleased)
+# dbt-dry-run v0.6.0
 
 ## Improvements & Bugfixes
 
@@ -9,8 +9,7 @@
 
 - Added support for `dbt-external-tables`. Any `source` marked with `external` will be 'dry runned' by reading the
   schema from the yaml metdata for the source. The dry run does not support schema prediction for external tables
-
-
+  
 # dbt-dry-run v0.5.1
 
 ## Bugfixes
