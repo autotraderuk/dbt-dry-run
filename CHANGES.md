@@ -1,11 +1,15 @@
 ## Changelog
 
-# dbt-dry-run v0.6.x
+# dbt-dry-run v0.6.x (Unreleased)
 
 ## Improvements & Bugfixes
 
-- Added support for `dbt-external-tables`. Any `source` marked with `external` will be 'dry runned' by reading the 
+- Support dry running tests. Generic and custom tests will be checked. This can catch errors such as column name typos in the
+  generic test metadata and SQL syntax errors in custom tests
+
+- Added support for `dbt-external-tables`. Any `source` marked with `external` will be 'dry runned' by reading the
   schema from the yaml metdata for the source. The dry run does not support schema prediction for external tables
+
 
 # dbt-dry-run v0.5.1
 
@@ -21,13 +25,13 @@
 - Add support for column metadata linting/validation. Mark a model in its metadata with `dry_run.check_columns: true`
   to enable checks that ensure that column names in the predicted dbt project schema match the columns in the metadata
   see the `README.md` for more info, failure will be reporting as a `LINTING` error:
-  
+
   ```text
   Dry running X models
   Node model.test_column_linting.badly_documented_model failed linting with rule violations:
           UNDOCUMENTED_COLUMNS : Column not documented in metadata: 'c'
           EXTRA_DOCUMENTED_COLUMNS : Extra column in metadata: 'd'
-  
+
   Total 1 failures:
   1       :       model.test_column_linting.badly_documented_model        :       LINTING :       ERROR
   DRY RUN FAILURE!
@@ -53,19 +57,19 @@
 ## Improvements & Bugfixes
 
 - Under the hood re-write of how we create the BigQuery connection. We now directly interact with dbt and create the
-  project config and BigQuery adapter using dbt instead of reimplementing the logic that dbt uses by reading your 
+  project config and BigQuery adapter using dbt instead of reimplementing the logic that dbt uses by reading your
   `profiles.yml`
-  
-- Due to the re-write there is backwards incompatible changes with the CLI where you should now run the dry runner in 
+
+- Due to the re-write there is backwards incompatible changes with the CLI where you should now run the dry runner in
   the same way use run `dbt compile` as it will search for the `dbt_project.yml` in the same directory as you run the
   dry runner (By default). This can be overridden in the same way as in dbt using the `--project-dir` option
-  
+
 - The CLI now also uses [Typer][get-typer] so the CLI help is now improved. Typing `dbt-dry-run --help` outputs:
 
   ```
   ❯ dbt-dry-run --help
     Usage: dbt-dry-run [OPTIONS] [PROFILE]
-    
+
     Options:
       --profiles-dir TEXT             [dbt] Where to search for `profiles.yml`
                                       [default: /Users/<user>/.dbt]
@@ -85,10 +89,10 @@
       --help                          Show this message and exit.
 
   ```
-  
+
   Where any option description prefixed with `[dbt]` should work in the same way as it does in the dbt CLI
 
-- Fixed issue where `partition_by` `data_type` was case-sensitive so a value of `DATE` would not be accepted by the 
+- Fixed issue where `partition_by` `data_type` was case-sensitive so a value of `DATE` would not be accepted by the
   dry runner but would be accepted by dbt when parsing the manifest
 
 # dbt-dry-run v0.3.1
@@ -104,7 +108,7 @@
 
 ### Improvements & Bugfixes
 
-- Add snapshot support! The dry runner can now correctly predict the schema of your snapshots and if they will 
+- Add snapshot support! The dry runner can now correctly predict the schema of your snapshots and if they will
   run or not. It can catch configuration errors as well such as incorrect `unique_key`, `check_cols` and
   `updated_at` columns
 
@@ -118,14 +122,14 @@
 
 - Improved error messages when passing incorrect parameters to the command line such as invalid `manifest.json`
 or profile directory
-  
+
 - `profiles.yml` that use `env_var` templating will correctly render (See [dbt docs][dbt-env-var])
 
 - `keyfile` is now optional when using `oath` authentication method in `profiles.yml`
 
-- Added `--output-path` argument. This will produce a JSON report of project dry run with predicted schema/error 
+- Added `--output-path` argument. This will produce a JSON report of project dry run with predicted schema/error
   message of each model and seed
-  
+
 - Concurrency will now respect `threads` in `profiles.yml` rather than being hardcoded to `8`
 
 ### Under the hood

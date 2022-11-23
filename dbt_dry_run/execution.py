@@ -5,8 +5,6 @@ from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple
 
 from dbt_dry_run.adapter.service import ProjectService
 from dbt_dry_run.linting.column_linting import lint_columns
-from dbt_dry_run.node_runner.snapshot_runner import SnapshotRunner
-from dbt_dry_run.node_runner.source_runner import SourceRunner
 from dbt_dry_run.sql_runner import SQLRunner
 
 if TYPE_CHECKING:
@@ -22,14 +20,24 @@ from dbt_dry_run.exception import (
 from dbt_dry_run.models.manifest import Manifest, Node
 from dbt_dry_run.node_runner import NodeRunner, get_runner_map
 from dbt_dry_run.node_runner.model_runner import ModelRunner
+from dbt_dry_run.node_runner.node_test_runner import NodeTestRunner
 from dbt_dry_run.node_runner.seed_runner import SeedRunner
+from dbt_dry_run.node_runner.snapshot_runner import SnapshotRunner
+from dbt_dry_run.node_runner.source_runner import SourceRunner
 from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
 from dbt_dry_run.scheduler import ManifestScheduler
 from dbt_dry_run.sql_runner.big_query_sql_runner import BigQuerySQLRunner
 
 CONCURRENCY = 8
 
-_RUNNER_CLASSES: List[Any] = [ModelRunner, SeedRunner, SnapshotRunner, SourceRunner]
+_RUNNER_CLASSES: List[Any] = [
+    ModelRunner,
+    SeedRunner,
+    SnapshotRunner,
+    NodeTestRunner,
+    SourceRunner,
+]
+
 _RUNNERS = get_runner_map(_RUNNER_CLASSES)
 
 
@@ -106,7 +114,7 @@ def dry_run_manifest(project: ProjectService) -> Results:
 
         scheduler = ManifestScheduler(manifest)
 
-        print(f"Dry running {len(scheduler)} models")
+        print(f"Dry running {len(scheduler)} nodes")
         for generation_id, generation in enumerate(scheduler):
             gen_futures: Dict[str, Future[None]] = {}
             for node in generation:
