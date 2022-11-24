@@ -1,5 +1,12 @@
 ## Changelog
 
+# dbt-dry-run v0.6.1
+
+## Bugfixes
+
+- Move column specification to `dry_run_columns` in `external` to avoid conflict with `dbt-external-tables` and other
+  dbt integrations
+
 # dbt-dry-run v0.6.0
 
 ## Improvements & Bugfixes
