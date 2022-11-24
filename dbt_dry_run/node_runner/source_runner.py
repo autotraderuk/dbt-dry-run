@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, cast
 
 from dbt_dry_run.columns_metadata import map_columns_to_table
 from dbt_dry_run.exception import (
@@ -7,7 +7,7 @@ from dbt_dry_run.exception import (
     UnknownDataTypeException,
 )
 from dbt_dry_run.models import Table
-from dbt_dry_run.models.manifest import Node
+from dbt_dry_run.models.manifest import ExternalConfig, Node
 from dbt_dry_run.node_runner import NodeRunner
 from dbt_dry_run.results import DryRunResult, DryRunStatus
 
@@ -20,8 +20,11 @@ class SourceRunner(NodeRunner):
         predicted_table: Optional[Table] = None
         status = DryRunStatus.SUCCESS
         if node.is_external_source():
+            external_config = cast(ExternalConfig, node.external)
             try:
-                predicted_table = map_columns_to_table(node.columns)
+                predicted_table = map_columns_to_table(
+                    external_config.dry_run_columns_map
+                )
             except (InvalidColumnSpecification, UnknownDataTypeException) as e:
                 status = DryRunStatus.FAILURE
                 exception = e

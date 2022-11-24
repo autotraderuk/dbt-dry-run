@@ -1,6 +1,6 @@
 from typing import Iterable, List, Optional, Set, Union
 
-from dbt_dry_run.models.manifest import Manifest, Node, NodeConfig
+from dbt_dry_run.models.manifest import ExternalConfig, Manifest, Node, NodeConfig
 from dbt_dry_run.scheduler import ManifestScheduler
 from dbt_dry_run.test.utils import SimpleNode
 
@@ -75,7 +75,7 @@ def test_manifest_with_external_sources_includes_source_in_schedule() -> None:
         original_file_path="/filepath1.yaml",
         root_path="/filepath1",
         columns={},
-        external={},
+        external=ExternalConfig(location="location"),
     )
     A = SimpleNode(unique_id="A", depends_on=[S])
     B = SimpleNode(unique_id="B", depends_on=[A])

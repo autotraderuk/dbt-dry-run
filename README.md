@@ -161,19 +161,19 @@ sources:
           location: 'gs://bucket/path/*'
             format: csv
 
-        columns:
-          - name: string_field
-            data_type: STRING
-            description: "Specify each column in the yaml for external sources"
-          - name: record_array_field[]
-            data_type: RECORD[]
-            description: "For struct/record fields specify the `data_type` as `RECORD`"
-          - name: record_array_field.foo
-            data_type: NUMERIC
-            description: "For record attributes use the dot notation"
-          - name: integer_array
-            data_type: NUMERIC[]
-            description: "For repeated fields suffix data_type with []"
+           dry_run_columns:
+             - name: string_field
+               data_type: STRING
+               description: "Specify each column in the yaml for external sources"
+             - name: record_array_field[]
+               data_type: RECORD[]
+               description: "For struct/record fields specify the `data_type` as `RECORD`"
+             - name: record_array_field.foo
+               data_type: NUMERIC
+               description: "For record attributes use the dot notation"
+             - name: integer_array
+               data_type: NUMERIC[]
+               description: "For repeated fields suffix data_type with []"
 ```
 
 The dry runner cannot predict the schema, therefore, it is up to you to accurately describe the schema in the YAML otherwise 

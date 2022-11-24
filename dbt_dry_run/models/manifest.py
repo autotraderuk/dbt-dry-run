@@ -61,6 +61,15 @@ class ManifestColumn(BaseModel):
     data_type: Optional[str]
 
 
+class ExternalConfig(BaseModel):
+    location: str
+    dry_run_columns: List[ManifestColumn] = Field(default_factory=lambda: list())
+
+    @property
+    def dry_run_columns_map(self) -> Dict[str, ManifestColumn]:
+        return {c.name: c for c in self.dry_run_columns}
+
+
 class Node(BaseModel):
     name: str
     config: NodeConfig
@@ -77,7 +86,7 @@ class Node(BaseModel):
     root_path: str
     columns: Dict[str, ManifestColumn]
     meta: Optional[NodeMeta]
-    external: Optional[Dict[str, Any]]
+    external: Optional[ExternalConfig]
 
     def __init__(self, **data: Any):
         super().__init__(
