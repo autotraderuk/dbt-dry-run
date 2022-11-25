@@ -80,10 +80,11 @@ class ManifestScheduler:
         return len(self._get_runnable_keys())
 
     def _node_is_runnable(self, node: Node) -> bool:
-        return (
+        node_is_runnable_type = (
             node.resource_type in self.RUNNABLE_RESOURCE_TYPE
             and node.config.materialized in self.RUNNABLE_MATERIAL
         ) or (node.is_external_source())
+        return node.config.enabled and node_is_runnable_type
 
     def _node_key_is_runnable(self, node_key: str, default: bool = False) -> bool:
         try:

@@ -14,7 +14,7 @@ class SimpleNode(BaseModel):
     depends_on: List[Union["SimpleNode", Node]]
     resource_type: str = ManifestScheduler.MODEL
     table_config: NodeConfig = NodeConfig(
-        materialized="table", on_schema_change="ignore"
+        enabled=True, materialized="table", on_schema_change="ignore"
     )
     database: str = "my_db"
     db_schema: str = Field("my_schema", alias="schema")

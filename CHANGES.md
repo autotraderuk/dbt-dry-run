@@ -1,5 +1,11 @@
 ## Changelog
 
+# dbt-dry-run v0.6.2
+
+## Bugfixes
+
+- Don't dry run nodes that are disabled
+
 # dbt-dry-run v0.6.1
 
 ## Bugfixes

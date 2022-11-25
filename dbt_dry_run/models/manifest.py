@@ -44,6 +44,7 @@ class NodeMeta(BaseModel):
 
 
 class NodeConfig(BaseModel):
+    enabled: bool = True
     materialized: Optional[str]
     on_schema_change: Optional[OnSchemaChange]
     sql_header: Optional[str]

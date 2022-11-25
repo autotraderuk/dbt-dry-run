@@ -9,3 +9,12 @@ models:
           - not_null
 
       - name: b
+
+  - name: missing_model
+    description: This model does not exist in the project so the tests shouldn't try and run
+    columns:
+        - name: some_column
+          tests:
+              - not_null
+              - accepted_values:
+                  values: ['some_values']

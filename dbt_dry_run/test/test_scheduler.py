@@ -101,3 +101,13 @@ def test_manifest_with_normal_sources_excludes_source_in_schedule() -> None:
     manifest = build_manifest([S, A, B])
 
     assert_node_order([{"A"}, {"B"}], manifest)
+
+
+def test_disabled_nodes_are_not_run() -> None:
+    A = SimpleNode(unique_id="A", depends_on=[])
+    B = SimpleNode(
+        unique_id="B", depends_on=[A], table_config=NodeConfig(enabled=False)
+    )
+    manifest = build_manifest([A, B])
+
+    assert_node_order([set("A")], manifest)
