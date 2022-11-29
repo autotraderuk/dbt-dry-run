@@ -103,7 +103,7 @@ def validate_manifest_compatibility(manifest: Manifest) -> None:
         )
 
 
-def dry_run_manifest(project: ProjectService) -> Results:
+def dry_run_manifest(project: ProjectService, models: str) -> Results:
     executor: ThreadPoolExecutor
     with create_context(project) as (sql_runner, executor):
         results = Results()
@@ -112,7 +112,7 @@ def dry_run_manifest(project: ProjectService) -> Results:
 
         validate_manifest_compatibility(manifest)
 
-        scheduler = ManifestScheduler(manifest)
+        scheduler = ManifestScheduler(manifest, models)
 
         print(f"Dry running {len(scheduler)} nodes")
         for generation_id, generation in enumerate(scheduler):
