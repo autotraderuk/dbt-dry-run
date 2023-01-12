@@ -88,6 +88,7 @@ class Node(BaseModel):
     columns: Dict[str, ManifestColumn]
     meta: Optional[NodeMeta]
     external: Optional[ExternalConfig]
+    tags: Optional[list]
 
     def __init__(self, **data: Any):
         super().__init__(

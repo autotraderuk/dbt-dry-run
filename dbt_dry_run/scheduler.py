@@ -15,40 +15,42 @@ class ManifestScheduler:
     RUNNABLE_RESOURCE_TYPE = (MODEL, SEED, SNAPSHOT, SOURCE, TEST)
     RUNNABLE_MATERIAL = ("view", "table", "incremental", "seed", "snapshot", "test")
 
-    def __init__(self, manifest: Manifest, model: Optional[str] = None):
+    def __init__(self, manifest: Manifest, tags: Optional[str] = None):
         self._manifest = manifest
-        self._model_filter = model
+        self._tags_filter = tags
         self._status: Dict[str, bool] = {
             node_key: False for node_key in self._manifest.all_nodes.keys()
         }
 
     def _filter_manifest(self) -> Set[str]:
-        if self._model_filter is None:
+        if self._tags_filter is None:
             return set(self._manifest.all_nodes.keys())
         else:
-            models = self._model_filter.split(",")
-            models_checklist = models.copy()
+            check_tags = self._tags_filter.split(",")
+            tags_checklist = check_tags.copy()
             filtered_nodes = []
-            for key in set(self._manifest.all_nodes.keys()):
-                node_type, node_model = key.split(".")[0], key.split(".")[2]
-                if node_type == "model":
-                    if node_model in self._model_filter.split(","):
-                        filtered_nodes.append(key)
-                        try:
-                            models_checklist.remove(node_model)
-                        except:
-                            pass # model already remove from check list
-            if models_checklist == []:
+            for key, node in self._manifest.all_nodes.items():
+                node_resource_type = node.resource_type
+                node_tags = node.tags
+                if node_resource_type in self.RUNNABLE_RESOURCE_TYPE:
+                    for tag in node_tags:
+                        if tag in check_tags:
+                            filtered_nodes.append(key)
+                            try:
+                                tags_checklist.remove(tag)
+                            except:
+                                pass # tags already remove from check list
+            if tags_checklist == []:
                 return set(filtered_nodes)
             else:
-                raise ValueError(f"Unknown models: {models_checklist}")
+                raise ValueError(f"Unknown tags: {tags_checklist}")
 
     def _get_runnable_keys(self) -> Set[str]:
         remaining_nodes = set(
             filter(self._node_key_is_runnable, self._manifest.all_nodes.keys())
         )
 
-        if self._model_filter:
+        if self._tags_filter:
             remaining_nodes = remaining_nodes.intersection(self._filter_manifest())
         return remaining_nodes
 

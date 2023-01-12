@@ -16,7 +16,7 @@ app = typer.Typer()
 def dry_run(
     project_dir: str,
     profiles_dir: str,
-    models: Optional[str],
+    tags: Optional[str],
     target: Optional[str],
     verbose: bool = False,
     report_path: Optional[str] = None,
@@ -31,7 +31,7 @@ def dry_run(
     project = ProjectService(args)
     exit_code: int
     try:
-        dry_run_results = dry_run_manifest(project, models)
+        dry_run_results = dry_run_manifest(project, tags)
         reporter = ResultReporter(dry_run_results, set(), verbose)
         exit_code = reporter.report_and_check_results()
 
@@ -61,7 +61,7 @@ def run(
     project_dir: str = Option(
         os.getcwd(), help="[dbt] Where to search for `dbt_project.yml`"
     ),
-    models: Optional[str] = Option(None, help="[dbt] models need to dry run"),
+    tags: Optional[str] = Option(None, help="[dbt] tags need to dry run"),
     vars: str = Option("{}", help="[dbt] CLI Variables to pass to dbt"),
     target: Optional[str] = Option(None, help="[dbt] Target profile"),
     verbose: bool = Option(False, help="Output verbose error messages"),
@@ -72,7 +72,7 @@ def run(
             "CLI format has changed see CHANGES.md v0.4.0 for instructions on how to migrate"
         )
         raise typer.Exit(1)
-    exit_code = dry_run(project_dir, profiles_dir, models, target, verbose, report_path, vars)
+    exit_code = dry_run(project_dir, profiles_dir, tags, target, verbose, report_path, vars)
     if exit_code > 0:
         raise typer.Exit(exit_code)
 

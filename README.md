@@ -50,6 +50,7 @@ The full CLI help is shown below, anything prefixed with [dbt] can be used in th
       --project-dir TEXT              [dbt] Where to search for `dbt_project.yml`
                                       [default: /Users/<user>/Code/dbt-
                                       dry-run]
+      --tags TEXT                     [dbt] tags need to dry run, eg: tag1,tag2
       --vars TEXT                     [dbt] CLI Variables to pass to dbt
       --target TEXT                   [dbt] Target profile
       --verbose / --no-verbose        Output verbose error messages  [default: no-
