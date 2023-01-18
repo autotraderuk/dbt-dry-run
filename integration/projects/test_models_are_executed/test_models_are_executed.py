@@ -8,7 +8,7 @@ def test_success(dry_run_result: IntegrationTestResult):
 
 def test_ran_correct_number_of_nodes(dry_run_result: IntegrationTestResult):
     report = assert_report_success(dry_run_result)
-    assert report.node_count == 3
+    assert report.node_count == 4
 
 
 def test_table_of_nodes_is_returned(dry_run_result: IntegrationTestResult):

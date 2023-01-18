@@ -26,6 +26,7 @@ class BigQueryFieldType(str, Enum):
     DATE = "DATE"
     TIME = "TIME"
     DATETIME = "DATETIME"
+    INTERVAL = "INTERVAL"
     GEOGRAPHY = "GEOGRAPHY"
     NUMERIC = "NUMERIC"
     BIGNUMERIC = "BIGNUMERIC"
