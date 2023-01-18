@@ -1,5 +1,11 @@
 ## Changelog
 
+# dbt-dry-run v0.6.3
+
+## Bugfixes
+
+- Add support for INTERVAL and JSON types.
+
 # dbt-dry-run v0.6.2
 
 ## Bugfixes

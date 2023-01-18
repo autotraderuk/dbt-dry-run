@@ -39,6 +39,7 @@ simple_column_types AS (
         ST_GeogPoint(0.0, 0.0) AS my_geography,
         CAST(1 AS NUMERIC) AS my_numeric,
         CAST(2 AS BIGNUMERIC) AS my_bignumeric,
+        PARSE_JSON('{"a": 1}') AS my_json,
 ),
 all_column_types AS (
     SELECT * FROM simple_column_types
@@ -63,6 +64,7 @@ SELECT
     my_geography,
     my_numeric,
     my_bignumeric,
+    my_json,
     my_struct,
     my_array_of_records,
 FROM all_column_types

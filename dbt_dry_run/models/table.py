@@ -30,8 +30,9 @@ class BigQueryFieldType(str, Enum):
     GEOGRAPHY = "GEOGRAPHY"
     NUMERIC = "NUMERIC"
     BIGNUMERIC = "BIGNUMERIC"
-    RECORD = "RECORD"
     STRUCT = "STRUCT"
+    JSON = "JSON"
+    RECORD = "RECORD"
 
 
 class TableField(BaseModel):
