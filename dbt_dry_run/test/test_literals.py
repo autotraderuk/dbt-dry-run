@@ -42,6 +42,11 @@ def test_single_field_integer_field() -> None:
     assert_fields_result_in_literal(fields, "(SELECT 1 as `foo`)")
 
 
+def test_single_field_interval_field() -> None:
+    fields = [TableField(name="foo", mode=BigQueryFieldMode.NULLABLE, type="INTERVAL")]
+    assert_fields_result_in_literal(fields, "(SELECT MAKE_INTERVAL(1) as `foo`)")
+
+
 def test_repeated_field() -> None:
     fields = [TableField(name="foo", mode=BigQueryFieldMode.REPEATED, type="STRING")]
     assert_fields_result_in_literal(fields, "(SELECT ['foo'] as `foo`)")
