@@ -31,15 +31,19 @@ Currently, we are using the below format for each release:
 
 ## Releasing to PyPi
 
-Currently, the github action setup in `.github/workflows/main.yml` does not work to automatically release to PyPi 
-on tag. Therefore, you should release the package locally. This can be done in the Makefile by following these steps:
+Currently, the github action setup in `.github/workflows/main.yml` automatically release to PyPi on tag. The procedure 
+for releasing should be:
 
-1. Check the `CHANGES.md` has been updated with all the commits/PRs from the last tagged release
+1. Check the last github action on `main` was green
 
-2. Check the version has been bumped and the version in `CHANGES.md` and `pyproject.toml` are consistent
+2. Check the `CHANGES.md` has been updated with all the commits/PRs from the last tagged release. Decide what version 
+   the new release should be, this project roughly follows SemVer
 
-3. Check the last github action on `main` was green
-
-4. Run `make build`
-
-5. Run `make release`
+3. Make and push a version bump commit which increases the version in `pyproject.toml` (Ensure this is consistent with the latest 
+   version in `CHANGES.md`)
+   
+4. Once the version bump commit GH action is green then tag this commit with the same version prefix with `v` so the tag
+   name should be `vX.X.X`. Once this tag is pushed another GH action will start which will release the package version 
+   to production PyPI
+   
+5. Verify the package is released
