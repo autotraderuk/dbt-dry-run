@@ -2,9 +2,12 @@
 
 # dbt-dry-run v0.6.3
 
-## Bugfixes
+## Bugfixes & Improvements
 
 - Add support for INTERVAL and JSON types.
+
+- Improved error handling when parsing the predicted schema of the dry run queries. Error message will now raise an
+  `UnknownSchemaException` detailing the field type returned by BigQuery that it does not recognise
 
 # dbt-dry-run v0.6.2
 
