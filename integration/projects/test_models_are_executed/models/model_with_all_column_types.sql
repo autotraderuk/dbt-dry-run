@@ -1,5 +1,3 @@
-{{ config(alias="model_with_all_column_types") }}
-
 WITH
 generated_structure AS (
     SELECT STRUCT(
