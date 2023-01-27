@@ -76,6 +76,7 @@ def test_manifest_with_external_sources_includes_source_in_schedule() -> None:
         root_path="/filepath1",
         columns={},
         external=ExternalConfig(location="location"),
+        alias="s",
     )
     A = SimpleNode(unique_id="A", depends_on=[S])
     B = SimpleNode(unique_id="B", depends_on=[A])
@@ -95,6 +96,7 @@ def test_manifest_with_normal_sources_excludes_source_in_schedule() -> None:
         original_file_path="/filepath1.yaml",
         root_path="/filepath1",
         columns={},
+        alias="s",
     )
     A = SimpleNode(unique_id="A", depends_on=[S])
     B = SimpleNode(unique_id="B", depends_on=[A])

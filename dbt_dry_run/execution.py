@@ -53,7 +53,7 @@ def dry_run_node(runners: Dict[str, NodeRunner], node: Node, results: Results) -
     """
     This method must be thread safe
     """
-    if node.compiled or node.is_external_source():
+    if node.compiled or node.is_external_source() or node.is_seed:
         dry_run_result = dispatch_node(node, runners)
         if node.get_should_check_columns():
             dry_run_result = lint_columns(node, dry_run_result)

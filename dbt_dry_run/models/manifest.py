@@ -80,11 +80,11 @@ class Node(BaseModel):
     compiled_code: str = ""
     database: str
     db_schema: str = Field(..., alias="schema")
-    alias: Optional[str]
+    alias: str
     language: Optional[str] = None
     resource_type: str
     original_file_path: str
-    root_path: str
+    root_path: Optional[str] = None
     columns: Dict[str, ManifestColumn]
     meta: Optional[NodeMeta]
     external: Optional[ExternalConfig]
@@ -94,6 +94,11 @@ class Node(BaseModel):
             compiled_code=data.pop("compiled_code", "") or data.pop("compiled_sql", ""),
             **data,
         )
+
+    @root_validator(pre=True)
+    def default_alias(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        values["alias"] = values.get("alias") or values["name"]
+        return values
 
     def to_table_ref_literal(self) -> str:
         if self.alias:
@@ -117,9 +122,12 @@ class Node(BaseModel):
     def is_external_source(self) -> bool:
         return self.external is not None and self.resource_type == "source"
 
+    @property
+    def is_seed(self) -> bool:
+        return self.resource_type == "seed"
+
 
 class Macro(BaseModel):
-    root_path: Path
     original_file_path: Path
 
 
