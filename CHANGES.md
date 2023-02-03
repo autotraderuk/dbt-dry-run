@@ -1,5 +1,11 @@
 ## Changelog
 
+# dbt-dry-run v0.6.4
+
+## Bugfixes & Improvements
+
+- Add support for dbt 1.4
+
 # dbt-dry-run v0.6.3
 
 ## Bugfixes & Improvements
