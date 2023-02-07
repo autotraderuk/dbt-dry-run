@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Optional
 
 import agate as ag
 from agate import data_types
@@ -39,3 +39,6 @@ class SeedRunner(NodeRunner):
         return DryRunResult(
             node=node, table=schema, status=DryRunStatus.SUCCESS, exception=None
         )
+
+    def validate_node(self, node: Node) -> Optional[DryRunResult]:
+        return None

@@ -1,10 +1,8 @@
 from typing import cast
-from unittest.mock import MagicMock
 
 from dbt_dry_run.models import Node
 from dbt_dry_run.node_runner import NodeRunner, get_runner_map
-from dbt_dry_run.results import DryRunResult, Results
-from dbt_dry_run.sql_runner.big_query_sql_runner import BigQuerySQLRunner
+from dbt_dry_run.results import DryRunResult
 
 
 class SingleNodeRunner(NodeRunner):

@@ -36,3 +36,6 @@ class SourceRunner(NodeRunner):
                 )
 
         return DryRunResult(node, predicted_table, status, exception)
+
+    def validate_node(self, node: Node) -> Optional[DryRunResult]:
+        return None

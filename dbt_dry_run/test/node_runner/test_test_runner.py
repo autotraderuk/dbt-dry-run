@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock
 
+from dbt_dry_run import flags
+from dbt_dry_run.exception import NotCompiledException
 from dbt_dry_run.literals import enable_test_example_values
 from dbt_dry_run.models import BigQueryFieldType, Table, TableField
 from dbt_dry_run.node_runner.node_test_runner import NodeTestRunner
@@ -52,3 +54,43 @@ def test_test_runs_sql() -> None:
     assert result.status == DryRunStatus.SUCCESS
     assert result.table
     assert result.table.fields[0].name == expected_table.fields[0].name
+
+
+def test_validate_node_fails_if_skip_not_compiled_is_false(
+    default_flags: flags.Flags,
+) -> None:
+    flags.set_flags(flags.Flags(skip_not_compiled=False))
+    mock_sql_runner = MagicMock()
+    results = MagicMock()
+
+    node = SimpleNode(
+        unique_id="node1", depends_on=[], resource_type=ManifestScheduler.MODEL
+    ).to_node()
+    node.compiled = False
+
+    model_runner = NodeTestRunner(mock_sql_runner, results)
+
+    validation_result = model_runner.validate_node(node)
+    assert validation_result
+    assert validation_result.status == DryRunStatus.FAILURE
+    assert isinstance(validation_result.exception, NotCompiledException)
+
+
+def test_validate_node_skips_if_skip_not_compiled_is_true(
+    default_flags: flags.Flags,
+) -> None:
+    flags.set_flags(flags.Flags(skip_not_compiled=True))
+    mock_sql_runner = MagicMock()
+    results = MagicMock()
+
+    node = SimpleNode(
+        unique_id="node1", depends_on=[], resource_type=ManifestScheduler.MODEL
+    ).to_node()
+    node.compiled = False
+
+    model_runner = NodeTestRunner(mock_sql_runner, results)
+
+    validation_result = model_runner.validate_node(node)
+    assert validation_result
+    assert validation_result.status == DryRunStatus.SKIPPED
+    assert validation_result.exception is None

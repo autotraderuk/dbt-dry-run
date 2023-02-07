@@ -3,7 +3,7 @@ from typing import List, Optional
 from pydantic import Field
 from pydantic.main import BaseModel
 
-from ..results import LintingStatus
+from ..results import DryRunStatus, LintingStatus
 from .table import Table
 
 
@@ -15,6 +15,7 @@ class ReportLintingError(BaseModel):
 class ReportNode(BaseModel):
     unique_id: str
     success: bool
+    status: DryRunStatus
     error_message: Optional[str]
     table: Optional[Table]
     linting_status: LintingStatus

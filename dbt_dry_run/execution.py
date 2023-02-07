@@ -3,6 +3,7 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple
 
+from dbt_dry_run import flags
 from dbt_dry_run.adapter.service import ProjectService
 from dbt_dry_run.linting.column_linting import lint_columns
 from dbt_dry_run.sql_runner import SQLRunner
@@ -46,6 +47,9 @@ def dispatch_node(node: Node, runners: Dict[str, NodeRunner]) -> DryRunResult:
         runner = runners[node.resource_type]
     except KeyError:
         raise ValueError(f"Unknown resource type '{node.resource_type}'")
+    validation_result = runner.validate_node(node)
+    if validation_result:
+        return validation_result
     return runner.run(node)
 
 
@@ -53,19 +57,10 @@ def dry_run_node(runners: Dict[str, NodeRunner], node: Node, results: Results) -
     """
     This method must be thread safe
     """
-    if node.compiled or node.is_external_source() or node.is_seed:
-        dry_run_result = dispatch_node(node, runners)
-        if node.get_should_check_columns():
-            dry_run_result = lint_columns(node, dry_run_result)
-        results.add_result(node.unique_id, dry_run_result)
-    else:
-        not_compiled_result = DryRunResult(
-            node=node,
-            table=None,
-            status=DryRunStatus.FAILURE,
-            exception=NotCompiledException(f"Node {node.unique_id} was not compiled"),
-        )
-        results.add_result(node.unique_id, not_compiled_result)
+    dry_run_result = dispatch_node(node, runners)
+    if node.get_should_check_columns():
+        dry_run_result = lint_columns(node, dry_run_result)
+    results.add_result(node.unique_id, dry_run_result)
 
 
 @contextmanager

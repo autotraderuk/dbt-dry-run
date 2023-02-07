@@ -1,5 +1,15 @@
 ## Changelog
 
+# dbt-dry-run v0.6.5
+
+## Bugfixes & Improvements
+
+- Added command line flag `--skip-not-compiled` which will override the default behaviour of raising a `NotCompiledExceptipon`
+  if a node is in the manifest that should be compiled. This should only be used in certain circumstances where you want 
+  to skip an entire section of your dbt project from the dry run. Or if you don't want to dry run tests
+  
+- Added `status` to the report artefact which can be `SUCCESS`, `FAILED`, `SKIPPED`
+
 # dbt-dry-run v0.6.4
 
 ## Bugfixes & Improvements

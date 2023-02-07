@@ -22,7 +22,16 @@ pip install dbt-dry-run
 ### Running
 
 The dry runner has a single command called `dbt-dry-run` in order for it to run you must first compile a dbt manifest
-using `dbt compile` as you normally would.
+using `dbt compile`. 
+
+<details>
+  <summary>How much of the project should I compile?</summary>
+      It is best practice to compile the entire dbt project when supplying a manifest for dry run. The 
+      dry run loops through your project in the DAG order (staging -> intermediate -> mart) based on `ref` and predicts the 
+      schema of each model as it progresses. If you dry run `marts` but have not compiled `staging` then it cannot 
+      determine if `marts` will run as it does not know the predicted schema of the upstream models and you will see 
+      `NotCompiledException` in the dry run output.
+</details>
 
 Then on the same machine (So that the dry runner has access to your dbt project source and the
 `manifest.yml`) you can run the dry-runner in the same directory as our `dbt_project.yml`:
@@ -42,25 +51,32 @@ The full CLI help is shown below, anything prefixed with [dbt] can be used in th
 
 ```
   ❯ dbt-dry-run --help
-    Usage: dbt-dry-run [OPTIONS] [PROFILE]
-    
-    Options:
-      --profiles-dir TEXT             [dbt] Where to search for `profiles.yml`
-                                      [default: /Users/<user>/.dbt]
-      --project-dir TEXT              [dbt] Where to search for `dbt_project.yml`
-                                      [default: /Users/<user>/Code/dbt-
-                                      dry-run]
-      --vars TEXT                     [dbt] CLI Variables to pass to dbt
-      --target TEXT                   [dbt] Target profile
-      --verbose / --no-verbose        Output verbose error messages  [default: no-
-                                      verbose]
-      --report-path TEXT              Json path to dump report to
-      --install-completion [bash|zsh|fish|powershell|pwsh]
-                                      Install completion for the specified shell.
-      --show-completion [bash|zsh|fish|powershell|pwsh]
-                                      Show completion for the specified shell, to
-                                      copy it or customize the installation.
-      --help                          Show this message and exit.
+   Usage: python -m dbt_dry_run [OPTIONS]
+   
+   Options:
+     --profiles-dir TEXT             [dbt] Where to search for `profiles.yml`
+                                     [default: /Users/connor.charles/.dbt]
+     --project-dir TEXT              [dbt] Where to search for `dbt_project.yml`
+                                     [default: /Users/connor.charles/Code/dbt-
+                                     dry-run]
+     --vars TEXT                     [dbt] CLI Variables to pass to dbt
+                                     [default: {}]
+     --target TEXT                   [dbt] Target profile
+     --verbose / --no-verbose        Output verbose error messages  [default: no-
+                                     verbose]
+     --report-path TEXT              Json path to dump report to
+     --skip-not-compiled             Whether or not the dry run should ignore
+                                     models that are not compiled. This has
+                                     several caveats that make this not a
+                                     recommended option. The dbt manifest should
+                                     generally be compiled with `--select *` to
+                                     ensure good  coverage
+     --install-completion [bash|zsh|fish|powershell|pwsh]
+                                     Install completion for the specified shell.
+     --show-completion [bash|zsh|fish|powershell|pwsh]
+                                     Show completion for the specified shell, to
+                                     copy it or customize the installation.
+     --help                          Show this message and exit.
 ```
 
 ## Reporting Results & Failures
@@ -91,7 +107,7 @@ DRY RUN FAILURE!`
 
 The process will also return exit code 1
 
-### Column and Metadata Linting (Experimental!)
+### Column and Metadata Linting
 
 The dry runner can also be configured to inspect your metadata YAML and assert that the predicted schema of your dbt
 projects data warehouse matches what is documented in the metadata. To enable this for your models specify the key
@@ -138,9 +154,6 @@ Currently, these rules can cause linting failures:
    YAML
 2. EXTRA_DOCUMENTED_COLUMNS: The predicted schema of the model does not have this column that was specified in the
    metadata
-
-This could be extended to verify that datatype has been set correctly as well or other linting rules such as naming
-conventions based on datatype.
 
 ### Usage with dbt-external-tables
 
@@ -195,7 +208,8 @@ information of each node's predicted schema or error message if it has failed:
   "nodes": [
     {
       "unique_id": "seed.test_models_with_invalid_sql.my_seed",
-      "success": true,
+      "success": true, 
+      "status": "SUCCESS",
       "error_message": null,
       "table": {
         "fields": [
@@ -206,6 +220,7 @@ information of each node's predicted schema or error message if it has failed:
     {
       "unique_id": "model.test_models_with_invalid_sql.first_layer",
       "success": true,
+      "status": "SUCCESS",
       "error_message": null,
       "table": {
         "fields": [
@@ -216,36 +231,13 @@ information of each node's predicted schema or error message if it has failed:
     {
       "unique_id": "model.test_models_with_invalid_sql.second_layer",
       "success": false,
+      "status": "FAILURE",
       "error_message": "BadRequest",
       "table": null
     }
   ]
 }
 ```
-
-## Contributing/Running locally
-
-To setup a dev environment you need [poetry][get-poetry], first run `poetry install` to install all dependencies. Then
-the `Makefile` contains all the commands needed to run the test suite and linting.
-
-- verify: Formats code with `black`, type checks with `mypy` and then runs the unit tests with coverage.
-- integration: Runs the integration tests against BigQuery (See Integration Tests)
-
-There is also a shell script `./run-integration.sh <PROJECT_DIR>` which will run one of the integration tests locally.
-Where `<PROJECT_DIR>` is one of the directory names in `/integration/projects/`. (See Integration Tests)
-
-### Running Integration Tests
-
-In order to run integration tests locally you will need access to a BigQuery project/instance in which your gcloud
-application default credentials has the role `Big Query Data Owner`. The BigQuery instance should have an empty dataset
-called `dry_run`.
-
-Setting the environment variable `DBT_PROJECT=<YOUR GCP PROJECT HERE>` will tell the integration tests which GCP project
-to run the test suite against. The test suite does not currently materialize any data into the project.
-
-The integration tests will run on any push to `main` to ensure the package's core functionality is still in place.
-
-__Auto Trader employees can request authorisation to access the `at-dry-run-integration-dev` project for this purpose__
 
 ## Capabilities and Limitations
 
@@ -275,12 +267,10 @@ There are certain cases where a syntactically valid query can fail due to the da
 
 ### Things still to do...
 
-Implementing the dry runner required re-implementing some areas of dbt. Mainly how the adapter sets up connections and
-credentials with the BigQuery client, we have only implemented the methods of how we connect to our warehouse so if you
-don't use OAUTH or service account JSON files then this won't be able to read `profiles.yml` correctly.
+The implementation of seeds is incomplete as we don't use them very much in our own dbt projects. The dry runner
+will just use the datatypes that `agate` infers from the CSV files. It will ignore any type overrides you add in the YAML.
 
-The implementation of seeds is incomplete as well as we don't use them very much in our own dbt projects. The dry runner
-will just use the datatypes that `agate` infers from the CSV files.
+If you see anything else that you think it should catch don't hesitate to raise an issue!
 
 [dbt-home]: https://www.getdbt.com/
 

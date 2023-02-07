@@ -105,7 +105,10 @@ def insert_dependant_sql_literals(node: Node, results: Results) -> str:
         raise KeyError(f"deep_nodes have not been created for {node.unique_id}")
     failed_upstreams = [r for r in upstream_results if r.status != DryRunStatus.SUCCESS]
     if failed_upstreams:
-        msg = f"Can't insert SELECT literals for {node.unique_id} because {[f.node.unique_id for f in failed_upstreams]} failed"
+        failed_upstreams_messages = ", ".join(
+            [f"{f.node.unique_id} : {f.status}" for f in failed_upstreams]
+        )
+        msg = f"Can't insert SELECT literals for {node.unique_id}. Upstreams did not run with status: {failed_upstreams_messages}"
         raise UpstreamFailedException(msg)
     completed_upstreams = [r for r in upstream_results if r.table]
 
