@@ -3,7 +3,6 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple
 
-from dbt_dry_run import flags
 from dbt_dry_run.adapter.service import ProjectService
 from dbt_dry_run.linting.column_linting import lint_columns
 from dbt_dry_run.sql_runner import SQLRunner
@@ -13,11 +12,7 @@ if TYPE_CHECKING:
 else:
     from typing import Awaitable as Future
 
-from dbt_dry_run.exception import (
-    ManifestValidationError,
-    NodeExecutionException,
-    NotCompiledException,
-)
+from dbt_dry_run.exception import ManifestValidationError, NodeExecutionException
 from dbt_dry_run.models.manifest import Manifest, Node
 from dbt_dry_run.node_runner import NodeRunner, get_runner_map
 from dbt_dry_run.node_runner.model_runner import ModelRunner
@@ -25,7 +20,7 @@ from dbt_dry_run.node_runner.node_test_runner import NodeTestRunner
 from dbt_dry_run.node_runner.seed_runner import SeedRunner
 from dbt_dry_run.node_runner.snapshot_runner import SnapshotRunner
 from dbt_dry_run.node_runner.source_runner import SourceRunner
-from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
+from dbt_dry_run.results import DryRunResult, Results
 from dbt_dry_run.scheduler import ManifestScheduler
 from dbt_dry_run.sql_runner.big_query_sql_runner import BigQuerySQLRunner
 
