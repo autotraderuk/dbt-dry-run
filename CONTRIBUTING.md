@@ -1,3 +1,27 @@
+# Contributing/Running locally
+
+To setup a dev environment you need [poetry][get-poetry], first run `poetry install` to install all dependencies. Then
+the `Makefile` contains all the commands needed to run the test suite and linting.
+
+- verify: Formats code with `black`, type checks with `mypy` and then runs the unit tests with coverage.
+- integration: Runs the integration tests against BigQuery (See Integration Tests)
+
+There is also a shell script `./run-integration.sh <PROJECT_DIR>` which will run one of the integration tests locally.
+Where `<PROJECT_DIR>` is one of the directory names in `/integration/projects/`. (See Integration Tests)
+
+## Running Integration Tests
+
+In order to run integration tests locally you will need access to a BigQuery project/instance in which your gcloud
+application default credentials has the role `Big Query Data Owner`. The BigQuery instance should have an empty dataset
+called `dry_run`.
+
+Setting the environment variable `DBT_PROJECT=<YOUR GCP PROJECT HERE>` will tell the integration tests which GCP project
+to run the test suite against. The test suite does not currently materialize any data into the project.
+
+The integration tests will run on any push to `main` to ensure the package's core functionality is still in place.
+
+__Auto Trader employees can request authorisation to access the `at-dry-run-integration-dev` project for this purpose__
+
 # Preparing for a Release
 
 ## Bump Version

@@ -12,11 +12,7 @@ if TYPE_CHECKING:
 else:
     from typing import Awaitable as Future
 
-from dbt_dry_run.exception import (
-    ManifestValidationError,
-    NodeExecutionException,
-    NotCompiledException,
-)
+from dbt_dry_run.exception import ManifestValidationError, NodeExecutionException
 from dbt_dry_run.models.manifest import Manifest, Node
 from dbt_dry_run.node_runner import NodeRunner, get_runner_map
 from dbt_dry_run.node_runner.model_runner import ModelRunner
@@ -24,7 +20,7 @@ from dbt_dry_run.node_runner.node_test_runner import NodeTestRunner
 from dbt_dry_run.node_runner.seed_runner import SeedRunner
 from dbt_dry_run.node_runner.snapshot_runner import SnapshotRunner
 from dbt_dry_run.node_runner.source_runner import SourceRunner
-from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
+from dbt_dry_run.results import DryRunResult, Results
 from dbt_dry_run.scheduler import ManifestScheduler
 from dbt_dry_run.sql_runner.big_query_sql_runner import BigQuerySQLRunner
 
@@ -46,6 +42,9 @@ def dispatch_node(node: Node, runners: Dict[str, NodeRunner]) -> DryRunResult:
         runner = runners[node.resource_type]
     except KeyError:
         raise ValueError(f"Unknown resource type '{node.resource_type}'")
+    validation_result = runner.validate_node(node)
+    if validation_result:
+        return validation_result
     return runner.run(node)
 
 
@@ -53,19 +52,10 @@ def dry_run_node(runners: Dict[str, NodeRunner], node: Node, results: Results) -
     """
     This method must be thread safe
     """
-    if node.compiled or node.is_external_source() or node.is_seed:
-        dry_run_result = dispatch_node(node, runners)
-        if node.get_should_check_columns():
-            dry_run_result = lint_columns(node, dry_run_result)
-        results.add_result(node.unique_id, dry_run_result)
-    else:
-        not_compiled_result = DryRunResult(
-            node=node,
-            table=None,
-            status=DryRunStatus.FAILURE,
-            exception=NotCompiledException(f"Node {node.unique_id} was not compiled"),
-        )
-        results.add_result(node.unique_id, not_compiled_result)
+    dry_run_result = dispatch_node(node, runners)
+    if node.get_should_check_columns():
+        dry_run_result = lint_columns(node, dry_run_result)
+    results.add_result(node.unique_id, dry_run_result)
 
 
 @contextmanager

@@ -60,6 +60,7 @@ class ResultReporter:
             new_node = ReportNode(
                 unique_id=result.node.unique_id,
                 success=result.status == DryRunStatus.SUCCESS,
+                status=result.status,
                 error_message=exception_type,
                 table=result.table,
                 linting_status=result.linting_status,

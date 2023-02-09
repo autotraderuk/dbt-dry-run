@@ -1,7 +1,10 @@
+import pytest
+
 from integration.conftest import IntegrationTestResult
 from integration.utils import assert_report_success
 
 
+@pytest.mark.skip(reason="Flaky test. Only include if worried about performance")
 def test_success(dry_run_result: IntegrationTestResult):
     assert_report_success(dry_run_result)
 

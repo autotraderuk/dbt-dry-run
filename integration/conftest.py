@@ -20,8 +20,7 @@ def running_in_github() -> bool:
     return os.environ.get("GITHUB_ACTIONS", 'not-set') == 'true'
 
 
-@pytest.fixture(scope="module")
-def dry_run_result(request: FixtureRequest) -> IntegrationTestResult:
+def _dry_run_result(request: FixtureRequest, skip_not_compiled: bool = False) -> IntegrationTestResult:
     folder = request.fspath.dirname
     profiles_dir = os.path.join(request.config.rootdir, "integration/profiles")
     target_dir = os.path.join(folder, "target")
@@ -46,16 +45,29 @@ def dry_run_result(request: FixtureRequest) -> IntegrationTestResult:
                            f" {dbt_stdout}\n"
                            f"Fix dbt compilation error to run test suite!", run_dbt.returncode)
     manifest_path = os.path.join(folder, "target/manifest.json")
+    dry_run_args = ["python3", "-m", "dbt_dry_run",
+                    "--project-dir", f"{folder}",
+                    "--profiles-dir", profiles_dir,
+                    "--target", target,
+                    '--report-path', report_path]
+    if skip_not_compiled:
+        dry_run_args.append("--skip-not-compiled")
     run_dry_run = subprocess.run(
-        ["python3", "-m", "dbt_dry_run",
-         "--project-dir", f"{folder}",
-         "--profiles-dir", profiles_dir,
-         "--target", target,
-         '--report-path', report_path], capture_output=True)
+        dry_run_args, capture_output=True)
 
     if os.path.exists(report_path):
         dry_run_report = Report.parse_file(report_path)
     else:
         dry_run_report = None
 
-    yield IntegrationTestResult(run_dry_run, dry_run_report)
+    return IntegrationTestResult(run_dry_run, dry_run_report)
+
+
+@pytest.fixture(scope="module")
+def dry_run_result_skip_not_compiled(request: FixtureRequest) -> IntegrationTestResult:
+    yield _dry_run_result(request, True)
+
+
+@pytest.fixture(scope="module")
+def dry_run_result(request: FixtureRequest) -> IntegrationTestResult:
+    yield _dry_run_result(request)

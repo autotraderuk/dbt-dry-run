@@ -2,6 +2,9 @@ from pathlib import Path
 from typing import Set
 from unittest.mock import MagicMock
 
+from dbt_dry_run import flags
+from dbt_dry_run.exception import NotCompiledException
+from dbt_dry_run.flags import Flags
 from dbt_dry_run.models import BigQueryFieldType
 from dbt_dry_run.models.manifest import Node
 from dbt_dry_run.node_runner.seed_runner import SeedRunner
@@ -61,3 +64,18 @@ def test_seed_runner_infers_dates(tmp_path: Path) -> None:
 
     assert result.table
     assert result.table.fields[2].type_ == BigQueryFieldType.DATE
+
+
+def test_validate_node_returns_none_if_node_is_not_compiled() -> None:
+    mock_sql_runner = MagicMock()
+    results = MagicMock()
+
+    node = SimpleNode(
+        unique_id="node1", depends_on=[], resource_type=ManifestScheduler.MODEL
+    ).to_node()
+    node.compiled = False
+
+    model_runner = SeedRunner(mock_sql_runner, results)
+
+    validation_result = model_runner.validate_node(node)
+    assert validation_result is None

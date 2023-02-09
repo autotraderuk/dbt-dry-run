@@ -1,0 +1,9 @@
+selectors:
+  - name: partial_compile
+    default: true
+    definition:
+      method: fqn
+      value: '*'
+      exclude:
+        - "skip_staging_model"
+        - "run_mart_model_excluded_test"
