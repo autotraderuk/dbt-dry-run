@@ -10,6 +10,7 @@ from dbt_dry_run.exception import ManifestValidationError
 from dbt_dry_run.execution import dry_run_manifest
 from dbt_dry_run.flags import Flags, set_flags
 from dbt_dry_run.result_reporter import ResultReporter
+from dbt_dry_run.version import VERSION
 
 app = typer.Typer()
 
@@ -57,6 +58,12 @@ _SKIP_NOT_COMPILED_HELP = """
 """
 
 
+def version_callback(value: bool) -> None:
+    if value:
+        print(f"dbt-dry-run v{VERSION}")
+        raise typer.Exit()
+
+
 @app.command()
 def run(
     profiles_dir: str = Option(
@@ -72,6 +79,7 @@ def run(
     skip_not_compiled: bool = Option(
         False, "--skip-not-compiled", help=_SKIP_NOT_COMPILED_HELP
     ),
+    _: Optional[bool] = Option(None, "--version", callback=version_callback),
 ) -> None:
     exit_code = dry_run(
         project_dir, profiles_dir, target, verbose, report_path, vars, skip_not_compiled
