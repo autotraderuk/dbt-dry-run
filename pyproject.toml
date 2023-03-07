@@ -44,7 +44,8 @@ testpaths = "dbt_dry_run/test"
 filterwarnings = [
     "error",
     "ignore:Deprecated call to",
-    "ignore:pkg_resources is deprecated as an API"
+    "ignore:pkg_resources is deprecated as an API",
+    "ignore:invalid escape sequence"
 ]
 pythonpath = [
   "."
