@@ -37,14 +37,14 @@ tests_no_zope = ["hypothesis", "pympler", "pytest (>=4.3.0)", "pytest-xdist", "c
 
 [[package]]
 name = "babel"
-version = "2.11.0"
+version = "2.12.1"
 description = "Internationalization utilities"
 category = "main"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 
 [package.dependencies]
-pytz = ">=2015.7"
+pytz = {version = ">=2015.7", markers = "python_version < \"3.9\""}
 
 [[package]]
 name = "betterproto"
@@ -127,11 +127,11 @@ pycparser = "*"
 
 [[package]]
 name = "charset-normalizer"
-version = "3.0.1"
+version = "3.1.0"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=3.7.0"
 
 [[package]]
 name = "click"
@@ -154,7 +154,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7
 
 [[package]]
 name = "coverage"
-version = "7.1.0"
+version = "7.2.1"
 description = "Code coverage measurement for Python"
 category = "dev"
 optional = false
@@ -168,7 +168,7 @@ toml = ["tomli"]
 
 [[package]]
 name = "cryptography"
-version = "39.0.0"
+version = "39.0.2"
 description = "cryptography is a package which provides cryptographic recipes and primitives to Python developers."
 category = "dev"
 optional = false
@@ -178,16 +178,18 @@ python-versions = ">=3.6"
 cffi = ">=1.12"
 
 [package.extras]
-docs = ["sphinx (>=1.6.5,!=1.8.0,!=3.1.0,!=3.1.1,!=5.2.0,!=5.2.0.post0)", "sphinx-rtd-theme"]
+docs = ["sphinx (>=5.3.0)", "sphinx-rtd-theme (>=1.1.1)"]
 docstest = ["pyenchant (>=1.6.11)", "twine (>=1.12.0)", "sphinxcontrib-spelling (>=4.0.1)"]
-pep8test = ["black", "ruff"]
+pep8test = ["black", "ruff", "mypy", "types-pytz", "types-requests", "check-manifest"]
 sdist = ["setuptools-rust (>=0.11.4)"]
 ssh = ["bcrypt (>=3.1.5)"]
-test = ["pytest (>=6.2.0)", "pytest-benchmark", "pytest-cov", "pytest-subtests", "pytest-xdist", "pretend", "iso8601", "pytz", "hypothesis (>=1.11.4,!=3.79.2)"]
+test = ["pytest (>=6.2.0)", "pytest-shard (>=0.1.2)", "pytest-benchmark", "pytest-cov", "pytest-subtests", "pytest-xdist", "pretend", "iso8601", "pytz", "hypothesis (>=1.11.4,!=3.79.2)"]
+test-randomorder = ["pytest-randomly"]
+tox = ["tox"]
 
 [[package]]
 name = "dbt-bigquery"
-version = "1.4.0"
+version = "1.4.1"
 description = "The Bigquery adapter plugin for dbt"
 category = "dev"
 optional = false
@@ -206,7 +208,7 @@ protobuf = ">=3.13.0,<4"
 
 [[package]]
 name = "dbt-core"
-version = "1.4.1"
+version = "1.4.4"
 description = "With dbt, data analysts and engineers can build analytics the way engineers build applications."
 category = "dev"
 optional = false
@@ -227,8 +229,9 @@ logbook = ">=1.5,<1.6"
 mashumaro = {version = "3.3.1", extras = ["msgpack"]}
 minimal-snowplow-tracker = "0.0.2"
 networkx = {version = ">=2.3,<3", markers = "python_version >= \"3.8\""}
-packaging = ">=20.9,<22.0"
+packaging = ">20.9"
 pathspec = ">=0.9,<0.11"
+pytz = ">=2015.7"
 pyyaml = ">=6.0"
 requests = "<3.0.0"
 sqlparse = ">=0.2.3,<0.5"
@@ -293,7 +296,7 @@ grpcio-gcp = ["grpcio-gcp (>=0.2.2,<1.0dev)"]
 
 [[package]]
 name = "google-auth"
-version = "2.16.0"
+version = "2.16.2"
 description = "Google Authentication Library"
 category = "main"
 optional = false
@@ -314,7 +317,7 @@ requests = ["requests (>=2.20.0,<3.0.0dev)"]
 
 [[package]]
 name = "google-cloud-bigquery"
-version = "3.4.2"
+version = "3.6.0"
 description = "Google BigQuery API client library"
 category = "main"
 optional = false
@@ -322,7 +325,7 @@ python-versions = ">=3.7"
 
 [package.dependencies]
 google-api-core = {version = ">=1.31.5,<2.0.0 || >2.3.0,<3.0.0dev", extras = ["grpc"]}
-google-cloud-core = ">=1.4.1,<3.0.0dev"
+google-cloud-core = ">=1.6.0,<3.0.0dev"
 google-resumable-media = ">=0.6.0,<3.0dev"
 grpcio = ">=1.47.0,<2.0dev"
 packaging = ">=20.0.0"
@@ -332,11 +335,11 @@ python-dateutil = ">=2.7.2,<3.0dev"
 requests = ">=2.21.0,<3.0.0dev"
 
 [package.extras]
-all = ["google-cloud-bigquery-storage (>=2.0.0,<3.0.0dev)", "grpcio (>=1.47.0,<2.0dev)", "pyarrow (>=3.0.0)", "pandas (>=1.1.0)", "db-dtypes (>=0.3.0,<2.0.0dev)", "ipywidgets (==7.7.1)", "geopandas (>=0.9.0,<1.0dev)", "Shapely (>=1.8.4,<2.0dev)", "ipython (>=7.0.1,!=8.1.0)", "tqdm (>=4.7.4,<5.0.0dev)", "opentelemetry-api (>=1.1.0)", "opentelemetry-sdk (>=1.1.0)", "opentelemetry-instrumentation (>=0.20b0)", "grpcio (>=1.49.1,<2.0dev)"]
+all = ["google-cloud-bigquery-storage (>=2.0.0,<3.0.0dev)", "grpcio (>=1.47.0,<2.0dev)", "pyarrow (>=3.0.0)", "pandas (>=1.1.0)", "db-dtypes (>=0.3.0,<2.0.0dev)", "ipywidgets (>=7.7.0,<8.0.1)", "geopandas (>=0.9.0,<1.0dev)", "Shapely (>=1.8.4,<2.0dev)", "ipython (>=7.0.1,!=8.1.0)", "tqdm (>=4.7.4,<5.0.0dev)", "opentelemetry-api (>=1.1.0)", "opentelemetry-sdk (>=1.1.0)", "opentelemetry-instrumentation (>=0.20b0)", "grpcio (>=1.49.1,<2.0dev)"]
 bqstorage = ["google-cloud-bigquery-storage (>=2.0.0,<3.0.0dev)", "grpcio (>=1.47.0,<2.0dev)", "pyarrow (>=3.0.0)", "grpcio (>=1.49.1,<2.0dev)"]
 geopandas = ["geopandas (>=0.9.0,<1.0dev)", "Shapely (>=1.8.4,<2.0dev)"]
 ipython = ["ipython (>=7.0.1,!=8.1.0)"]
-ipywidgets = ["ipywidgets (==7.7.1)"]
+ipywidgets = ["ipywidgets (>=7.7.0,<8.0.1)"]
 opentelemetry = ["opentelemetry-api (>=1.1.0)", "opentelemetry-sdk (>=1.1.0)", "opentelemetry-instrumentation (>=0.20b0)"]
 pandas = ["pandas (>=1.1.0)", "pyarrow (>=3.0.0)", "db-dtypes (>=0.3.0,<2.0.0dev)"]
 tqdm = ["tqdm (>=4.7.4,<5.0.0dev)"]
@@ -358,7 +361,7 @@ grpc = ["grpcio (>=1.38.0,<2.0dev)"]
 
 [[package]]
 name = "google-cloud-dataproc"
-version = "5.3.0"
+version = "5.4.0"
 description = "Google Cloud Dataproc API client library"
 category = "dev"
 optional = false
@@ -366,6 +369,7 @@ python-versions = ">=3.7"
 
 [package.dependencies]
 google-api-core = {version = ">=1.34.0,<2.0.0 || >=2.11.0,<3.0.0dev", extras = ["grpc"]}
+grpc-google-iam-v1 = ">=0.12.4,<1.0.0dev"
 proto-plus = ">=1.22.0,<2.0.0dev"
 protobuf = ">=3.19.5,<3.20.0 || >3.20.0,<3.20.1 || >3.20.1,<4.21.0 || >4.21.0,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4.21.4 || >4.21.4,<4.21.5 || >4.21.5,<5.0.0dev"
 
@@ -422,21 +426,35 @@ optional = false
 python-versions = ">=3.7"
 
 [package.dependencies]
+grpcio = {version = ">=1.44.0,<2.0.0dev", optional = true, markers = "extra == \"grpc\""}
 protobuf = ">=3.19.5,<3.20.0 || >3.20.0,<3.20.1 || >3.20.1,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4.21.4 || >4.21.4,<4.21.5 || >4.21.5,<5.0.0dev"
 
 [package.extras]
 grpc = ["grpcio (>=1.44.0,<2.0.0dev)"]
 
 [[package]]
+name = "grpc-google-iam-v1"
+version = "0.12.6"
+description = "IAM API client library"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+googleapis-common-protos = {version = ">=1.56.0,<2.0.0dev", extras = ["grpc"]}
+grpcio = ">=1.44.0,<2.0.0dev"
+protobuf = ">=3.19.5,<3.20.0 || >3.20.0,<3.20.1 || >3.20.1,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4.21.4 || >4.21.4,<4.21.5 || >4.21.5,<5.0.0dev"
+
+[[package]]
 name = "grpcio"
-version = "1.51.1"
+version = "1.52.0"
 description = "HTTP/2-based RPC framework"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 
 [package.extras]
-protobuf = ["grpcio-tools (>=1.51.1)"]
+protobuf = ["grpcio-tools (>=1.52.0)"]
 
 [[package]]
 name = "grpcio-status"
@@ -532,7 +550,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "flake8 (<5)", "pytest-co
 
 [[package]]
 name = "importlib-resources"
-version = "5.10.2"
+version = "5.12.0"
 description = "Read resources from Python packages"
 category = "dev"
 optional = false
@@ -566,16 +584,16 @@ six = "*"
 
 [[package]]
 name = "isort"
-version = "5.11.4"
+version = "5.12.0"
 description = "A Python utility / library to sort Python imports."
 category = "dev"
 optional = false
-python-versions = ">=3.7.0"
+python-versions = ">=3.8.0"
 
 [package.extras]
-colors = ["colorama (>=0.4.3,<0.5.0)"]
+colors = ["colorama (>=0.4.3)"]
 requirements-deprecated-finder = ["pip-api", "pipreqs"]
-pipfile-deprecated-finder = ["pipreqs", "requirementslib"]
+pipfile-deprecated-finder = ["pip-shims (>=0.5.2)", "pipreqs", "requirementslib"]
 plugins = ["setuptools"]
 
 [[package]]
@@ -727,7 +745,7 @@ six = ">=1.9.0,<2.0"
 
 [[package]]
 name = "more-itertools"
-version = "9.0.0"
+version = "9.1.0"
 description = "More routines for operating on iterables, beyond itertools"
 category = "dev"
 optional = false
@@ -768,11 +786,11 @@ python2 = ["typed-ast (>=1.4.0,<2)"]
 
 [[package]]
 name = "mypy-extensions"
-version = "0.4.3"
-description = "Experimental type system extensions for programs checked with the mypy typechecker."
+version = "1.0.0"
+description = "Type system extensions for programs checked with the mypy type checker."
 category = "dev"
 optional = false
-python-versions = "*"
+python-versions = ">=3.5"
 
 [[package]]
 name = "networkx"
@@ -791,14 +809,11 @@ test = ["pytest (>=7.2)", "pytest-cov (>=4.0)", "codecov (>=2.1)"]
 
 [[package]]
 name = "packaging"
-version = "21.3"
+version = "23.0"
 description = "Core utilities for Python packages"
 category = "main"
 optional = false
-python-versions = ">=3.6"
-
-[package.dependencies]
-pyparsing = ">=2.0.2,<3.0.5 || >3.0.5"
+python-versions = ">=3.7"
 
 [[package]]
 name = "parsedatetime"
@@ -832,15 +847,15 @@ testing = ["pytest", "pytest-cov"]
 
 [[package]]
 name = "platformdirs"
-version = "2.6.2"
+version = "3.1.0"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 
 [package.extras]
-docs = ["furo (>=2022.12.7)", "proselint (>=0.13)", "sphinx-autodoc-typehints (>=1.19.5)", "sphinx (>=5.3)"]
-test = ["appdirs (==1.4.4)", "covdefaults (>=2.2.2)", "pytest-cov (>=4)", "pytest-mock (>=3.10)", "pytest (>=7.2)"]
+docs = ["furo (>=2022.12.7)", "proselint (>=0.13)", "sphinx-autodoc-typehints (>=1.22,!=1.23.4)", "sphinx (>=6.1.3)"]
+test = ["appdirs (==1.4.4)", "covdefaults (>=2.2.2)", "pytest-cov (>=4)", "pytest-mock (>=3.10)", "pytest (>=7.2.1)"]
 
 [[package]]
 name = "pluggy"
@@ -905,7 +920,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
 name = "pydantic"
-version = "1.10.4"
+version = "1.10.5"
 description = "Data validation and settings management using python type hints"
 category = "main"
 optional = false
@@ -930,17 +945,6 @@ python-versions = ">=3.6"
 plugins = ["importlib-metadata"]
 
 [[package]]
-name = "pyparsing"
-version = "3.0.9"
-description = "pyparsing module - Classes and methods to define and execute parsing grammars"
-category = "main"
-optional = false
-python-versions = ">=3.6.8"
-
-[package.extras]
-diagrams = ["railroad-diagrams", "jinja2"]
-
-[[package]]
 name = "pyrsistent"
 version = "0.19.3"
 description = "Persistent/Functional/Immutable data structures"
@@ -950,7 +954,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "pytest"
-version = "7.2.1"
+version = "7.2.2"
 description = "pytest: simple powerful testing with Python"
 category = "dev"
 optional = false
@@ -1010,7 +1014,7 @@ six = ">=1.5"
 
 [[package]]
 name = "python-slugify"
-version = "7.0.0"
+version = "8.0.1"
 description = "A Python slugify application that also handles Unicode"
 category = "main"
 optional = false
@@ -1159,7 +1163,7 @@ python-versions = "*"
 
 [[package]]
 name = "tenacity"
-version = "8.1.0"
+version = "8.2.2"
 description = "Retry code until it succeeds"
 category = "main"
 optional = false
@@ -1186,11 +1190,11 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "tqdm"
-version = "4.64.1"
+version = "4.65.0"
 description = "Fast, Extensible Progress Meter"
 category = "dev"
 optional = false
-python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,>=2.7"
+python-versions = ">=3.7"
 
 [package.dependencies]
 colorama = {version = "*", markers = "platform_system == \"Windows\""}
@@ -1240,7 +1244,7 @@ test = ["shellingham (>=1.3.0,<2.0.0)", "pytest (>=4.4.0,<5.4.0)", "pytest-cov (
 
 [[package]]
 name = "types-pyyaml"
-version = "6.0.12.3"
+version = "6.0.12.8"
 description = "Typing stubs for PyYAML"
 category = "dev"
 optional = false
@@ -1256,7 +1260,7 @@ python-versions = "*"
 
 [[package]]
 name = "typing-extensions"
-version = "4.4.0"
+version = "4.5.0"
 description = "Backported and Experimental Type Hints for Python 3.7+"
 category = "main"
 optional = false
@@ -1285,7 +1289,7 @@ python-versions = "*"
 
 [[package]]
 name = "werkzeug"
-version = "2.2.2"
+version = "2.2.3"
 description = "The comprehensive WSGI web application library."
 category = "dev"
 optional = false
@@ -1299,20 +1303,20 @@ watchdog = ["watchdog"]
 
 [[package]]
 name = "zipp"
-version = "3.11.0"
+version = "3.15.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 
 [package.extras]
-docs = ["sphinx (>=3.5)", "jaraco.packaging (>=9)", "rst.linker (>=1.9)", "furo", "jaraco.tidelift (>=1.4)"]
-testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "flake8 (<5)", "pytest-cov", "pytest-enabler (>=1.3)", "jaraco.itertools", "func-timeout", "jaraco.functools", "more-itertools", "pytest-black (>=0.3.7)", "pytest-mypy (>=0.9.1)", "pytest-flake8"]
+docs = ["sphinx (>=3.5)", "jaraco.packaging (>=9)", "rst.linker (>=1.9)", "furo", "sphinx-lint", "jaraco.tidelift (>=1.4)"]
+testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "flake8 (<5)", "pytest-cov", "pytest-enabler (>=1.3)", "jaraco.itertools", "jaraco.functools", "more-itertools", "big-o", "pytest-black (>=0.3.7)", "pytest-mypy (>=0.9.1)", "pytest-flake8"]
 
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.10"
-content-hash = "0e1c2d0e2744d7d88ff078b37ae1ef0e027cdb2b6517da445a8a21dbf70ee839"
+content-hash = "7ccb339d4e931906722f7f83c942e06a58e8c8e46085e74172544608778949ff"
 
 [metadata.files]
 agate = [
@@ -1367,6 +1371,7 @@ google-cloud-storage = []
 google-crc32c = []
 google-resumable-media = []
 googleapis-common-protos = []
+grpc-google-iam-v1 = []
 grpcio = []
 grpcio-status = []
 grpclib = []
@@ -1492,15 +1497,9 @@ mypy = [
     {file = "mypy-0.931-py3-none-any.whl", hash = "sha256:1171f2e0859cfff2d366da2c7092b06130f232c636a3f7301e3feb8b41f6377d"},
     {file = "mypy-0.931.tar.gz", hash = "sha256:0038b21890867793581e4cb0d810829f5fd4441aa75796b53033af3aa30430ce"},
 ]
-mypy-extensions = [
-    {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},
-    {file = "mypy_extensions-0.4.3.tar.gz", hash = "sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8"},
-]
+mypy-extensions = []
 networkx = []
-packaging = [
-    {file = "packaging-21.3-py3-none-any.whl", hash = "sha256:ef103e05f519cdc783ae24ea4e2e0f508a9c99b2d4969652eed6a2e1ea5bd522"},
-    {file = "packaging-21.3.tar.gz", hash = "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb"},
-]
+packaging = []
 parsedatetime = [
     {file = "parsedatetime-2.4-py2-none-any.whl", hash = "sha256:9ee3529454bf35c40a77115f5a596771e59e1aee8c53306f346c461b8e913094"},
     {file = "parsedatetime-2.4.tar.gz", hash = "sha256:3d817c58fb9570d1eec1dd46fa9448cd644eeed4fb612684b02dfda3a79cb84b"},
@@ -1550,10 +1549,6 @@ pycparser = [
 ]
 pydantic = []
 pygments = []
-pyparsing = [
-    {file = "pyparsing-3.0.9-py3-none-any.whl", hash = "sha256:5026bae9a10eeaefb61dab2f09052b9f4307d44aee4eda64b309723d8d206bbc"},
-    {file = "pyparsing-3.0.9.tar.gz", hash = "sha256:2b020ecf7d21b687f219b71ecad3631f644a47f01403fa1d1036b0c6416d70fb"},
-]
 pyrsistent = []
 pytest = []
 pytest-cov = []
