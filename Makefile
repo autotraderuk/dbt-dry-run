@@ -18,6 +18,7 @@ mypy:
 .PHONY: format
 format:
 	black dbt_dry_run
+	black integration
 	isort dbt_dry_run
 
 .PHONY: verify
