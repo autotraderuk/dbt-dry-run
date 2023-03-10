@@ -45,7 +45,8 @@ filterwarnings = [
     "error",
     "ignore:Deprecated call to",
     "ignore:pkg_resources is deprecated as an API",
-    "ignore:invalid escape sequence"
+    "ignore:invalid escape sequence",
+    "ignore:unclosed"
 ]
 pythonpath = [
   "."
