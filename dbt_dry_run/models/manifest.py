@@ -1,7 +1,7 @@
 import json
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field, root_validator
 
@@ -37,7 +37,21 @@ class PartitionBy(BaseModel):
 
 
 class NodeMeta(BaseModel):
-    check_columns: bool = Field(False, alias="dry_run.check_columns")
+    DEFAULT_CHECK_COLUMNS_KEY: ClassVar[str] = "dry_run.check_columns"
+
+    __root__: Dict[str, Any]
+
+    def get(self, key: str) -> Optional[Any]:
+        return self.__root__.get(key)
+
+    def __getitem__(self, key: str) -> Any:
+        try:
+            return self.__root__[key]
+        except KeyError:
+            raise KeyError(f"Node does not have metadata '{key}'")
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.__root__
 
     class Config:
         allow_population_by_field_name = True
@@ -107,17 +121,11 @@ class Node(BaseModel):
             sql = f"`{self.database}`.`{self.db_schema}`.`{self.name}`"
         return sql
 
-    def get_should_check_columns(self) -> bool:
-        node_check_columns: bool = self.meta.check_columns if self.meta else False
-        config_check_columns: Optional[bool] = (
-            self.config.meta.check_columns if self.config.meta else None
-        )
-        merged_check_columns = (
-            config_check_columns
-            if config_check_columns is not None
-            else node_check_columns
-        )
-        return merged_check_columns
+    def get_combined_metadata(self, key: str) -> Optional[Any]:
+        node_meta = self.meta.get(key) if self.meta else None
+        config_meta = self.config.meta.get(key) if self.config.meta else None
+        merged_meta = config_meta if config_meta is not None else node_meta
+        return merged_meta
 
     def is_external_source(self) -> bool:
         return self.external is not None and self.resource_type == "source"

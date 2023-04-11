@@ -3,6 +3,7 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple
 
+from dbt_dry_run import flags
 from dbt_dry_run.adapter.service import ProjectService
 from dbt_dry_run.linting.column_linting import lint_columns
 from dbt_dry_run.sql_runner import SQLRunner
@@ -48,12 +49,26 @@ def dispatch_node(node: Node, runners: Dict[str, NodeRunner]) -> DryRunResult:
     return runner.run(node)
 
 
+def should_check_columns(node: Node) -> bool:
+    check_column = node.get_combined_metadata("dry_run.check_columns")
+    if check_column is not None:
+        return check_column
+
+    if flags.EXTRA_CHECK_COLUMNS_METADATA_KEY is not None:
+        extra_check_column = node.get_combined_metadata(
+            flags.EXTRA_CHECK_COLUMNS_METADATA_KEY
+        )
+        return extra_check_column if extra_check_column is not None else False
+
+    return False
+
+
 def dry_run_node(runners: Dict[str, NodeRunner], node: Node, results: Results) -> None:
     """
     This method must be thread safe
     """
     dry_run_result = dispatch_node(node, runners)
-    if node.get_should_check_columns():
+    if should_check_columns(node):
         dry_run_result = lint_columns(node, dry_run_result)
     results.add_result(node.unique_id, dry_run_result)
 

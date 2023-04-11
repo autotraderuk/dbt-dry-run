@@ -23,8 +23,14 @@ def dry_run(
     report_path: Optional[str] = None,
     cli_vars: str = "{}",
     skip_not_compiled: bool = False,
+    extra_check_columns_metadata_key: Optional[str] = None,
 ) -> int:
-    set_flags(Flags(skip_not_compiled=skip_not_compiled))
+    set_flags(
+        Flags(
+            skip_not_compiled=skip_not_compiled,
+            extra_check_columns_metadata_key=extra_check_columns_metadata_key,
+        )
+    )
     args = DbtArgs(
         project_dir=project_dir,
         profiles_dir=os.path.abspath(profiles_dir),
@@ -57,6 +63,10 @@ _SKIP_NOT_COMPILED_HELP = """
     coverage
 """
 
+_EXTRA_CHECK_COLUMNS_METADATA_KEY_HELP = """
+
+"""
+
 
 def version_callback(value: bool) -> None:
     if value:
@@ -79,10 +89,22 @@ def run(
     skip_not_compiled: bool = Option(
         False, "--skip-not-compiled", help=_SKIP_NOT_COMPILED_HELP
     ),
+    extra_check_columns_metadata_key: Optional[str] = Option(
+        None,
+        "--extra-check-columns-metadata-key",
+        help=_EXTRA_CHECK_COLUMNS_METADATA_KEY_HELP,
+    ),
     _: Optional[bool] = Option(None, "--version", callback=version_callback),
 ) -> None:
     exit_code = dry_run(
-        project_dir, profiles_dir, target, verbose, report_path, vars, skip_not_compiled
+        project_dir,
+        profiles_dir,
+        target,
+        verbose,
+        report_path,
+        vars,
+        skip_not_compiled,
+        extra_check_columns_metadata_key,
     )
     if exit_code > 0:
         raise typer.Exit(exit_code)
