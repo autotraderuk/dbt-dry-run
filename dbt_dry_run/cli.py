@@ -64,7 +64,9 @@ _SKIP_NOT_COMPILED_HELP = """
 """
 
 _EXTRA_CHECK_COLUMNS_METADATA_KEY_HELP = """
-
+    An extra metadata key that can be used in place of `dry_run.check_columns` for verifying column metadata has been
+    specified correctly. `dry_run.check_columns` will always take precedence. The metadata key should be of boolean type
+    or it will be cast to a boolean to be 'True/Falsey`
 """
 
 
