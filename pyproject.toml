@@ -14,7 +14,7 @@ repository = "https://github.com/autotraderuk/dbt-dry-run"
 dbt-dry-run = "dbt_dry_run.__main__:main"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = ">=3.8,<3.12"
 agate = "^1.6"
 google-cloud-bigquery = "^3"
 pydantic = "^1.9.0"
@@ -46,7 +46,8 @@ filterwarnings = [
     "ignore:Deprecated call to",
     "ignore:pkg_resources is deprecated as an API",
     "ignore:invalid escape sequence",
-    "ignore:unclosed"
+    "ignore:unclosed",
+    "ignore:'cgi' is deprecated and slated for removal"
 ]
 pythonpath = [
   "."
