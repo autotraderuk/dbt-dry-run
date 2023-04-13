@@ -51,7 +51,7 @@ The full CLI help is shown below, anything prefixed with [dbt] can be used in th
 
 ```
   ❯ dbt-dry-run --help
-   Usage: python -m dbt_dry_run [OPTIONS]
+   Usage: dbt-dry-run [OPTIONS]
    
    Options:
      --profiles-dir TEXT             [dbt] Where to search for `profiles.yml`
@@ -71,6 +71,15 @@ The full CLI help is shown below, anything prefixed with [dbt] can be used in th
                                      recommended option. The dbt manifest should
                                      generally be compiled with `--select *` to
                                      ensure good  coverage
+     --extra-check-columns-metadata-key TEXT
+                                     An extra metadata key that can be used in
+                                     place of `dry_run.check_columns` for
+                                     verifying column metadata has been specified
+                                     correctly. `dry_run.check_columns` will
+                                     always take precedence. The metadata key
+                                     should be of boolean type or it will be cast
+                                     to a boolean to be 'True/Falsey`
+     --version
      --install-completion [bash|zsh|fish|powershell|pwsh]
                                      Install completion for the specified shell.
      --show-completion [bash|zsh|fish|powershell|pwsh]
@@ -111,8 +120,9 @@ The process will also return exit code 1
 
 The dry runner can also be configured to inspect your metadata YAML and assert that the predicted schema of your dbt
 projects data warehouse matches what is documented in the metadata. To enable this for your models specify the key
-`dry_run.check_columns: true`. The dry runner will then fail if the model's documentation does not match. For example
-the full metadata for this model:
+`dry_run.check_columns: true`. The dry runner will then fail if the model's documentation does not match. You can also
+specify a custom extra key to enable `check_columns` by setting the CLI argument `--extra-check-columns-metadata-key`.
+For example the full metadata for this model:
 
 ```yaml
 models:
