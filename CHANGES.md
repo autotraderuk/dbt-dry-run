@@ -1,5 +1,18 @@
 ## Changelog
 
+# dbt-dry-run v0.6.6
+
+## Bugfixes & Improvements
+
+- Added `--extra-check-columns-metadata-key` CLI option. Specifying this will mean that you can use another metadata 
+  key instead of just `dry_run.check_columns`. `dry_run.check_columns` will always take priority over the extra key.
+  This is useful if you have an existing metadata key such as `governance.is_odp` that you want to enable metadata 
+  checking for
+
+- Added `--version` CLI option to print the installed version of `dbt-dry-run`
+
+- Added support for Python 3.11 ([zachary-povey](https://github.com/zachary-povey))
+
 # dbt-dry-run v0.6.5
 
 ## Bugfixes & Improvements
