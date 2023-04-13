@@ -52,13 +52,13 @@ def dispatch_node(node: Node, runners: Dict[str, NodeRunner]) -> DryRunResult:
 def should_check_columns(node: Node) -> bool:
     check_column = node.get_combined_metadata("dry_run.check_columns")
     if check_column is not None:
-        return check_column
+        return bool(check_column)
 
     if flags.EXTRA_CHECK_COLUMNS_METADATA_KEY is not None:
         extra_check_column = node.get_combined_metadata(
             flags.EXTRA_CHECK_COLUMNS_METADATA_KEY
         )
-        return extra_check_column if extra_check_column is not None else False
+        return bool(extra_check_column) if extra_check_column is not None else False
 
     return False
 
