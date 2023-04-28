@@ -20,7 +20,7 @@ class DbtArgs:
     profile: Optional[str] = None
     target: Optional[str] = None
     vars: Dict[str, Any] = field(default_factory=dict)
-    threads: int = 1
+    threads: Optional[int] = None
 
     def to_namespace(self) -> Namespace:
         self_as_dict = asdict(self)

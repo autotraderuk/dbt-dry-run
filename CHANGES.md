@@ -4,6 +4,8 @@
 
 - Compatibility with dbt v1.5
 
+- Adds `--threads` option as an override
+
 # dbt-dry-run v0.6.6
 
 ## Bugfixes & Improvements
