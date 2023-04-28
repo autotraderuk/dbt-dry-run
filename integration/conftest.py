@@ -111,6 +111,7 @@ def dry_run_result(compiled_project: ProjectContext) -> DryRunResult:
 def compiled_project(request: FixtureRequest) -> ProjectContext:
     folder = request.fspath.dirname
     profiles_dir = os.path.join(request.config.rootdir, "integration/profiles")
+    target_path = os.path.join(folder, "target")
     if running_in_github():
         target = "integration-github"
     else:
@@ -125,6 +126,8 @@ def compiled_project(request: FixtureRequest) -> ProjectContext:
             profiles_dir,
             "--target",
             target,
+            "--target-path",
+            target_path
         ],
         capture_output=True,
     )
