@@ -1,8 +1,8 @@
 __all__ = ("VERSION",)
 
-import pkg_resources
+from importlib import metadata
 
 try:
-    VERSION = pkg_resources.get_distribution("dbt-dry-run").version
-except pkg_resources.DistributionNotFound:
+    VERSION = metadata.version("dbt-dry-run")
+except metadata.PackageNotFoundError:
     VERSION = "0.0.0"

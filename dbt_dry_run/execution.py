@@ -25,8 +25,6 @@ from dbt_dry_run.results import DryRunResult, Results
 from dbt_dry_run.scheduler import ManifestScheduler
 from dbt_dry_run.sql_runner.big_query_sql_runner import BigQuerySQLRunner
 
-CONCURRENCY = 8
-
 _RUNNER_CLASSES: List[Any] = [
     ModelRunner,
     SeedRunner,
