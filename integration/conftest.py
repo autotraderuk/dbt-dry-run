@@ -127,7 +127,7 @@ def compiled_project(request: FixtureRequest) -> ProjectContext:
             "--target",
             target,
             "--target-path",
-            target_path
+            target_path,
         ],
         capture_output=True,
     )
