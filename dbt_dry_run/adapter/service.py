@@ -1,26 +1,35 @@
+import json
 import os
-from dataclasses import dataclass
-from typing import Optional
+from argparse import Namespace
+from dataclasses import asdict, dataclass, field
+from typing import Any, Dict, Optional
 
 from dbt.adapters.factory import get_adapter, register_adapter, reset_adapters
 from dbt.config import RuntimeConfig
 from dbt.contracts.connection import Connection
-from dbt.flags import DEFAULT_PROFILES_DIR, set_from_args
+from dbt.flags import set_from_args
 
+from dbt_dry_run.adapter.utils import default_profiles_dir
 from dbt_dry_run.models import Manifest
 
 
 @dataclass(frozen=True)
 class DbtArgs:
-    profiles_dir: str = DEFAULT_PROFILES_DIR
+    profiles_dir: str = field(default_factory=default_profiles_dir)
     project_dir: str = os.getcwd()
     profile: Optional[str] = None
     target: Optional[str] = None
-    vars: str = "{}"
+    vars: Dict[str, Any] = field(default_factory=dict)
+    threads: Optional[int] = None
+
+    def to_namespace(self) -> Namespace:
+        self_as_dict = asdict(self)
+        # self_as_dict["vars"] = json.loads(self_as_dict["vars"])
+        return Namespace(**self_as_dict)
 
 
 def set_dbt_args(args: DbtArgs) -> None:
-    set_from_args(args, args)
+    set_from_args(args.to_namespace(), args)
 
 
 class ProjectService:

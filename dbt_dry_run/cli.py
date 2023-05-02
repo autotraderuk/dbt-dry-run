@@ -1,11 +1,12 @@
+import json
 import os
 from typing import Optional
 
 import typer
-from dbt.flags import DEFAULT_PROFILES_DIR
 from typer import Option
 
 from dbt_dry_run.adapter.service import DbtArgs, ProjectService
+from dbt_dry_run.adapter.utils import default_profiles_dir
 from dbt_dry_run.exception import ManifestValidationError
 from dbt_dry_run.execution import dry_run_manifest
 from dbt_dry_run.flags import Flags, set_flags
@@ -24,7 +25,9 @@ def dry_run(
     cli_vars: str = "{}",
     skip_not_compiled: bool = False,
     extra_check_columns_metadata_key: Optional[str] = None,
+    threads: Optional[int] = None,
 ) -> int:
+    cli_vars_parsed = json.loads(cli_vars)
     set_flags(
         Flags(
             skip_not_compiled=skip_not_compiled,
@@ -35,7 +38,8 @@ def dry_run(
         project_dir=project_dir,
         profiles_dir=os.path.abspath(profiles_dir),
         target=target,
-        vars=cli_vars,
+        vars=cli_vars_parsed,
+        threads=threads,
     )
     project = ProjectService(args)
     exit_code: int
@@ -69,6 +73,11 @@ _EXTRA_CHECK_COLUMNS_METADATA_KEY_HELP = """
     or it will be cast to a boolean to be 'True/Falsey`
 """
 
+_THREADS_HELP = """
+"[dbt] Number of threads to execute DAG with. You can normally set this higher than the concurrency of your actual dbt
+runs because the dry run queries execute much faster and don't use any resources"
+"""
+
 
 def version_callback(value: bool) -> None:
     if value:
@@ -79,13 +88,14 @@ def version_callback(value: bool) -> None:
 @app.command()
 def run(
     profiles_dir: str = Option(
-        DEFAULT_PROFILES_DIR, help="[dbt] Where to search for `profiles.yml`"
+        default_profiles_dir(), help="[dbt] Where to search for `profiles.yml`"
     ),
     project_dir: str = Option(
         os.getcwd(), help="[dbt] Where to search for `dbt_project.yml`"
     ),
     vars: str = Option("{}", help="[dbt] CLI Variables to pass to dbt"),
     target: Optional[str] = Option(None, help="[dbt] Target profile"),
+    threads: Optional[int] = Option(None, help=_THREADS_HELP),
     verbose: bool = Option(False, help="Output verbose error messages"),
     report_path: Optional[str] = Option(None, help="Json path to dump report to"),
     skip_not_compiled: bool = Option(
@@ -107,6 +117,7 @@ def run(
         vars,
         skip_not_compiled,
         extra_check_columns_metadata_key,
+        threads,
     )
     if exit_code > 0:
         raise typer.Exit(exit_code)
