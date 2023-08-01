@@ -292,13 +292,13 @@ files = [
 
 [[package]]
 name = "click"
-version = "8.1.3"
+version = "8.1.6"
 description = "Composable command line interface toolkit"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "click-8.1.3-py3-none-any.whl", hash = "sha256:bb4d8133cb15a609f44e8213d9b391b0809795062913b383c62be0ee95b1db48"},
-    {file = "click-8.1.3.tar.gz", hash = "sha256:7682dc8afb30297001674575ea00d1814d808d6a36af415a82bd481d37ba7b8e"},
+    {file = "click-8.1.6-py3-none-any.whl", hash = "sha256:fa244bb30b3b5ee2cae3da8f55c9e5e0c0e86093306301fb418eb9dc40fbded5"},
+    {file = "click-8.1.6.tar.gz", hash = "sha256:48ee849951919527a045bfe3bf7baa8a959c423134e1a5b98c05c20ba75a1cbd"},
 ]
 
 [package.dependencies]
@@ -437,39 +437,39 @@ test-randomorder = ["pytest-randomly"]
 
 [[package]]
 name = "dbt-bigquery"
-version = "1.6.0rc1"
+version = "1.6.0"
 description = "The Bigquery adapter plugin for dbt"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "dbt-bigquery-1.6.0rc1.tar.gz", hash = "sha256:cef426bd350a99914e978f1bfe6cc2717ca6742178e94a19b68557405a1c14a9"},
-    {file = "dbt_bigquery-1.6.0rc1-py3-none-any.whl", hash = "sha256:9b202cb650da234184a277d1f172d0226f204405e0e7ac61a4f9dfffdb9754df"},
+    {file = "dbt-bigquery-1.6.0.tar.gz", hash = "sha256:8c2a6fbcd254196686cf6f25d81750959459d063e55962a345759586d02329f5"},
+    {file = "dbt_bigquery-1.6.0-py3-none-any.whl", hash = "sha256:9bbf6bfb732488a26fd60d2ea90f041d88f6908674357a99e53cffbfc380b3bc"},
 ]
 
 [package.dependencies]
-dbt-core = ">=1.6.0rc1,<1.7.0"
+dbt-core = ">=1.6.0,<1.7.0"
 google-cloud-bigquery = ">=3.0,<4.0"
 google-cloud-dataproc = ">=5.0,<6.0"
 google-cloud-storage = ">=2.4,<3.0"
 
 [[package]]
 name = "dbt-core"
-version = "1.6.0rc1"
+version = "1.6.0"
 description = "With dbt, data analysts and engineers can build analytics the way engineers build applications."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "dbt-core-1.6.0rc1.tar.gz", hash = "sha256:04a2eefec02e1f8d2860e694e7e91e21857c31146e763d9ecd123544d164ed91"},
-    {file = "dbt_core-1.6.0rc1-py3-none-any.whl", hash = "sha256:60ccb385f2a9eab874ad68828f8b3ce43d2a9a7c54bc27a61b445721d10aaae0"},
+    {file = "dbt-core-1.6.0.tar.gz", hash = "sha256:51da239af02ed449562d3c5caea903edee7b5427c47efd5a6439634c59858087"},
+    {file = "dbt_core-1.6.0-py3-none-any.whl", hash = "sha256:494018fef1254e6169f754c9ea32986d3851f1e5a8214d02f4e75fdd4a6c6c50"},
 ]
 
 [package.dependencies]
 agate = ">=1.7.0,<1.8.0"
 cffi = ">=1.9,<2.0.0"
-click = ">=8.1.1,<8.1.4"
+click = "<9"
 colorama = ">=0.3.9,<0.5"
 dbt-extractor = ">=0.4.1,<0.5.0"
-dbt-semantic-interfaces = ">=0.1.0rc1,<0.2.0"
+dbt-semantic-interfaces = ">=0.2.0,<0.3.0"
 hologram = ">=0.0.16,<0.1.0"
 idna = ">=2.5,<4"
 isodate = ">=0.6,<0.7"
@@ -484,7 +484,7 @@ protobuf = ">=4.0.0"
 pytz = ">=2015.7"
 pyyaml = ">=6.0"
 requests = "<3.0.0"
-sqlparse = ">=0.2.3"
+sqlparse = ">=0.2.3,<0.5"
 typing-extensions = ">=3.7.4"
 urllib3 = ">=1.0,<2.0"
 
@@ -515,13 +515,13 @@ files = [
 
 [[package]]
 name = "dbt-semantic-interfaces"
-version = "0.1.0rc1"
+version = "0.2.0"
 description = "The shared semantic layer definitions that dbt-core and MetricFlow use"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "dbt_semantic_interfaces-0.1.0rc1-py3-none-any.whl", hash = "sha256:66081ba294795e09cd32e92e947d3abb7e64c2109c031516317b9954067ab6eb"},
-    {file = "dbt_semantic_interfaces-0.1.0rc1.tar.gz", hash = "sha256:dd9d51461ada34f7a44785df5c1ee5806f12de250fdbce41f2517c04e0073a46"},
+    {file = "dbt_semantic_interfaces-0.2.0-py3-none-any.whl", hash = "sha256:823c9bd53745604cae2af854c7d5064056383d0304560c35236a33c5f0e52090"},
+    {file = "dbt_semantic_interfaces-0.2.0.tar.gz", hash = "sha256:4afecc6dc56f85ecce7ac424dea07561513467e0bf28ead7307b78a22e6b999b"},
 ]
 
 [package.dependencies]
@@ -809,13 +809,13 @@ requests = ["requests (>=2.18.0,<3.0.0dev)"]
 
 [[package]]
 name = "googleapis-common-protos"
-version = "1.59.1"
+version = "1.60.0"
 description = "Common protobufs used in Google APIs"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "googleapis-common-protos-1.59.1.tar.gz", hash = "sha256:b35d530fe825fb4227857bc47ad84c33c809ac96f312e13182bdeaa2abe1178a"},
-    {file = "googleapis_common_protos-1.59.1-py2.py3-none-any.whl", hash = "sha256:0cbedb6fb68f1c07e18eb4c48256320777707e7d0c55063ae56c15db3224a61e"},
+    {file = "googleapis-common-protos-1.60.0.tar.gz", hash = "sha256:e73ebb404098db405ba95d1e1ae0aa91c3e15a71da031a2eeb6b2e23e7bc3708"},
+    {file = "googleapis_common_protos-1.60.0-py2.py3-none-any.whl", hash = "sha256:69f9bbcc6acde92cab2db95ce30a70bd2b81d20b12eff3f1aabaffcbe8a93918"},
 ]
 
 [package.dependencies]
@@ -1425,13 +1425,13 @@ files = [
 
 [[package]]
 name = "pathspec"
-version = "0.11.1"
+version = "0.11.2"
 description = "Utility library for gitignore style pattern matching of file paths."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pathspec-0.11.1-py3-none-any.whl", hash = "sha256:d8af70af76652554bd134c22b3e8a1cc46ed7d91edcdd721ef1a0c51a84a5293"},
-    {file = "pathspec-0.11.1.tar.gz", hash = "sha256:2798de800fa92780e33acca925945e9a19a133b715067cf165b8866c15a31687"},
+    {file = "pathspec-0.11.2-py3-none-any.whl", hash = "sha256:1d6ed233af05e679efb96b1851550ea95bbb64b7c490b0f5aa52996c11e92a20"},
+    {file = "pathspec-0.11.2.tar.gz", hash = "sha256:e0d8d0ac2f12da61956eb2306b69f9469b42f4deb0f3cb6ed47b9cce9996ced3"},
 ]
 
 [[package]]
@@ -1450,18 +1450,18 @@ testing = ["pytest", "pytest-cov"]
 
 [[package]]
 name = "platformdirs"
-version = "3.9.1"
+version = "3.10.0"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "platformdirs-3.9.1-py3-none-any.whl", hash = "sha256:ad8291ae0ae5072f66c16945166cb11c63394c7a3ad1b1bc9828ca3162da8c2f"},
-    {file = "platformdirs-3.9.1.tar.gz", hash = "sha256:1b42b450ad933e981d56e59f1b97495428c9bd60698baab9f3eb3d00d5822421"},
+    {file = "platformdirs-3.10.0-py3-none-any.whl", hash = "sha256:d7c24979f292f916dc9cbf8648319032f551ea8c49a4c9bf2fb556a02070ec1d"},
+    {file = "platformdirs-3.10.0.tar.gz", hash = "sha256:b45696dab2d7cc691a3226759c0d3b00c47c8b6e293d96f6436f733303f77f6d"},
 ]
 
 [package.extras]
-docs = ["furo (>=2023.5.20)", "proselint (>=0.13)", "sphinx (>=7.0.1)", "sphinx-autodoc-typehints (>=1.23,!=1.23.4)"]
-test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=7.3.1)", "pytest-cov (>=4.1)", "pytest-mock (>=3.10)"]
+docs = ["furo (>=2023.7.26)", "proselint (>=0.13)", "sphinx (>=7.1.1)", "sphinx-autodoc-typehints (>=1.24)"]
+test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=7.4)", "pytest-cov (>=4.1)", "pytest-mock (>=3.11.1)"]
 
 [[package]]
 name = "pluggy"
@@ -2142,4 +2142,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "116ad2b1ca3df2f7a79f125a6deaa855b349d9a6f2efc52b26d3a67649588d08"
+content-hash = "32f6b9852b3b7bfb315dfba44c2fdb15f2074acc2f413f8cbd99982c5a632dda"
