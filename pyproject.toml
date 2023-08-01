@@ -33,7 +33,7 @@ pytest-cov = "^4.0.0"
 twine = "^3.8.0"
 types-setuptools = "^57.4.9"
 pytest-mock = "^3.7.0"
-dbt-bigquery = "^1.5.0"
+dbt-bigquery = "^1.6.0"
 
 [build-system]
 requires = ["poetry-core>=1.5.0"]
@@ -47,7 +47,8 @@ filterwarnings = [
     "ignore:pkg_resources is deprecated as an API",
     "ignore:invalid escape sequence",
     "ignore:unclosed",
-    "ignore:'cgi' is deprecated and slated for removal"
+    "ignore:'cgi' is deprecated and slated for removal",
+    "ignore:Your application has authenticated using end user credentials"
 ]
 pythonpath = [
   "."
