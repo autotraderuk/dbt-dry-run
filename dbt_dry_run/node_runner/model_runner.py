@@ -82,7 +82,7 @@ class ModelRunner(NodeRunner):
 
     def _modify_sql(self, node: Node, sql_statement: str) -> str:
         if node.config.materialized == "view":
-            sql_statement = f"CREATE OR REPLACE VIEW `{node.database}`.`{node.db_schema}`.`{node.alias}` AS (\n{sql_statement}\n)"
+            sql_statement = f"CREATE OR REPLACE VIEW {self._sql_runner.get_node_identifier(node)} AS (\n{sql_statement}\n)"
 
         if node.config.sql_header:
             sql_statement = f"{node.config.sql_header}\n{sql_statement}"

@@ -16,6 +16,10 @@ class SQLRunner(metaclass=ABCMeta):
         ...
 
     @abstractmethod
+    def get_node_identifier(self, node: Node) -> str:
+        ...
+
+    @abstractmethod
     def get_node_schema(self, node: Node) -> Optional[Table]:
         ...
 

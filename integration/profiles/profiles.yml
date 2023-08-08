@@ -10,7 +10,7 @@ default:
   target: integration-local
 
   outputs:
-    integration-local:
+    integration-local-bigquery:
       type: bigquery
       method: oauth
       project:  "{{ env_var('DBT_PROJECT', 'at-dry-run-integration-dev') }}"
@@ -19,7 +19,7 @@ default:
       threads: 8
       timeout_seconds: 300
 
-    integration-github:
+    integration-github-bigquery:
       type: bigquery
       method: service-account
       project: "{{ env_var('DBT_PROJECT', 'at-dry-run-integration-dev') }}"
@@ -28,3 +28,16 @@ default:
       threads: 8
       timeout_seconds: 300
       keyfile: "{{ env_var('HOME', '/home') }}/bq_svc.json"
+
+    integration-local-snowflake:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+
+      # User/password auth
+      user: "{{ env_var('SNOWFLAKE_USERNAME') }}"
+      password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
+
+      database: "{{ env_var('DBT_PROJECT', 'at_dry_run_integration_dev') }}"
+      warehouse: COMPUTE_WH
+      schema: dry_run
+      threads: 8

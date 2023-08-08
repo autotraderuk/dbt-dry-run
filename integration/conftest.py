@@ -4,12 +4,27 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Optional, Iterable, Generator
 
+import click
 import pytest
 from _pytest.fixtures import FixtureRequest
 
 from dbt_dry_run.models import Report, Node, Manifest
 from dbt_dry_run.adapter.service import ProjectService, DbtArgs
 from google.cloud.bigquery import Client
+
+
+def pytest_addoption(parser):
+    parser.addoption("--db", type=click.Choice(["bigquery", "snowflake"]))
+
+
+@pytest.fixture(scope="session")
+def active_target(pytestconfig) -> str:
+    db = pytestconfig.getoption("db")
+    if running_in_github():
+        target = f"integration-github-{db}"
+    else:
+        target = f"integration-local-{db}"
+    return target
 
 
 @dataclass
@@ -108,14 +123,11 @@ def dry_run_result(compiled_project: ProjectContext) -> DryRunResult:
 
 
 @pytest.fixture(scope="module")
-def compiled_project(request: FixtureRequest) -> ProjectContext:
+def compiled_project(request: FixtureRequest, active_target: str) -> ProjectContext:
     folder = request.fspath.dirname
     profiles_dir = os.path.join(request.config.rootdir, "integration/profiles")
     target_path = os.path.join(folder, "target")
-    if running_in_github():
-        target = "integration-github"
-    else:
-        target = "integration-local"
+
     run_dbt = subprocess.run(
         [
             "dbt",
@@ -125,7 +137,7 @@ def compiled_project(request: FixtureRequest) -> ProjectContext:
             "--profiles-dir",
             profiles_dir,
             "--target",
-            target,
+            active_target,
             "--target-path",
             target_path,
         ],
@@ -141,4 +153,6 @@ def compiled_project(request: FixtureRequest) -> ProjectContext:
             f"Fix dbt compilation error to run test suite!",
             run_dbt.returncode,
         )
-    return ProjectContext(project_dir=folder, profiles_dir=profiles_dir, target=target)
+    return ProjectContext(
+        project_dir=folder, profiles_dir=profiles_dir, target=active_target
+    )

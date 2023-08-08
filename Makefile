@@ -8,8 +8,16 @@ testcov: test
 	@coverage html
 
 .PHONY: integration
-integration:
-	pytest ./integration
+integration: integration-bq integration-snowflake
+
+.PHONY: integration-bq
+integration-bq:
+	pytest ./integration --db bigquery
+
+.PHONY: integration-snowflake
+integration-snowflake:
+	pytest ./integration --db snowflake
+
 
 .PHONY: mypy
 mypy:

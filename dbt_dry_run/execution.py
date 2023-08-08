@@ -7,6 +7,7 @@ from dbt_dry_run import flags
 from dbt_dry_run.adapter.service import ProjectService
 from dbt_dry_run.linting.column_linting import lint_columns
 from dbt_dry_run.sql_runner import SQLRunner
+from dbt_dry_run.sql_runner.snowflake_sql_runner import SnowflakeSQLRunner
 
 if TYPE_CHECKING:
     from mypy.typeshed.stdlib.concurrent.futures._base import Future
@@ -75,10 +76,15 @@ def dry_run_node(runners: Dict[str, NodeRunner], node: Node, results: Results) -
 def create_context(
     project: ProjectService,
 ) -> Generator[Tuple[SQLRunner, ThreadPoolExecutor], None, None]:
-    sql_runner: Optional[SQLRunner] = None
+    sql_runner: Optional[SQLRunner]
     executor: Optional[ThreadPoolExecutor] = None
     try:
-        sql_runner = BigQuerySQLRunner(project)
+        if project.adapter_type == "biquery":
+            sql_runner = BigQuerySQLRunner(project)
+        elif project.adapter_type == "snowflake":
+            sql_runner = SnowflakeSQLRunner(project)
+        else:
+            raise RuntimeError(f"Unknown adapter type {project.adapter_type}")
         executor = ThreadPoolExecutor(max_workers=project.threads)
         yield sql_runner, executor
     finally:

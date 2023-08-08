@@ -53,6 +53,9 @@ class BigQuerySQLRunner(SQLRunner):
         connection = self._project.get_connection()
         return connection.handle
 
+    def get_node_identifier(self, node: Node) -> str:
+        return f"`{node.database}`.`{node.db_schema}`.`{node.alias}`"
+
     @retry(
         retry=retry_if_exception_type(BadRequest),
         stop=stop_after_attempt(MAX_ATTEMPT_NUMBER),
@@ -95,7 +98,7 @@ class BigQuerySQLRunner(SQLRunner):
                 )
             except ValidationError as e:
                 raise UnknownSchemaException.from_validation_error(
-                    schema_field, e
+                    schema_field.name, e
                 ) from e
 
         job_fields = list(map(_map_schema_fields_to_table_field, schema_fields))
