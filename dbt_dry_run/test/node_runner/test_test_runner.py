@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 from dbt_dry_run import flags
 from dbt_dry_run.exception import NotCompiledException
 from dbt_dry_run.literals import enable_test_example_values
-from dbt_dry_run.models import BigQueryFieldType, Table, TableField
+from dbt_dry_run.models import FieldType, Table, TableField
 from dbt_dry_run.node_runner.node_test_runner import NodeTestRunner
 from dbt_dry_run.results import DryRunStatus, Results
 from dbt_dry_run.scheduler import ManifestScheduler
@@ -15,7 +15,7 @@ A_SIMPLE_TABLE = Table(
     fields=[
         TableField(
             name="a",
-            type=BigQueryFieldType.STRING,
+            type=FieldType.STRING,
         )
     ]
 )
@@ -34,7 +34,7 @@ def test_test_runs_sql() -> None:
         fields=[
             TableField(
                 name="a",
-                type=BigQueryFieldType.STRING,
+                type=FieldType.STRING,
             )
         ]
     )

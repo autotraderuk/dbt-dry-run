@@ -79,7 +79,7 @@ def create_context(
     sql_runner: Optional[SQLRunner]
     executor: Optional[ThreadPoolExecutor] = None
     try:
-        if project.adapter_type == "biquery":
+        if project.adapter_type == "bigquery":
             sql_runner = BigQuerySQLRunner(project)
         elif project.adapter_type == "snowflake":
             sql_runner = SnowflakeSQLRunner(project)

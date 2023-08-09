@@ -102,7 +102,7 @@ class ModelRunner(NodeRunner):
 
     def run(self, node: Node) -> DryRunResult:
         try:
-            run_sql = insert_dependant_sql_literals(node, self._results)
+            run_sql = insert_dependant_sql_literals(node, self._results, self._sql_runner)
         except UpstreamFailedException as e:
             return DryRunResult(node, None, DryRunStatus.FAILURE, e)
 

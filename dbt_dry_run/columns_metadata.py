@@ -2,7 +2,7 @@ from itertools import groupby
 from typing import Dict, List, Set, Tuple
 
 from dbt_dry_run.exception import InvalidColumnSpecification, UnknownDataTypeException
-from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
+from dbt_dry_run.models import FieldMode, FieldType, Table, TableField
 from dbt_dry_run.models.manifest import ManifestColumn
 
 REPEATED_SUFFIX = "[]"
@@ -36,19 +36,19 @@ def _column_is_repeated(data_type: str) -> bool:
 
 def _split_column_data_type_and_mode(
     data_type: str,
-) -> Tuple[BigQueryFieldType, BigQueryFieldMode]:
+) -> Tuple[FieldType, FieldMode]:
     mode = (
-        BigQueryFieldMode.REPEATED
+        FieldMode.REPEATED
         if _column_is_repeated(data_type)
-        else BigQueryFieldMode.NULLABLE
+        else FieldMode.NULLABLE
     )
-    if mode == BigQueryFieldMode.REPEATED:
+    if mode == FieldMode.REPEATED:
         clean_data_type = data_type[: -len(REPEATED_SUFFIX)]
     else:
         clean_data_type = data_type
 
     try:
-        return BigQueryFieldType(clean_data_type), mode
+        return FieldType(clean_data_type), mode
     except ValueError:
         raise UnknownDataTypeException(
             f"Could not parse data_type `{clean_data_type}` from manifest"

@@ -5,7 +5,7 @@ import pytest
 from dbt_dry_run import flags
 from dbt_dry_run.exception import NotCompiledException
 from dbt_dry_run.literals import enable_test_example_values
-from dbt_dry_run.models import BigQueryFieldType, Table, TableField
+from dbt_dry_run.models import FieldType, Table, TableField
 from dbt_dry_run.models.manifest import NodeConfig
 from dbt_dry_run.node_runner.snapshot_runner import SnapshotRunner
 from dbt_dry_run.results import DryRunStatus, Results
@@ -18,7 +18,7 @@ A_SIMPLE_TABLE = Table(
     fields=[
         TableField(
             name="a",
-            type=BigQueryFieldType.STRING,
+            type=FieldType.STRING,
         )
     ]
 )
@@ -37,7 +37,7 @@ def test_snapshot_with_check_all_strategy_runs_sql_with_id() -> None:
         fields=[
             TableField(
                 name="a",
-                type=BigQueryFieldType.STRING,
+                type=FieldType.STRING,
             )
         ]
     )
@@ -72,7 +72,7 @@ def test_snapshot_with_check_all_strategy_fails_without_id() -> None:
         fields=[
             TableField(
                 name="a",
-                type=BigQueryFieldType.STRING,
+                type=FieldType.STRING,
             )
         ]
     )
@@ -106,11 +106,11 @@ def test_snapshot_with_check_all_strategy_runs_sql_with_matching_columns() -> No
         fields=[
             TableField(
                 name="a",
-                type=BigQueryFieldType.STRING,
+                type=FieldType.STRING,
             ),
             TableField(
                 name="b",
-                type=BigQueryFieldType.STRING,
+                type=FieldType.STRING,
             ),
         ]
     )
@@ -148,7 +148,7 @@ def test_snapshot_with_check_cols_strategy_fails_with_missing_column() -> None:
         fields=[
             TableField(
                 name="a",
-                type=BigQueryFieldType.STRING,
+                type=FieldType.STRING,
             )
         ]
     )
@@ -182,9 +182,9 @@ def test_snapshot_with_timestamp_strategy_with_updated_at_column() -> None:
         fields=[
             TableField(
                 name="a",
-                type=BigQueryFieldType.STRING,
+                type=FieldType.STRING,
             ),
-            TableField(name="last_updated_col", type=BigQueryFieldType.TIMESTAMP),
+            TableField(name="last_updated_col", type=FieldType.TIMESTAMP),
         ]
     )
     mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, None)
@@ -217,9 +217,9 @@ def test_snapshot_with_timestamp_strategy_with_missing_updated_at_column() -> No
         fields=[
             TableField(
                 name="a",
-                type=BigQueryFieldType.STRING,
+                type=FieldType.STRING,
             ),
-            TableField(name="last_updated_col", type=BigQueryFieldType.TIMESTAMP),
+            TableField(name="last_updated_col", type=FieldType.TIMESTAMP),
         ]
     )
     mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, None)
@@ -256,9 +256,9 @@ def test_snapshot_with_list_of_unique_key_columns_raises_error() -> None:
         fields=[
             TableField(
                 name="a",
-                type=BigQueryFieldType.STRING,
+                type=FieldType.STRING,
             ),
-            TableField(name="last_updated_col", type=BigQueryFieldType.TIMESTAMP),
+            TableField(name="last_updated_col", type=FieldType.TIMESTAMP),
         ]
     )
     mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, None)

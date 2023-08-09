@@ -4,7 +4,7 @@ from typing import List, Optional
 import agate as ag
 from agate import data_types
 
-from dbt_dry_run.models import BigQueryFieldType, Table, TableField
+from dbt_dry_run.models import FieldType, Table, TableField
 from dbt_dry_run.models.manifest import Node
 from dbt_dry_run.node_runner import NodeRunner
 from dbt_dry_run.results import DryRunResult, DryRunStatus
@@ -13,13 +13,13 @@ from dbt_dry_run.results import DryRunResult, DryRunStatus
 class SeedRunner(NodeRunner):
     resource_type = ("seed",)
 
-    DEFAULT_TYPE = BigQueryFieldType.STRING
+    DEFAULT_TYPE = FieldType.STRING
     TYPE_MAP = {
-        data_types.Text: BigQueryFieldType.STRING,
-        data_types.Number: BigQueryFieldType.FLOAT64,
-        data_types.Boolean: BigQueryFieldType.BOOLEAN,
-        data_types.Date: BigQueryFieldType.DATE,
-        data_types.DateTime: BigQueryFieldType.DATETIME,
+        data_types.Text: FieldType.STRING,
+        data_types.Number: FieldType.FLOAT64,
+        data_types.Boolean: FieldType.BOOLEAN,
+        data_types.Date: FieldType.DATE,
+        data_types.DateTime: FieldType.DATETIME,
     }
 
     def run(self, node: Node) -> DryRunResult:

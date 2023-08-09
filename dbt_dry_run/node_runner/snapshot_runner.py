@@ -2,7 +2,7 @@ from typing import Set
 
 from dbt_dry_run.exception import SnapshotConfigException, UpstreamFailedException
 from dbt_dry_run.literals import insert_dependant_sql_literals
-from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
+from dbt_dry_run.models import FieldMode, FieldType, Table, TableField
 from dbt_dry_run.models.manifest import Node
 from dbt_dry_run.node_runner import NodeRunner
 from dbt_dry_run.results import DryRunResult, DryRunStatus
@@ -17,23 +17,23 @@ def _check_cols_missing(node: Node, table: Table) -> Set[str]:
 DBT_SNAPSHOT_FIELDS = [
     TableField(
         name="dbt_scd_id",
-        type=BigQueryFieldType.STRING,
-        mode=BigQueryFieldMode.NULLABLE,
+        type=FieldType.STRING,
+        mode=FieldMode.NULLABLE,
     ),
     TableField(
         name="dbt_updated_at",
-        type=BigQueryFieldType.TIMESTAMP,
-        mode=BigQueryFieldMode.NULLABLE,
+        type=FieldType.TIMESTAMP,
+        mode=FieldMode.NULLABLE,
     ),
     TableField(
         name="dbt_valid_from",
-        type=BigQueryFieldType.TIMESTAMP,
-        mode=BigQueryFieldMode.NULLABLE,
+        type=FieldType.TIMESTAMP,
+        mode=FieldMode.NULLABLE,
     ),
     TableField(
         name="dbt_valid_to",
-        type=BigQueryFieldType.TIMESTAMP,
-        mode=BigQueryFieldMode.NULLABLE,
+        type=FieldType.TIMESTAMP,
+        mode=FieldMode.NULLABLE,
     ),
 ]
 

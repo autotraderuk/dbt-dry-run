@@ -2,7 +2,7 @@ from typing import List, Optional, Union
 
 from pydantic import BaseModel, Field
 
-from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, TableField
+from dbt_dry_run.models import FieldMode, FieldType, TableField
 from dbt_dry_run.models.manifest import Node, NodeConfig, NodeDependsOn, NodeMeta
 from dbt_dry_run.scheduler import ManifestScheduler
 
@@ -51,8 +51,8 @@ SimpleNode.update_forward_refs()
 
 def field_with_name(
     name: str,
-    type_: BigQueryFieldType = BigQueryFieldType.STRING,
-    mode: BigQueryFieldMode = BigQueryFieldMode.NULLABLE,
+    type_: FieldType = FieldType.STRING,
+    mode: FieldMode = FieldMode.NULLABLE,
     fields: Optional[List[TableField]] = None,
 ) -> TableField:
     return TableField(name=name, type=type_, mode=mode, fields=fields)

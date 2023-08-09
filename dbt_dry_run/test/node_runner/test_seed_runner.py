@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 from dbt_dry_run import flags
 from dbt_dry_run.exception import NotCompiledException
 from dbt_dry_run.flags import Flags
-from dbt_dry_run.models import BigQueryFieldType
+from dbt_dry_run.models import FieldType
 from dbt_dry_run.models.manifest import Node
 from dbt_dry_run.node_runner.seed_runner import SeedRunner
 from dbt_dry_run.results import DryRunResult, DryRunStatus
@@ -63,7 +63,7 @@ def test_seed_runner_infers_dates(tmp_path: Path) -> None:
     result = assert_success_and_columns_equal(node, expected_columns)
 
     assert result.table
-    assert result.table.fields[2].type_ == BigQueryFieldType.DATE
+    assert result.table.fields[2].type_ == FieldType.DATE
 
 
 def test_validate_node_returns_none_if_node_is_not_compiled() -> None:

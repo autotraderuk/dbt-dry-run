@@ -8,13 +8,13 @@ from pydantic import Field
 from pydantic.main import BaseModel
 
 
-class BigQueryFieldMode(str, Enum):
+class FieldMode(str, Enum):
     NULLABLE = "NULLABLE"
     REQUIRED = "REQUIRED"
     REPEATED = "REPEATED"
 
 
-class BigQueryFieldType(str, Enum):
+class FieldType(str, Enum):
     STRING = "STRING"
     BYTES = "BYTES"
     INTEGER = "INTEGER"
@@ -38,14 +38,14 @@ class BigQueryFieldType(str, Enum):
 
 class TableField(BaseModel):
     name: str
-    type_: BigQueryFieldType = Field(..., alias="type")
-    mode: Optional[BigQueryFieldMode]
+    type_: FieldType = Field(..., alias="type")
+    mode: Optional[FieldMode]
     fields: Optional[List["TableField"]] = None
     description: Optional[str]
 
     @pydantic.validator("type_", pre=True)
-    def validate_type_field(cls, field: str) -> BigQueryFieldType:
-        return BigQueryFieldType(field)
+    def validate_type_field(cls, field: str) -> FieldType:
+        return FieldType(field)
 
 
 TableField.update_forward_refs()

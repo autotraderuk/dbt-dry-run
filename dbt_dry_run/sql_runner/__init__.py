@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import Optional, Tuple
 
-from dbt_dry_run.models import Table
+from dbt_dry_run.models import Table, TableField, FieldType
 from dbt_dry_run.models.manifest import Node
 from dbt_dry_run.results import DryRunStatus
 
@@ -20,11 +20,19 @@ class SQLRunner(metaclass=ABCMeta):
         ...
 
     @abstractmethod
+    def get_example_value(self, type_: FieldType) -> str:
+        ...
+
+    @abstractmethod
+    def get_sql_literal_from_field(self, field: TableField) -> str:
+        ...
+
+    @abstractmethod
     def get_node_schema(self, node: Node) -> Optional[Table]:
         ...
 
     @abstractmethod
     def query(
-        self, sql: str
+            self, sql: str
     ) -> Tuple[DryRunStatus, Optional[Table], Optional[Exception]]:
         ...

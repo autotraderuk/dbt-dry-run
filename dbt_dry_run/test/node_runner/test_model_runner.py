@@ -8,7 +8,7 @@ from dbt_dry_run.exception import (
 )
 from dbt_dry_run.flags import Flags
 from dbt_dry_run.literals import enable_test_example_values
-from dbt_dry_run.models import BigQueryFieldType, Table, TableField
+from dbt_dry_run.models import FieldType, Table, TableField
 from dbt_dry_run.models.manifest import NodeConfig, PartitionBy
 from dbt_dry_run.node_runner.model_runner import ModelRunner
 from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
@@ -23,7 +23,7 @@ A_SIMPLE_TABLE = Table(
     fields=[
         TableField(
             name="a",
-            type=BigQueryFieldType.STRING,
+            type=FieldType.STRING,
         )
     ]
 )
@@ -42,7 +42,7 @@ def test_model_with_no_dependencies_runs_sql() -> None:
         fields=[
             TableField(
                 name="a",
-                type=BigQueryFieldType.STRING,
+                type=FieldType.STRING,
             )
         ]
     )
@@ -195,7 +195,7 @@ def test_incremental_model_that_does_not_exist_returns_dry_run_schema() -> None:
         fields=[
             TableField(
                 name="a",
-                type=BigQueryFieldType.STRING,
+                type=FieldType.STRING,
             )
         ]
     )
@@ -223,27 +223,27 @@ def test_incremental_model_that_exists_and_has_a_column_removed_and_readded_with
     mock_sql_runner = MagicMock()
     target_table = Table(
         fields=[
-            TableField(name="a", type=BigQueryFieldType.STRING),
-            TableField(name="b", type=BigQueryFieldType.STRING),
+            TableField(name="a", type=FieldType.STRING),
+            TableField(name="b", type=FieldType.STRING),
         ]
     )
     predicted_table = Table(
         fields=[
             TableField(
                 name="a",
-                type=BigQueryFieldType.STRING,
+                type=FieldType.STRING,
             ),
             TableField(
                 name="c",
-                type=BigQueryFieldType.STRING,
+                type=FieldType.STRING,
             ),
         ]
     )
     expected_table = Table(
         fields=[
-            TableField(name="a", type=BigQueryFieldType.STRING),
-            TableField(name="b", type=BigQueryFieldType.STRING),
-            TableField(name="c", type=BigQueryFieldType.STRING),
+            TableField(name="a", type=FieldType.STRING),
+            TableField(name="b", type=FieldType.STRING),
+            TableField(name="c", type=FieldType.STRING),
         ]
     )
 
@@ -271,16 +271,16 @@ def test_incremental_model_that_exists_and_has_a_column_removed_and_readded_with
 
 def test_incremental_model_that_exists_and_has_a_column_added_does_nothing() -> None:
     mock_sql_runner = MagicMock()
-    target_table = Table(fields=[TableField(name="a", type=BigQueryFieldType.STRING)])
+    target_table = Table(fields=[TableField(name="a", type=FieldType.STRING)])
     predicted_table = Table(
         fields=[
             TableField(
                 name="a",
-                type=BigQueryFieldType.STRING,
+                type=FieldType.STRING,
             ),
             TableField(
                 name="b",
-                type=BigQueryFieldType.STRING,
+                type=FieldType.STRING,
             ),
         ]
     )
@@ -310,19 +310,19 @@ def test_incremental_model_that_exists_and_syncs_all_columns() -> None:
     mock_sql_runner = MagicMock()
     target_table = Table(
         fields=[
-            TableField(name="a", type=BigQueryFieldType.STRING),
-            TableField(name="b", type=BigQueryFieldType.STRING),
+            TableField(name="a", type=FieldType.STRING),
+            TableField(name="b", type=FieldType.STRING),
         ]
     )
     predicted_table = Table(
         fields=[
             TableField(
                 name="a",
-                type=BigQueryFieldType.STRING,
+                type=FieldType.STRING,
             ),
             TableField(
                 name="c",
-                type=BigQueryFieldType.STRING,
+                type=FieldType.STRING,
             ),
         ]
     )
@@ -355,19 +355,19 @@ def test_incremental_model_that_exists_and_fails_when_schema_changed() -> None:
     mock_sql_runner = MagicMock()
     target_table = Table(
         fields=[
-            TableField(name="a", type=BigQueryFieldType.STRING),
-            TableField(name="b", type=BigQueryFieldType.STRING),
+            TableField(name="a", type=FieldType.STRING),
+            TableField(name="b", type=FieldType.STRING),
         ]
     )
     predicted_table = Table(
         fields=[
             TableField(
                 name="a",
-                type=BigQueryFieldType.STRING,
+                type=FieldType.STRING,
             ),
             TableField(
                 name="c",
-                type=BigQueryFieldType.STRING,
+                type=FieldType.STRING,
             ),
         ]
     )
@@ -397,19 +397,19 @@ def test_incremental_model_that_exists_and_success_when_schema_not_changed() -> 
     mock_sql_runner = MagicMock()
     target_table = Table(
         fields=[
-            TableField(name="a", type=BigQueryFieldType.STRING),
-            TableField(name="b", type=BigQueryFieldType.STRING),
+            TableField(name="a", type=FieldType.STRING),
+            TableField(name="b", type=FieldType.STRING),
         ]
     )
     predicted_table = Table(
         fields=[
             TableField(
                 name="a",
-                type=BigQueryFieldType.STRING,
+                type=FieldType.STRING,
             ),
             TableField(
                 name="b",
-                type=BigQueryFieldType.STRING,
+                type=FieldType.STRING,
             ),
         ]
     )

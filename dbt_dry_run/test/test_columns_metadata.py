@@ -9,7 +9,7 @@ from dbt_dry_run.columns_metadata import (
 )
 from dbt_dry_run.exception import InvalidColumnSpecification, UnknownDataTypeException
 from dbt_dry_run.literals import enable_test_example_values
-from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
+from dbt_dry_run.models import FieldMode, FieldType, Table, TableField
 from dbt_dry_run.models.manifest import ManifestColumn
 from dbt_dry_run.test.utils import field_with_name
 
@@ -29,7 +29,7 @@ def assert_columns_result_in_table(
     ), f"SQL Literal:\n {actual} does not equal expected:\n {expected}"
 
 
-def field_type_as_repeated(field_type: BigQueryFieldType) -> str:
+def field_type_as_repeated(field_type: FieldType) -> str:
     return field_type + REPEATED_SUFFIX
 
 
@@ -77,18 +77,18 @@ def test_expand_table_fields_with_nested_struct() -> None:
 
 def test_map_columns_to_table_handles_flat_schema() -> None:
     columns = [
-        ManifestColumn(name="a", data_type=BigQueryFieldType.STRING),
-        ManifestColumn(name="b", data_type=BigQueryFieldType.NUMERIC),
+        ManifestColumn(name="a", data_type=FieldType.STRING),
+        ManifestColumn(name="b", data_type=FieldType.NUMERIC),
     ]
     table = Table(
         fields=[
             TableField(
-                name="a", type=BigQueryFieldType.STRING, mode=BigQueryFieldMode.NULLABLE
+                name="a", type=FieldType.STRING, mode=FieldMode.NULLABLE
             ),
             TableField(
                 name="b",
-                type=BigQueryFieldType.NUMERIC,
-                mode=BigQueryFieldMode.NULLABLE,
+                type=FieldType.NUMERIC,
+                mode=FieldMode.NULLABLE,
             ),
         ]
     )
@@ -97,20 +97,20 @@ def test_map_columns_to_table_handles_flat_schema() -> None:
 
 def test_map_columns_to_table_handles_repeated_fields() -> None:
     columns = [
-        ManifestColumn(name="a", data_type=BigQueryFieldType.STRING),
+        ManifestColumn(name="a", data_type=FieldType.STRING),
         ManifestColumn(
-            name="b", data_type=field_type_as_repeated(BigQueryFieldType.NUMERIC)
+            name="b", data_type=field_type_as_repeated(FieldType.NUMERIC)
         ),
     ]
     table = Table(
         fields=[
             TableField(
-                name="a", type=BigQueryFieldType.STRING, mode=BigQueryFieldMode.NULLABLE
+                name="a", type=FieldType.STRING, mode=FieldMode.NULLABLE
             ),
             TableField(
                 name="b",
-                type=BigQueryFieldType.NUMERIC,
-                mode=BigQueryFieldMode.REPEATED,
+                type=FieldType.NUMERIC,
+                mode=FieldMode.REPEATED,
             ),
         ]
     )
@@ -119,30 +119,30 @@ def test_map_columns_to_table_handles_repeated_fields() -> None:
 
 def test_map_columns_to_table_handles_record() -> None:
     columns = [
-        ManifestColumn(name="a", data_type=BigQueryFieldType.STRING),
-        ManifestColumn(name="b", data_type=BigQueryFieldType.RECORD),
-        ManifestColumn(name="b.c", data_type=BigQueryFieldType.STRING),
-        ManifestColumn(name="b.d", data_type=BigQueryFieldType.NUMERIC),
+        ManifestColumn(name="a", data_type=FieldType.STRING),
+        ManifestColumn(name="b", data_type=FieldType.RECORD),
+        ManifestColumn(name="b.c", data_type=FieldType.STRING),
+        ManifestColumn(name="b.d", data_type=FieldType.NUMERIC),
     ]
     table = Table(
         fields=[
             TableField(
-                name="a", type=BigQueryFieldType.STRING, mode=BigQueryFieldMode.NULLABLE
+                name="a", type=FieldType.STRING, mode=FieldMode.NULLABLE
             ),
             TableField(
                 name="b",
-                type=BigQueryFieldType.RECORD,
-                mode=BigQueryFieldMode.NULLABLE,
+                type=FieldType.RECORD,
+                mode=FieldMode.NULLABLE,
                 fields=[
                     TableField(
                         name="c",
-                        type=BigQueryFieldType.STRING,
-                        mode=BigQueryFieldMode.NULLABLE,
+                        type=FieldType.STRING,
+                        mode=FieldMode.NULLABLE,
                     ),
                     TableField(
                         name="d",
-                        type=BigQueryFieldType.NUMERIC,
-                        mode=BigQueryFieldMode.NULLABLE,
+                        type=FieldType.NUMERIC,
+                        mode=FieldMode.NULLABLE,
                     ),
                 ],
             ),
@@ -153,8 +153,8 @@ def test_map_columns_to_table_handles_record() -> None:
 
 def test_map_columns_to_table_raises_error_when_using_unknown_data_type() -> None:
     columns = [
-        ManifestColumn(name="a", data_type=BigQueryFieldType.STRING + "_WRONG"),
-        ManifestColumn(name="b", data_type=BigQueryFieldType.STRING),
+        ManifestColumn(name="a", data_type=FieldType.STRING + "_WRONG"),
+        ManifestColumn(name="b", data_type=FieldType.STRING),
     ]
     with pytest.raises(UnknownDataTypeException):
         map_columns_to_table(get_column_map(columns))
@@ -162,9 +162,9 @@ def test_map_columns_to_table_raises_error_when_using_unknown_data_type() -> Non
 
 def test_map_columns_to_table_raises_error_when_struct_root_not_defined() -> None:
     columns = [
-        ManifestColumn(name="a", data_type=BigQueryFieldType.STRING),
-        ManifestColumn(name="b.c", data_type=BigQueryFieldType.STRING),
-        ManifestColumn(name="b.d", data_type=BigQueryFieldType.NUMERIC),
+        ManifestColumn(name="a", data_type=FieldType.STRING),
+        ManifestColumn(name="b.c", data_type=FieldType.STRING),
+        ManifestColumn(name="b.d", data_type=FieldType.NUMERIC),
     ]
     with pytest.raises(InvalidColumnSpecification):
         map_columns_to_table(get_column_map(columns))
