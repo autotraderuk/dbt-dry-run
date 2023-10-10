@@ -57,13 +57,13 @@ def test_single_column_ignore_raises_error_if_column_type_changes(
 
 
 def test_full_refresh_on_incremental_should_use_the_model_schema(
-    compiled_project: ProjectContext,
+    compiled_project_full_refresh: ProjectContext,
 ):
     node_id = "model.test_incremental.single_column_full_refresh"
-    manifest_node = compiled_project.manifest.nodes[node_id]
+    manifest_node = compiled_project_full_refresh.manifest.nodes[node_id]
     columns = ["existing_column STRING"]
-    with compiled_project.create_state(manifest_node, columns):
-        run_result = compiled_project.dry_run(full_refresh=True)
+    with compiled_project_full_refresh.create_state(manifest_node, columns):
+        run_result = compiled_project_full_refresh.dry_run(full_refresh=True)
         assert_report_produced(run_result)
         report_node = get_report_node_by_id(
             run_result.report,

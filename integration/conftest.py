@@ -19,12 +19,13 @@ class DryRunResult:
 
 
 class ProjectContext:
-    def __init__(self, project_dir: str, profiles_dir: str, target: str):
+    def __init__(self, project_dir: str, profiles_dir: str, target: str, target_path: str):
         self.project_dir = project_dir
         self.profiles_dir = profiles_dir
         self.target = target
+        self.target_path = target_path
         args = DbtArgs(
-            profiles_dir=profiles_dir, project_dir=project_dir, target=target
+            profiles_dir=profiles_dir, target_path=target_path, project_dir=project_dir, target=target
         )
         self._project = ProjectService(args)
         self._manifest: Optional[Manifest] = None
@@ -57,8 +58,7 @@ class ProjectContext:
         return self._manifest
 
     def dry_run(self, skip_not_compiled: bool = False, full_refresh: bool = False) -> DryRunResult:
-        target_dir = os.path.join(self.project_dir, "target")
-        report_path = os.path.join(target_dir, "dry_run_output.json")
+        report_path = os.path.join(self.target_path, "dry_run_output.json")
         if os.path.exists(report_path):
             os.remove(report_path)
 
@@ -72,6 +72,8 @@ class ProjectContext:
             self.profiles_dir,
             "--target",
             self.target,
+            "--target-path",
+            self.target_path,
             "--report-path",
             report_path,
         ]
@@ -116,26 +118,40 @@ def dry_run_result(compiled_project: ProjectContext) -> DryRunResult:
 
 @pytest.fixture(scope="module")
 def compiled_project(request: FixtureRequest) -> ProjectContext:
+    return _compiled_project(request, full_refresh=False)
+
+
+@pytest.fixture(scope="module")
+def compiled_project_full_refresh(request: FixtureRequest) -> ProjectContext:
+    return _compiled_project(request, full_refresh=True)
+
+
+def _compiled_project(request: FixtureRequest, full_refresh: bool = False) -> ProjectContext:
     folder = request.fspath.dirname
     profiles_dir = os.path.join(request.config.rootdir, "integration/profiles")
     target_path = os.path.join(folder, "target")
+    if full_refresh:
+        target_path = os.path.join(folder, "target-full-refresh")
     if running_in_github():
         target = "integration-github"
     else:
         target = "integration-local"
+    dbt_args = [
+        "dbt",
+        "compile",
+        "--project-dir",
+        f"{folder}",
+        "--profiles-dir",
+        profiles_dir,
+        "--target",
+        target,
+        "--target-path",
+        target_path,
+    ]
+    if full_refresh:
+        dbt_args.append("--full-refresh")
     run_dbt = subprocess.run(
-        [
-            "dbt",
-            "compile",
-            "--project-dir",
-            f"{folder}",
-            "--profiles-dir",
-            profiles_dir,
-            "--target",
-            target,
-            "--target-path",
-            target_path,
-        ],
+        dbt_args,
         capture_output=True,
     )
     test_display_name = f"{request.keywords.node.name}/{request.node.name}"
@@ -148,4 +164,4 @@ def compiled_project(request: FixtureRequest) -> ProjectContext:
             f"Fix dbt compilation error to run test suite!",
             run_dbt.returncode,
         )
-    return ProjectContext(project_dir=folder, profiles_dir=profiles_dir, target=target)
+    return ProjectContext(project_dir=folder, profiles_dir=profiles_dir, target=target, target_path=target_path)
