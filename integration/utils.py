@@ -17,7 +17,9 @@ def assert_report_success(result: DryRunResult) -> Report:
 
 
 def assert_report_failure(result: DryRunResult) -> Report:
-    assert result.report
+    assert result.report, f"Report is missing: {result.process.stdout.decode('utf-8')}\n{result.process.stderr.decode('utf-8')}"
+    print(result.process.stdout.decode('utf-8'))
+    print(result.process.stderr.decode('utf-8'))
     assert not result.report.success
     return result.report
 

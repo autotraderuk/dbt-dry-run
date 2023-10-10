@@ -100,6 +100,14 @@ class ModelRunner(NodeRunner):
 
         return sql_statement
 
+    def _get_full_refresh_config(self, node) -> bool:
+        full_refresh = False
+        if flags.FULL_REFRESH:
+            full_refresh = True
+        if node.config.full_refresh is not None:
+            full_refresh = node.config.full_refresh
+        return full_refresh
+
     def run(self, node: Node) -> DryRunResult:
         try:
             run_sql = insert_dependant_sql_literals(node, self._results)
@@ -107,14 +115,16 @@ class ModelRunner(NodeRunner):
             return DryRunResult(node, None, DryRunStatus.FAILURE, e)
 
         run_sql = self._modify_sql(node, run_sql)
-        status, predicted_table, exception = self._sql_runner.query(run_sql)
+        status, model_schema, exception = self._sql_runner.query(run_sql)
 
-        result = DryRunResult(node, predicted_table, status, exception)
+        result = DryRunResult(node, model_schema, status, exception)
+
+        full_refresh = self._get_full_refresh_config(node)
 
         if (
             result.status == DryRunStatus.SUCCESS
             and node.config.materialized == "incremental"
-            and not flags.FULL_REFRESH
+            and not full_refresh
         ):
             target_table = self._sql_runner.get_node_schema(node)
             if target_table:

@@ -68,6 +68,7 @@ class NodeConfig(BaseModel):
     check_cols: Optional[Union[Literal["all"], List[str]]]
     partition_by: Optional[PartitionBy]
     meta: Optional[NodeMeta]
+    full_refresh: Optional[bool]
 
 
 class ManifestColumn(BaseModel):
