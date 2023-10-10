@@ -56,7 +56,7 @@ class ProjectContext:
         self._manifest = self._project.get_dbt_manifest()
         return self._manifest
 
-    def dry_run(self, skip_not_compiled: bool = False) -> DryRunResult:
+    def dry_run(self, skip_not_compiled: bool = False, full_refresh: bool = False) -> DryRunResult:
         target_dir = os.path.join(self.project_dir, "target")
         report_path = os.path.join(target_dir, "dry_run_output.json")
         if os.path.exists(report_path):
@@ -77,6 +77,8 @@ class ProjectContext:
         ]
         if skip_not_compiled:
             dry_run_args.append("--skip-not-compiled")
+        if full_refresh:
+            dry_run_args.append("--full-refresh")
         run_dry_run = subprocess.run(dry_run_args, capture_output=True)
 
         if os.path.exists(report_path):
@@ -92,14 +94,19 @@ def running_in_github() -> bool:
 
 
 def _dry_run_result(
-    project: ProjectContext, skip_not_compiled: bool = False
+    project: ProjectContext, skip_not_compiled: bool = False, full_refresh: bool = False
 ) -> DryRunResult:
-    return project.dry_run(skip_not_compiled)
+    return project.dry_run(skip_not_compiled, full_refresh)
 
 
 @pytest.fixture(scope="module")
 def dry_run_result_skip_not_compiled(compiled_project: ProjectContext) -> DryRunResult:
-    yield _dry_run_result(compiled_project, True)
+    yield _dry_run_result(compiled_project, skip_not_compiled=True)
+
+
+@pytest.fixture(scope="module")
+def dry_run_result_full_refresh(compiled_project: ProjectContext) -> DryRunResult:
+    yield _dry_run_result(compiled_project, full_refresh=True)
 
 
 @pytest.fixture(scope="module")

@@ -6,12 +6,12 @@ from integration.conftest import DryRunResult
 
 
 def assert_report_produced(result: DryRunResult) -> Report:
-    assert result.report
+    assert result.report, f"Report is missing: {result.process.stdout.decode()}\n{result.process.stderr.decode()}"
     return result.report
 
 
 def assert_report_success(result: DryRunResult) -> Report:
-    assert result.report, f"Report is missing: {result.process.stdout}"
+    assert result.report, f"Report is missing: {result.process.stdout.decode()}\n{result.process.stderr.decode()}"
     assert result.report.success, "Expected success but got failure"
     return result.report
 

@@ -5,6 +5,7 @@ from integration.utils import (
     assert_report_node_has_columns,
     get_report_node_by_id,
     assert_node_failed_with_error,
+    assert_report_produced,
 )
 
 
@@ -16,6 +17,7 @@ def test_single_column_ignore_retains_schema_in_target(
     columns = ["my_string2 STRING"]
     with compiled_project.create_state(manifest_node, columns):
         run_result = compiled_project.dry_run()
+        assert_report_produced(run_result)
         report_node = get_report_node_by_id(
             run_result.report,
             node_id,
@@ -31,6 +33,7 @@ def test_single_column_append_new_columns_has_both_columns(
     columns = ["my_string2 STRING"]
     with compiled_project.create_state(manifest_node, columns):
         run_result = compiled_project.dry_run()
+        assert_report_produced(run_result)
         report_node = get_report_node_by_id(
             run_result.report,
             node_id,
@@ -49,4 +52,21 @@ def test_single_column_ignore_raises_error_if_column_type_changes(
     columns = ["my_string NUMERIC"]
     with compiled_project.create_state(manifest_node, columns):
         run_result = compiled_project.dry_run()
+        assert_report_produced(run_result)
         assert_node_failed_with_error(run_result.report, node_id, "BadRequest")
+
+
+def test_full_refresh_on_incremental_should_use_the_model_schema(
+    compiled_project: ProjectContext,
+):
+    node_id = "model.test_incremental.single_column_full_refresh"
+    manifest_node = compiled_project.manifest.nodes[node_id]
+    columns = ["existing_column STRING"]
+    with compiled_project.create_state(manifest_node, columns):
+        run_result = compiled_project.dry_run(full_refresh=True)
+        assert_report_produced(run_result)
+        report_node = get_report_node_by_id(
+            run_result.report,
+            node_id,
+        )
+        assert_report_node_has_columns(report_node, {"existing_column", "new_column"})
