@@ -41,9 +41,6 @@ def test_single_column_append_new_columns_has_both_columns(
         assert_report_node_has_columns(report_node, {"my_string", "my_string2"})
 
 
-@pytest.mark.xfail(
-    reason="False positive if column type of incremental changes: https://github.com/autotraderuk/dbt-dry-run/issues/26"
-)
 def test_single_column_ignore_raises_error_if_column_type_changes(
     compiled_project: ProjectContext,
 ):
