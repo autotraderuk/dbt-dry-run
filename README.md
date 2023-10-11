@@ -62,6 +62,7 @@ The full CLI help is shown below, anything prefixed with [dbt] can be used in th
      --vars TEXT                     [dbt] CLI Variables to pass to dbt
                                      [default: {}]
      --target TEXT                   [dbt] Target profile
+     --target-path TEXT              [dbt] Target path
      --verbose / --no-verbose        Output verbose error messages  [default: no-
                                      verbose]
      --report-path TEXT              Json path to dump report to
@@ -71,6 +72,7 @@ The full CLI help is shown below, anything prefixed with [dbt] can be used in th
                                      recommended option. The dbt manifest should
                                      generally be compiled with `--select *` to
                                      ensure good  coverage
+     --full-refresh                  [dbt] Full refresh
      --extra-check-columns-metadata-key TEXT
                                      An extra metadata key that can be used in
                                      place of `dry_run.check_columns` for

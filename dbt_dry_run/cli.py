@@ -20,10 +20,12 @@ def dry_run(
     project_dir: str,
     profiles_dir: str,
     target: Optional[str],
+    target_path: Optional[str],
     verbose: bool = False,
     report_path: Optional[str] = None,
     cli_vars: str = "{}",
     skip_not_compiled: bool = False,
+    full_refresh: bool = False,
     extra_check_columns_metadata_key: Optional[str] = None,
     threads: Optional[int] = None,
 ) -> int:
@@ -31,6 +33,7 @@ def dry_run(
     set_flags(
         Flags(
             skip_not_compiled=skip_not_compiled,
+            full_refresh=full_refresh,
             extra_check_columns_metadata_key=extra_check_columns_metadata_key,
         )
     )
@@ -38,6 +41,7 @@ def dry_run(
         project_dir=project_dir,
         profiles_dir=os.path.abspath(profiles_dir),
         target=target,
+        target_path=target_path,
         vars=cli_vars_parsed,
         threads=threads,
     )
@@ -95,12 +99,14 @@ def run(
     ),
     vars: str = Option("{}", help="[dbt] CLI Variables to pass to dbt"),
     target: Optional[str] = Option(None, help="[dbt] Target profile"),
+    target_path: Optional[str] = Option(None, help="[dbt] Target path"),
     threads: Optional[int] = Option(None, help=_THREADS_HELP),
     verbose: bool = Option(False, help="Output verbose error messages"),
     report_path: Optional[str] = Option(None, help="Json path to dump report to"),
     skip_not_compiled: bool = Option(
         False, "--skip-not-compiled", help=_SKIP_NOT_COMPILED_HELP
     ),
+    full_refresh: bool = Option(False, "--full-refresh", help="[dbt] Full refresh"),
     extra_check_columns_metadata_key: Optional[str] = Option(
         None,
         "--extra-check-columns-metadata-key",
@@ -112,10 +118,12 @@ def run(
         project_dir,
         profiles_dir,
         target,
+        target_path,
         verbose,
         report_path,
         vars,
         skip_not_compiled,
+        full_refresh,
         extra_check_columns_metadata_key,
         threads,
     )

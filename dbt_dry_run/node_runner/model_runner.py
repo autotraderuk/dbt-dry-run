@@ -1,5 +1,6 @@
 from typing import Callable, Dict, Optional
 
+from dbt_dry_run import flags
 from dbt_dry_run.exception import SchemaChangeException, UpstreamFailedException
 from dbt_dry_run.literals import insert_dependant_sql_literals
 from dbt_dry_run.models import Table
@@ -100,6 +101,12 @@ class ModelRunner(NodeRunner):
 
         return sql_statement
 
+    def _get_full_refresh_config(self, node: Node) -> bool:
+        # precedence defined here - https://docs.getdbt.com/reference/resource-configs/full_refresh
+        if node.config.full_refresh is not None:
+            return node.config.full_refresh
+        return flags.FULL_REFRESH
+
     def run(self, node: Node) -> DryRunResult:
         try:
             run_sql = insert_dependant_sql_literals(node, self._results)
@@ -107,13 +114,16 @@ class ModelRunner(NodeRunner):
             return DryRunResult(node, None, DryRunStatus.FAILURE, e)
 
         run_sql = self._modify_sql(node, run_sql)
-        status, predicted_table, exception = self._sql_runner.query(run_sql)
+        status, model_schema, exception = self._sql_runner.query(run_sql)
 
-        result = DryRunResult(node, predicted_table, status, exception)
+        result = DryRunResult(node, model_schema, status, exception)
+
+        full_refresh = self._get_full_refresh_config(node)
 
         if (
             result.status == DryRunStatus.SUCCESS
             and node.config.materialized == "incremental"
+            and not full_refresh
         ):
             target_table = self._sql_runner.get_node_schema(node)
             if target_table:

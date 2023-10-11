@@ -19,6 +19,7 @@ class DbtArgs:
     project_dir: str = os.getcwd()
     profile: Optional[str] = None
     target: Optional[str] = None
+    target_path: Optional[str] = None
     vars: Dict[str, Any] = field(default_factory=dict)
     threads: Optional[int] = None
 

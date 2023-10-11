@@ -351,6 +351,149 @@ def test_incremental_model_that_exists_and_syncs_all_columns() -> None:
     assert_result_has_table(expected_table, result)
 
 
+def test_usage_of_predicted_table_and_target_table_when_full_refresh_flag_is_false(
+    default_flags: flags.Flags,
+) -> None:
+    flags.set_flags(flags.Flags(full_refresh=False))
+    mock_sql_runner = MagicMock()
+    target_table = Table(
+        fields=[
+            TableField(name="a", type=BigQueryFieldType.STRING),
+            TableField(name="b", type=BigQueryFieldType.STRING),
+        ]
+    )
+    predicted_table = Table(
+        fields=[
+            TableField(
+                name="a",
+                type=BigQueryFieldType.STRING,
+            ),
+            TableField(
+                name="c",
+                type=BigQueryFieldType.STRING,
+            ),
+        ]
+    )
+
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, predicted_table, None)
+    mock_sql_runner.get_node_schema.return_value = target_table
+
+    node_with_no_full_refresh_config = SimpleNode(
+        unique_id="node1",
+        depends_on=[],
+        resource_type=ManifestScheduler.MODEL,
+        table_config=NodeConfig(materialized="incremental"),
+    ).to_node()
+    node_with_no_full_refresh_config.depends_on.deep_nodes = []
+    node_with_full_refresh_set_to_true = SimpleNode(
+        unique_id="node2",
+        depends_on=[],
+        resource_type=ManifestScheduler.MODEL,
+        table_config=NodeConfig(materialized="incremental", full_refresh=True),
+    ).to_node()
+    node_with_full_refresh_set_to_true.depends_on.deep_nodes = []
+    node_with_full_refresh_set_to_false = SimpleNode(
+        unique_id="node3",
+        depends_on=[],
+        resource_type=ManifestScheduler.MODEL,
+        table_config=NodeConfig(materialized="incremental", full_refresh=False),
+    ).to_node()
+    node_with_full_refresh_set_to_false.depends_on.deep_nodes = []
+
+    ModelRunner(mock_sql_runner, Results()).run(node_with_no_full_refresh_config)
+    mock_sql_runner.query.assert_called_with(
+        node_with_no_full_refresh_config.compiled_code
+    )
+    assert len(mock_sql_runner.get_node_schema.call_args_list) == 1
+    mock_sql_runner.get_node_schema.assert_called_with(node_with_no_full_refresh_config)
+
+    ModelRunner(mock_sql_runner, Results()).run(node_with_full_refresh_set_to_true)
+    mock_sql_runner.query.assert_called_with(
+        node_with_full_refresh_set_to_true.compiled_code
+    )
+    assert len(mock_sql_runner.get_node_schema.call_args_list) == 1
+
+    ModelRunner(mock_sql_runner, Results()).run(node_with_full_refresh_set_to_false)
+    mock_sql_runner.query.assert_called_with(
+        node_with_full_refresh_set_to_false.compiled_code
+    )
+    assert len(mock_sql_runner.get_node_schema.call_args_list) == 2
+    mock_sql_runner.get_node_schema.assert_called_with(
+        node_with_full_refresh_set_to_false
+    )
+
+
+def test_usage_of_predicted_table_and_target_table_when_full_refresh_flag_is_true(
+    default_flags: flags.Flags,
+) -> None:
+    flags.set_flags(flags.Flags(full_refresh=True))
+    mock_sql_runner = MagicMock()
+    target_table = Table(
+        fields=[
+            TableField(name="a", type=BigQueryFieldType.STRING),
+            TableField(name="b", type=BigQueryFieldType.STRING),
+        ]
+    )
+    predicted_table = Table(
+        fields=[
+            TableField(
+                name="a",
+                type=BigQueryFieldType.STRING,
+            ),
+            TableField(
+                name="c",
+                type=BigQueryFieldType.STRING,
+            ),
+        ]
+    )
+
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, predicted_table, None)
+    mock_sql_runner.get_node_schema.return_value = target_table
+
+    node_with_no_full_refresh_config = SimpleNode(
+        unique_id="node1",
+        depends_on=[],
+        resource_type=ManifestScheduler.MODEL,
+        table_config=NodeConfig(materialized="incremental"),
+    ).to_node()
+    node_with_no_full_refresh_config.depends_on.deep_nodes = []
+    node_with_full_refresh_set_to_true = SimpleNode(
+        unique_id="node2",
+        depends_on=[],
+        resource_type=ManifestScheduler.MODEL,
+        table_config=NodeConfig(materialized="incremental", full_refresh=True),
+    ).to_node()
+    node_with_full_refresh_set_to_true.depends_on.deep_nodes = []
+    node_with_full_refresh_set_to_false = SimpleNode(
+        unique_id="node3",
+        depends_on=[],
+        resource_type=ManifestScheduler.MODEL,
+        table_config=NodeConfig(materialized="incremental", full_refresh=False),
+    ).to_node()
+    node_with_full_refresh_set_to_false.depends_on.deep_nodes = []
+
+    ModelRunner(mock_sql_runner, Results()).run(node_with_no_full_refresh_config)
+    mock_sql_runner.query.assert_called_with(
+        node_with_no_full_refresh_config.compiled_code
+    )
+    assert len(mock_sql_runner.get_node_schema.call_args_list) == 0
+
+    ModelRunner(mock_sql_runner, Results()).run(node_with_full_refresh_set_to_true)
+    mock_sql_runner.query.assert_called_with(
+        node_with_full_refresh_set_to_true.compiled_code
+    )
+    assert len(mock_sql_runner.get_node_schema.call_args_list) == 0
+
+    ModelRunner(mock_sql_runner, Results()).run(node_with_full_refresh_set_to_false)
+    mock_sql_runner.query.assert_called_with(
+        node_with_full_refresh_set_to_false.compiled_code
+    )
+    assert len(mock_sql_runner.get_node_schema.call_args_list) == 1
+    mock_sql_runner.get_node_schema.assert_called_with(
+        node_with_full_refresh_set_to_false
+    )
+
+
 def test_incremental_model_that_exists_and_fails_when_schema_changed() -> None:
     mock_sql_runner = MagicMock()
     target_table = Table(
