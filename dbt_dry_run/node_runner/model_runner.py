@@ -100,7 +100,7 @@ class ModelRunner(NodeRunner):
 
         return sql_statement
 
-    def _get_full_refresh_config(self, node) -> bool:
+    def _get_full_refresh_config(self, node: Node) -> bool:
         full_refresh = False
         if flags.FULL_REFRESH:
             full_refresh = True
