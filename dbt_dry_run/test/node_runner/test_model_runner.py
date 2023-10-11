@@ -352,7 +352,7 @@ def test_incremental_model_that_exists_and_syncs_all_columns() -> None:
 
 
 def test_usage_of_predicted_table_and_target_table_when_full_refresh_flag_is_false(
-        default_flags: flags.Flags,
+    default_flags: flags.Flags,
 ) -> None:
     flags.set_flags(flags.Flags(full_refresh=False))
     mock_sql_runner = MagicMock()
@@ -401,22 +401,30 @@ def test_usage_of_predicted_table_and_target_table_when_full_refresh_flag_is_fal
     node_with_full_refresh_set_to_false.depends_on.deep_nodes = []
 
     ModelRunner(mock_sql_runner, Results()).run(node_with_no_full_refresh_config)
-    mock_sql_runner.query.assert_called_with(node_with_no_full_refresh_config.compiled_code)
+    mock_sql_runner.query.assert_called_with(
+        node_with_no_full_refresh_config.compiled_code
+    )
     assert len(mock_sql_runner.get_node_schema.call_args_list) == 1
     mock_sql_runner.get_node_schema.assert_called_with(node_with_no_full_refresh_config)
 
     ModelRunner(mock_sql_runner, Results()).run(node_with_full_refresh_set_to_true)
-    mock_sql_runner.query.assert_called_with(node_with_full_refresh_set_to_true.compiled_code)
+    mock_sql_runner.query.assert_called_with(
+        node_with_full_refresh_set_to_true.compiled_code
+    )
     assert len(mock_sql_runner.get_node_schema.call_args_list) == 1
 
     ModelRunner(mock_sql_runner, Results()).run(node_with_full_refresh_set_to_false)
-    mock_sql_runner.query.assert_called_with(node_with_full_refresh_set_to_false.compiled_code)
+    mock_sql_runner.query.assert_called_with(
+        node_with_full_refresh_set_to_false.compiled_code
+    )
     assert len(mock_sql_runner.get_node_schema.call_args_list) == 2
-    mock_sql_runner.get_node_schema.assert_called_with(node_with_full_refresh_set_to_false)
+    mock_sql_runner.get_node_schema.assert_called_with(
+        node_with_full_refresh_set_to_false
+    )
 
 
 def test_usage_of_predicted_table_and_target_table_when_full_refresh_flag_is_true(
-        default_flags: flags.Flags,
+    default_flags: flags.Flags,
 ) -> None:
     flags.set_flags(flags.Flags(full_refresh=True))
     mock_sql_runner = MagicMock()
@@ -465,17 +473,25 @@ def test_usage_of_predicted_table_and_target_table_when_full_refresh_flag_is_tru
     node_with_full_refresh_set_to_false.depends_on.deep_nodes = []
 
     ModelRunner(mock_sql_runner, Results()).run(node_with_no_full_refresh_config)
-    mock_sql_runner.query.assert_called_with(node_with_no_full_refresh_config.compiled_code)
+    mock_sql_runner.query.assert_called_with(
+        node_with_no_full_refresh_config.compiled_code
+    )
     assert len(mock_sql_runner.get_node_schema.call_args_list) == 0
 
     ModelRunner(mock_sql_runner, Results()).run(node_with_full_refresh_set_to_true)
-    mock_sql_runner.query.assert_called_with(node_with_full_refresh_set_to_true.compiled_code)
+    mock_sql_runner.query.assert_called_with(
+        node_with_full_refresh_set_to_true.compiled_code
+    )
     assert len(mock_sql_runner.get_node_schema.call_args_list) == 0
 
     ModelRunner(mock_sql_runner, Results()).run(node_with_full_refresh_set_to_false)
-    mock_sql_runner.query.assert_called_with(node_with_full_refresh_set_to_false.compiled_code)
+    mock_sql_runner.query.assert_called_with(
+        node_with_full_refresh_set_to_false.compiled_code
+    )
     assert len(mock_sql_runner.get_node_schema.call_args_list) == 1
-    mock_sql_runner.get_node_schema.assert_called_with(node_with_full_refresh_set_to_false)
+    mock_sql_runner.get_node_schema.assert_called_with(
+        node_with_full_refresh_set_to_false
+    )
 
 
 def test_incremental_model_that_exists_and_fails_when_schema_changed() -> None:

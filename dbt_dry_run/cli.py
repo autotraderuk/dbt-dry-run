@@ -106,9 +106,7 @@ def run(
     skip_not_compiled: bool = Option(
         False, "--skip-not-compiled", help=_SKIP_NOT_COMPILED_HELP
     ),
-    full_refresh: bool = Option(
-        False, "--full-refresh", help="[dbt] Full refresh"
-    ),
+    full_refresh: bool = Option(False, "--full-refresh", help="[dbt] Full refresh"),
     extra_check_columns_metadata_key: Optional[str] = Option(
         None,
         "--extra-check-columns-metadata-key",

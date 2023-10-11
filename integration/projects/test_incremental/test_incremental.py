@@ -5,7 +5,8 @@ from integration.utils import (
     assert_report_node_has_columns,
     get_report_node_by_id,
     assert_node_failed_with_error,
-    assert_report_produced, )
+    assert_report_produced,
+)
 
 
 def test_single_column_ignore_retains_schema_in_target(
@@ -117,4 +118,3 @@ def test_no_full_refresh_on_the_model_should_fail_dry_run_using_the_bigquery_sch
             node_id,
         )
         assert_report_node_has_columns(report_node, {"existing_column"})
-
