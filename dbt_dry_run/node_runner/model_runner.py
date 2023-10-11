@@ -102,12 +102,10 @@ class ModelRunner(NodeRunner):
         return sql_statement
 
     def _get_full_refresh_config(self, node: Node) -> bool:
-        full_refresh = False
-        if flags.FULL_REFRESH:
-            full_refresh = True
+        # precedence defined here - https://docs.getdbt.com/reference/resource-configs/full_refresh
         if node.config.full_refresh is not None:
-            full_refresh = node.config.full_refresh
-        return full_refresh
+            return node.config.full_refresh
+        return flags.FULL_REFRESH
 
     def run(self, node: Node) -> DryRunResult:
         try:
