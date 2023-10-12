@@ -78,21 +78,14 @@ PARTITION_DATA_TYPES_VALUES_MAPPING: Dict[str, str] = {
 }
 
 
-class ModelRunner(NodeRunner):
+class IncrementalRunner(NodeRunner):
     resource_type = ("model",)
 
     def _modify_sql(self, node: Node, sql_statement: str) -> str:
-        if node.config.materialized == "view":
-            sql_statement = f"CREATE OR REPLACE VIEW `{node.database}`.`{node.db_schema}`.`{node.alias}` AS (\n{sql_statement}\n)"
-
         if node.config.sql_header:
             sql_statement = f"{node.config.sql_header}\n{sql_statement}"
 
-        if (
-            node.config.materialized == "incremental"
-            and node.config.partition_by
-            and "_dbt_max_partition" in node.compiled_code
-        ):
+        if node.config.partition_by and "_dbt_max_partition" in node.compiled_code:
             dbt_max_partition_declaration = (
                 f"declare _dbt_max_partition {node.config.partition_by.data_type} default"
                 f" {PARTITION_DATA_TYPES_VALUES_MAPPING[node.config.partition_by.data_type]};"
@@ -120,11 +113,7 @@ class ModelRunner(NodeRunner):
 
         full_refresh = self._get_full_refresh_config(node)
 
-        if (
-            result.status == DryRunStatus.SUCCESS
-            and node.config.materialized == "incremental"
-            and not full_refresh
-        ):
+        if result.status == DryRunStatus.SUCCESS and not full_refresh:
             target_table = self._sql_runner.get_node_schema(node)
             if target_table:
                 on_schema_change = node.config.on_schema_change or OnSchemaChange.IGNORE
