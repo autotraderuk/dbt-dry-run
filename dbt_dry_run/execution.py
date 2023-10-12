@@ -1,11 +1,12 @@
 from concurrent import futures
 from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, Generator, List, Optional, Tuple
 
 from dbt_dry_run import flags
 from dbt_dry_run.adapter.service import ProjectService
 from dbt_dry_run.linting.column_linting import lint_columns
+from dbt_dry_run.node_dispatch import RUNNERS, RunnerKey, dispatch_node
 from dbt_dry_run.sql_runner import SQLRunner
 
 if TYPE_CHECKING:
@@ -15,36 +16,10 @@ else:
 
 from dbt_dry_run.exception import ManifestValidationError, NodeExecutionException
 from dbt_dry_run.models.manifest import Manifest, Node
-from dbt_dry_run.node_runner import NodeRunner, get_runner_map
-from dbt_dry_run.node_runner.model_runner import ModelRunner
-from dbt_dry_run.node_runner.node_test_runner import NodeTestRunner
-from dbt_dry_run.node_runner.seed_runner import SeedRunner
-from dbt_dry_run.node_runner.snapshot_runner import SnapshotRunner
-from dbt_dry_run.node_runner.source_runner import SourceRunner
-from dbt_dry_run.results import DryRunResult, Results
+from dbt_dry_run.node_runner import NodeRunner
+from dbt_dry_run.results import Results
 from dbt_dry_run.scheduler import ManifestScheduler
 from dbt_dry_run.sql_runner.big_query_sql_runner import BigQuerySQLRunner
-
-_RUNNER_CLASSES: List[Any] = [
-    ModelRunner,
-    SeedRunner,
-    SnapshotRunner,
-    NodeTestRunner,
-    SourceRunner,
-]
-
-_RUNNERS = get_runner_map(_RUNNER_CLASSES)
-
-
-def dispatch_node(node: Node, runners: Dict[str, NodeRunner]) -> DryRunResult:
-    try:
-        runner = runners[node.resource_type]
-    except KeyError:
-        raise ValueError(f"Unknown resource type '{node.resource_type}'")
-    validation_result = runner.validate_node(node)
-    if validation_result:
-        return validation_result
-    return runner.run(node)
 
 
 def should_check_columns(node: Node) -> bool:
@@ -61,7 +36,9 @@ def should_check_columns(node: Node) -> bool:
     return False
 
 
-def dry_run_node(runners: Dict[str, NodeRunner], node: Node, results: Results) -> None:
+def dry_run_node(
+    runners: Dict[RunnerKey, NodeRunner], node: Node, results: Results
+) -> None:
     """
     This method must be thread safe
     """
@@ -110,7 +87,7 @@ def dry_run_manifest(project: ProjectService) -> Results:
     executor: ThreadPoolExecutor
     with create_context(project) as (sql_runner, executor):
         results = Results()
-        runners = {t: runner(sql_runner, results) for t, runner in _RUNNERS.items()}
+        runners = {t: runner(sql_runner, results) for t, runner in RUNNERS.items()}
         manifest = project.get_dbt_manifest()
 
         validate_manifest_compatibility(manifest)

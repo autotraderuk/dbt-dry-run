@@ -13,8 +13,6 @@ from dbt_dry_run.results import DryRunResult, DryRunStatus
 
 
 class SourceRunner(NodeRunner):
-    resource_type = ("source",)
-
     def run(self, node: Node) -> DryRunResult:
         exception: Optional[Exception] = None
         predicted_table: Optional[Table] = None
