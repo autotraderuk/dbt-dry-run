@@ -82,8 +82,8 @@ class IncrementalRunner(NodeRunner):
     resource_type = ("model",)
 
     def _modify_sql(self, node: Node, sql_statement: str) -> str:
-        if self._sql_runner.node_exists(node):
-            schema = self._sql_runner.get_node_schema(node)
+        schema = self._sql_runner.get_node_schema(node)
+        if schema:
             values_csv = ",".join([field.name for field in schema.fields])
             sql_statement = f"""
                 MERGE {node.to_table_ref_literal()}
