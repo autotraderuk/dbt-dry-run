@@ -1,4 +1,5 @@
-from typing import Callable, Dict, Optional, Set
+from textwrap import dedent
+from typing import Callable, Dict, Iterable, Optional, Set
 
 from dbt_dry_run import flags
 from dbt_dry_run.exception import SchemaChangeException, UpstreamFailedException
@@ -82,6 +83,23 @@ def get_common_field_names(left: Table, right: Table) -> Set[str]:
     return left.field_names.intersection(right.field_names)
 
 
+def get_merge_sql(
+    node: Node, common_field_names: Iterable[str], select_statement: str
+) -> str:
+    values_csv = ",".join(sorted(common_field_names))
+    return dedent(
+        f"""MERGE {node.to_table_ref_literal()}
+                USING (
+                  {select_statement}
+                )
+                ON True
+                WHEN NOT MATCHED THEN 
+                INSERT ({values_csv}) 
+                VALUES ({values_csv})
+            """
+    )
+
+
 class IncrementalRunner(NodeRunner):
     resource_type = ("model",)
 
@@ -97,17 +115,7 @@ class IncrementalRunner(NodeRunner):
         common_field_names = get_common_field_names(initial_result.table, target_table)
         if not common_field_names:
             return initial_result
-        values_csv = ",".join(common_field_names)
-        sql_statement = f"""
-            MERGE {node.to_table_ref_literal()}
-            USING (
-              {sql_statement}
-            )
-            ON True
-            WHEN NOT MATCHED THEN 
-            INSERT ({values_csv}) 
-            VALUES ({values_csv})
-        """
+        sql_statement = get_merge_sql(node, common_field_names, sql_statement)
         status, model_schema, exception = self._sql_runner.query(sql_statement)
         if status == DryRunStatus.SUCCESS:
             return initial_result
