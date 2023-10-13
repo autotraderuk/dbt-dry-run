@@ -1,5 +1,3 @@
-import pytest
-
 from integration.conftest import ProjectContext
 from integration.utils import (
     assert_report_node_has_columns,
