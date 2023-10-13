@@ -51,6 +51,18 @@ def test_single_column_ignore_raises_error_if_column_type_changes(
         assert_node_failed_with_error(run_result.report, node_id, "BadRequest")
 
 
+def test_single_struct_column_append_new_columns_fails_to_add_new_field(
+    compiled_project: ProjectContext,
+):
+    node_id = "model.test_incremental.single_struct_column_append_new_columns"
+    manifest_node = compiled_project.manifest.nodes[node_id]
+    columns = ["my_struct STRUCT<my_string STRING>"]
+    with compiled_project.create_state(manifest_node, columns):
+        run_result = compiled_project.dry_run()
+        assert_report_produced(run_result)
+        assert_node_failed_with_error(run_result.report, node_id, "BadRequest")
+
+
 def test_cli_full_refresh_should_use_the_model_schema(
     compiled_project_full_refresh: ProjectContext,
 ):

@@ -169,6 +169,34 @@ def test_incremental_model_that_exists_and_has_a_column_added_does_nothing() -> 
     assert_result_has_table(expected_table, result)
 
 
+def test_incremental_model_that_exists_and_has_no_common_columns() -> None:
+    mock_sql_runner = get_mock_sql_runner_with_all_string_columns(
+        ["a", "b"], ["c", "d"]
+    )
+    expected_table = Table(
+        fields=[
+            TableField(name="c", type=BigQueryFieldType.STRING),
+            TableField(name="d", type=BigQueryFieldType.STRING),
+        ]
+    )
+
+    node = SimpleNode(
+        unique_id="node1",
+        depends_on=[],
+        resource_type=ManifestScheduler.SEED,
+        table_config=NodeConfig(materialized="incremental", on_schema_change="ignore"),
+    ).to_node()
+    node.depends_on.deep_nodes = []
+
+    results = Results()
+
+    model_runner = IncrementalRunner(mock_sql_runner, results)
+
+    result = model_runner.run(node)
+    mock_sql_runner.query.assert_has_calls([call(node.compiled_code)])
+    assert_result_has_table(expected_table, result)
+
+
 def test_incremental_model_that_exists_and_syncs_all_columns() -> None:
     mock_sql_runner = get_mock_sql_runner_with_all_string_columns(
         ["a", "c"], ["a", "b"]
