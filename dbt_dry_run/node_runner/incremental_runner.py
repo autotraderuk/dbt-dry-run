@@ -1,4 +1,5 @@
-from typing import Callable, Dict, Optional
+from textwrap import dedent
+from typing import Callable, Dict, Iterable, Optional, Set
 
 from dbt_dry_run import flags
 from dbt_dry_run.exception import SchemaChangeException, UpstreamFailedException
@@ -78,8 +79,48 @@ PARTITION_DATA_TYPES_VALUES_MAPPING: Dict[str, str] = {
 }
 
 
+def get_common_field_names(left: Table, right: Table) -> Set[str]:
+    return left.field_names.intersection(right.field_names)
+
+
+def get_merge_sql(
+    node: Node, common_field_names: Iterable[str], select_statement: str
+) -> str:
+    values_csv = ",".join(sorted(common_field_names))
+    return dedent(
+        f"""MERGE {node.to_table_ref_literal()}
+                USING (
+                  {select_statement}
+                )
+                ON True
+                WHEN NOT MATCHED THEN 
+                INSERT ({values_csv}) 
+                VALUES ({values_csv})
+            """
+    )
+
+
 class IncrementalRunner(NodeRunner):
     resource_type = ("model",)
+
+    def _verify_merge_type_compatibility(
+        self,
+        node: Node,
+        sql_statement: str,
+        initial_result: DryRunResult,
+        target_table: Table,
+    ) -> DryRunResult:
+        if not initial_result.table:
+            return initial_result
+        common_field_names = get_common_field_names(initial_result.table, target_table)
+        if not common_field_names:
+            return initial_result
+        sql_statement = get_merge_sql(node, common_field_names, sql_statement)
+        status, model_schema, exception = self._sql_runner.query(sql_statement)
+        if status == DryRunStatus.SUCCESS:
+            return initial_result
+
+        return DryRunResult(node, model_schema, status, exception)
 
     def _modify_sql(self, node: Node, sql_statement: str) -> str:
         if node.config.sql_header:
@@ -118,6 +159,9 @@ class IncrementalRunner(NodeRunner):
             if target_table:
                 on_schema_change = node.config.on_schema_change or OnSchemaChange.IGNORE
                 handler = ON_SCHEMA_CHANGE_TABLE_HANDLER[on_schema_change]
+                result = self._verify_merge_type_compatibility(
+                    node, run_sql, result, target_table
+                )
                 result = handler(result, target_table)
 
         return result

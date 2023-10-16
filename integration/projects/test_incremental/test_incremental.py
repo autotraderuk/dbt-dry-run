@@ -1,5 +1,3 @@
-import pytest
-
 from integration.conftest import ProjectContext
 from integration.utils import (
     assert_report_node_has_columns,
@@ -41,15 +39,24 @@ def test_single_column_append_new_columns_has_both_columns(
         assert_report_node_has_columns(report_node, {"my_string", "my_string2"})
 
 
-@pytest.mark.xfail(
-    reason="False positive if column type of incremental changes: https://github.com/autotraderuk/dbt-dry-run/issues/26"
-)
 def test_single_column_ignore_raises_error_if_column_type_changes(
     compiled_project: ProjectContext,
 ):
     node_id = "model.test_incremental.single_column_ignore"
     manifest_node = compiled_project.manifest.nodes[node_id]
     columns = ["my_string NUMERIC"]
+    with compiled_project.create_state(manifest_node, columns):
+        run_result = compiled_project.dry_run()
+        assert_report_produced(run_result)
+        assert_node_failed_with_error(run_result.report, node_id, "BadRequest")
+
+
+def test_single_struct_column_append_new_columns_fails_to_add_new_field(
+    compiled_project: ProjectContext,
+):
+    node_id = "model.test_incremental.single_struct_column_append_new_columns"
+    manifest_node = compiled_project.manifest.nodes[node_id]
+    columns = ["my_struct STRUCT<my_string STRING>"]
     with compiled_project.create_state(manifest_node, columns):
         run_result = compiled_project.dry_run()
         assert_report_produced(run_result)
