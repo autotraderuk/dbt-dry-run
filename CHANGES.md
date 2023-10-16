@@ -1,11 +1,17 @@
 ## Changelog
 
+# dbt-dry-run v0.7.1
+
+## Bugfixes
+
+- Fix dry runner falsely reporting success if incremental has incompatible type change for existing column
+
 # dbt-dry-run v0.7.0
 
 ## Improvements
 
-- Adds `--full-refresh` support. Dry running with full refresh will make use of predicted schema. This option aligns with the dbt cli. 
-- Adds `--target-path` support. This option aligns with the dbt cli.
+- Adds `--full-refresh` support. Dry running with full refresh will make use of predicted schema. This option aligns with the dbt cli 
+- Adds `--target-path` support. This option aligns with the dbt cli
 
 # dbt-dry-run v0.6.8
 
