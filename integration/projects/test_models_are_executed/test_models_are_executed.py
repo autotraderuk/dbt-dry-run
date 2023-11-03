@@ -1,3 +1,5 @@
+from dbt_dry_run.columns_metadata import expand_table_fields_with_types
+from dbt_dry_run.models import BigQueryFieldType
 from integration.conftest import DryRunResult
 from integration.utils import (
     assert_report_success,
@@ -18,7 +20,12 @@ def test_ran_correct_number_of_nodes(dry_run_result: DryRunResult):
 def test_table_of_nodes_is_returned(dry_run_result: DryRunResult):
     report = assert_report_success(dry_run_result)
     seed_node = get_report_node_by_id(report, "seed.test_models_are_executed.my_seed")
-    assert_report_node_has_columns(seed_node, {"a", "seed_b"})
+    columns = expand_table_fields_with_types(seed_node.table)
+    assert columns == {
+        "a": BigQueryFieldType.STRING,
+        "seed_b": BigQueryFieldType.INT64,
+        "seed_c": BigQueryFieldType.FLOAT64,
+    }
 
     first_layer = get_report_node_by_id(
         report, "model.test_models_are_executed.first_layer"
@@ -28,7 +35,7 @@ def test_table_of_nodes_is_returned(dry_run_result: DryRunResult):
     second_layer = get_report_node_by_id(
         report, "model.test_models_are_executed.second_layer"
     )
-    assert_report_node_has_columns(second_layer, {"a", "b", "c", "seed_b"})
+    assert_report_node_has_columns(second_layer, {"a", "b", "c", "seed_b", "seed_c"})
 
 
 def test_disabled_model_not_run(dry_run_result: DryRunResult):

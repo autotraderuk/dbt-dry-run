@@ -1,9 +1,9 @@
-import json
 import os
 from argparse import Namespace
 from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, Optional
 
+from dbt.adapters.base import BaseAdapter
 from dbt.adapters.factory import get_adapter, register_adapter, reset_adapters
 from dbt.config import RuntimeConfig
 from dbt.contracts.connection import Connection
@@ -62,3 +62,7 @@ class ProjectService:
     @property
     def threads(self) -> int:
         return self._profile.threads
+
+    @property
+    def adapter(self) -> BaseAdapter:
+        return self._adapter
