@@ -48,7 +48,7 @@ def assert_node_failed_with_error(report: Report, unique_id: str, error: str) ->
     node = get_report_node_by_id(report, unique_id)
     assert (
         not node.success
-    ), f"Expected node {node.unique_id} to fail but it was successful"
+    ), f"Expected node {node.unique_id} to fail but it was successful. Schema {node.table}"
     assert (
         node.error_message == error
     ), f"Node failed but error message '{node.error_message}' did not match expected: '{error}'"
