@@ -20,7 +20,10 @@ class SeedRunner(NodeRunner):
 
         fields: List[TableField] = []
         for idx, column in enumerate(csv_table.columns):
-            new_type = self._sql_runner.convert_agate_type(csv_table, idx)
+            override_type = node.config.column_types.get(column.name)
+            new_type = override_type or self._sql_runner.convert_agate_type(
+                csv_table, idx
+            )
             if new_type is None:
                 msg = f"Unknown Big Query schema for seed '{node.unique_id}' Column '{column.name}'"
                 exception = UnknownSchemaException(msg)

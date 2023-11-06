@@ -69,6 +69,29 @@ def test_seed_runner_fails_if_type_returns_none(tmp_path: Path) -> None:
     assert type(result.exception) == UnknownSchemaException
 
 
+def test_seed_runner_uses_column_overrides(tmp_path: Path) -> None:
+    p = tmp_path / "seed1.csv"
+    csv_content = """a,b,c
+    foo,bar,baz
+    foo2,bar2,baz2
+    """
+    p.write_text(csv_content)
+
+    node = SimpleNode(
+        unique_id="node1",
+        depends_on=[],
+        resource_type=ManifestScheduler.SEED,
+        original_file_path=p.as_posix(),
+    ).to_node()
+    node.config.column_types = {"a": "NUMERIC"}
+    result = get_result(node, "STRING")
+
+    expected_fields = {"a": "NUMERIC", "b": "STRING", "c": "STRING"}
+    assert result.table, "Expected result to have a table"
+    mapped_fields = {field.name: field.type_ for field in result.table.fields}
+    assert mapped_fields == expected_fields
+
+
 def test_validate_node_returns_none_if_node_is_not_compiled() -> None:
     mock_sql_runner = MagicMock()
     results = MagicMock()

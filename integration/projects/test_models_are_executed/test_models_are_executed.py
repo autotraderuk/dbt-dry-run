@@ -1,30 +1,29 @@
+import pytest
+
 from dbt_dry_run.columns_metadata import expand_table_fields_with_types
 from dbt_dry_run.models import BigQueryFieldType
+from dbt_dry_run.results import DryRunStatus
 from integration.conftest import DryRunResult
 from integration.utils import (
-    assert_report_success,
     get_report_node_by_id,
     assert_report_node_has_columns,
+    assert_report_produced,
 )
 
 
-def test_success(dry_run_result: DryRunResult):
-    assert_report_success(dry_run_result)
-
-
 def test_ran_correct_number_of_nodes(dry_run_result: DryRunResult):
-    report = assert_report_success(dry_run_result)
-    assert report.node_count == 4
+    report = assert_report_produced(dry_run_result)
+    assert report.node_count == 5
 
 
 def test_table_of_nodes_is_returned(dry_run_result: DryRunResult):
-    report = assert_report_success(dry_run_result)
+    report = assert_report_produced(dry_run_result)
     seed_node = get_report_node_by_id(report, "seed.test_models_are_executed.my_seed")
     columns = expand_table_fields_with_types(seed_node.table)
     assert columns == {
         "a": BigQueryFieldType.STRING,
-        "seed_b": BigQueryFieldType.INT64,
-        "seed_c": BigQueryFieldType.FLOAT64,
+        "seed_b": BigQueryFieldType.FLOAT64,
+        "seed_c": BigQueryFieldType.BIGNUMERIC,
     }
 
     first_layer = get_report_node_by_id(
@@ -39,10 +38,21 @@ def test_table_of_nodes_is_returned(dry_run_result: DryRunResult):
 
 
 def test_disabled_model_not_run(dry_run_result: DryRunResult):
-    report = assert_report_success(dry_run_result)
+    report = assert_report_produced(dry_run_result)
     assert "model.test_models_are_executed.disabled_model" not in set(
         n.unique_id for n in report.nodes
     ), "Found disabled model in dry run output"
+
+
+@pytest.mark.xfail(
+    reason="Seed type compatibility not checked. (Trying to convert string to number)"
+)
+def test_badly_configured_seed_fails(dry_run_result: DryRunResult):
+    report = assert_report_produced(dry_run_result)
+    seed_node = get_report_node_by_id(
+        report, "seed.test_models_are_executed.badly_configured_seed"
+    )
+    assert seed_node.status == DryRunStatus.FAILURE
 
 
 def test_model_with_all_column_types_succeeds(dry_run_result: DryRunResult):
