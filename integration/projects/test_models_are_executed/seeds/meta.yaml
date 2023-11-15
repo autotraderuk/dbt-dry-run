@@ -1,0 +1,13 @@
+seeds:
+  - name: my_seed
+    config:
+      column_types:
+        seed_a: STRING
+        seed_b: FLOAT64
+        seed_c: BIGNUMERIC
+
+  - name: badly_configured_seed
+    config:
+      column_types:
+        seed_number: NUMERIC
+        seed_string: NUMERIC

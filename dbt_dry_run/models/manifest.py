@@ -69,6 +69,7 @@ class NodeConfig(BaseModel):
     partition_by: Optional[PartitionBy]
     meta: Optional[NodeMeta]
     full_refresh: Optional[bool]
+    column_types: Dict[str, str] = Field(default_factory=dict)
 
 
 class ManifestColumn(BaseModel):

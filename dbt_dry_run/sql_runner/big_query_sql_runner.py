@@ -1,10 +1,8 @@
-from contextlib import contextmanager
 from typing import List, Optional, Tuple
 
 from google.cloud.bigquery import (
     Client,
     DatasetReference,
-    QueryJob,
     QueryJobConfig,
     SchemaField,
     TableReference,
