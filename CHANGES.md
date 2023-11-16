@@ -1,5 +1,12 @@
 ## Changelog
 
+# dbt-dry-run v0.7.2
+
+## Bugfixes
+
+- Seed files now get their schema using type inference from the adapter so always line up with what dbt will produces
+- Seed file `column_type` configuration is respected
+
 # dbt-dry-run v0.7.1
 
 ## Bugfixes
