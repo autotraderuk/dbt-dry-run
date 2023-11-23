@@ -172,7 +172,11 @@ Currently, these rules can cause linting failures:
 The dbt package [dbt-external-tables][dbt-external-tables] gives dbt support for staging and managing
 [external tables][bq-external-tables]. These sources do not produce any compiled sql in the manifest, so it is not
 possible for the dry runner to predict their schema. Therefore, you must specify the resulting schema manually in the
-metadata of the source. For example if you were import data from a gcs bucket:
+metadata of the source. 
+
+However, if the `columns` schema is already defined under the `name` in the yaml config, you do not need to specify `dry_run_columns` under `external`. The dry runner will use the `columns` schema if `dry_run_columns` is not specified. This avoids duplicated schema definitions.
+
+For example if you were import data from a gcs bucket:
 
 ```yaml
 version: 2

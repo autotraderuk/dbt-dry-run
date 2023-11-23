@@ -20,9 +20,13 @@ class SourceRunner(NodeRunner):
         if node.is_external_source():
             external_config = cast(ExternalConfig, node.external)
             try:
-                predicted_table = map_columns_to_table(
+                # Use columns schema if dry_run_columns is not specified
+                columns_to_map = (
                     external_config.dry_run_columns_map
+                    if external_config.dry_run_columns
+                    else node.columns
                 )
+                predicted_table = map_columns_to_table(columns_to_map)
             except (InvalidColumnSpecification, UnknownDataTypeException) as e:
                 status = DryRunStatus.FAILURE
                 exception = e
