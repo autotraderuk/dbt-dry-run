@@ -6,8 +6,13 @@ from dbt_dry_run.exception import SchemaChangeException
 from dbt_dry_run.literals import enable_test_example_values
 from dbt_dry_run.models import BigQueryFieldType, Table, TableField
 from dbt_dry_run.models.manifest import NodeConfig, PartitionBy
-from dbt_dry_run.node_runner.incremental_runner import IncrementalRunner, get_merge_sql
-from dbt_dry_run.results import DryRunStatus, Results
+from dbt_dry_run.node_runner.incremental_runner import (
+    IncrementalRunner,
+    append_new_columns_handler,
+    get_merge_sql,
+    ignore_handler,
+)
+from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
 from dbt_dry_run.scheduler import ManifestScheduler
 from dbt_dry_run.test.utils import SimpleNode, assert_result_has_table, get_executed_sql
 
@@ -469,3 +474,36 @@ def test_model_with_sql_header_executes_header_first() -> None:
     executed_sql = get_executed_sql(mock_sql_runner)
     assert executed_sql.startswith(pre_header_value)
     assert node.compiled_code in executed_sql
+
+
+def test_append_handler_preserves_column_order() -> None:
+    model_table = Table(
+        fields=[
+            TableField(name="col_1", type=BigQueryFieldType.STRING),
+            TableField(name="col_2", type=BigQueryFieldType.STRING),
+            TableField(name="col_3", type=BigQueryFieldType.STRING),
+        ]
+    )
+    node = SimpleNode(
+        unique_id="node1", depends_on=[], resource_type=ManifestScheduler.MODEL
+    ).to_node()
+    dry_run_result = DryRunResult(
+        node=node, status=DryRunStatus.SUCCESS, table=model_table, exception=None
+    )
+    target_table = Table(
+        fields=[
+            TableField(name="col_2", type=BigQueryFieldType.STRING),
+            TableField(name="col_1", type=BigQueryFieldType.STRING),
+        ]
+    )
+    actual_result = append_new_columns_handler(dry_run_result, target_table)
+
+    expected_table = Table(
+        fields=[
+            TableField(name="col_2", type=BigQueryFieldType.STRING),
+            TableField(name="col_1", type=BigQueryFieldType.STRING),
+            TableField(name="col_3", type=BigQueryFieldType.STRING),
+        ]
+    )
+
+    assert actual_result.table == expected_table

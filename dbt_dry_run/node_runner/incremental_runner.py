@@ -19,14 +19,15 @@ def append_new_columns_handler(
 ) -> DryRunResult:
     if dry_run_result.table is None:
         return dry_run_result
-    mapped_predicted_table = {
-        field.name: field for field in dry_run_result.table.fields
-    }
-    mapped_target_table = {field.name: field for field in target_table.fields}
-    mapped_predicted_table.update(mapped_target_table)
-    return dry_run_result.replace_table(
-        Table(fields=list(mapped_predicted_table.values()))
-    )
+
+    target_column_names = set(field.name for field in target_table.fields)
+    new_columns = [
+        new_field
+        for new_field in dry_run_result.table.fields
+        if new_field.name not in target_column_names
+    ]
+    final_fields = target_table.fields + new_columns
+    return dry_run_result.replace_table(Table(fields=final_fields))
 
 
 def sync_all_columns_handler(
@@ -159,9 +160,10 @@ class IncrementalRunner(NodeRunner):
             if target_table:
                 on_schema_change = node.config.on_schema_change or OnSchemaChange.IGNORE
                 handler = ON_SCHEMA_CHANGE_TABLE_HANDLER[on_schema_change]
-                result = self._verify_merge_type_compatibility(
-                    node, run_sql, result, target_table
-                )
+                if "RECURSIVE" not in node.compiled_code:
+                    result = self._verify_merge_type_compatibility(
+                        node, run_sql, result, target_table
+                    )
                 result = handler(result, target_table)
 
         return result
