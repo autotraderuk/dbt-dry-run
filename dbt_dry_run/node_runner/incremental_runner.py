@@ -51,9 +51,6 @@ def sync_all_columns_handler(
     return dry_run_result.replace_table(Table(fields=final_fields))
 
 
-
-
-
 def fail_handler(dry_run_result: DryRunResult, target_table: Table) -> DryRunResult:
     if dry_run_result.table is None:
         return dry_run_result
