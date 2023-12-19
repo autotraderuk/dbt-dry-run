@@ -165,7 +165,7 @@ def test_model_with_dependency_inserts_sql_literal() -> None:
     assert result.status == DryRunStatus.SUCCESS
     assert result.total_bytes_processed == A_TOTAL_BYTES_PROCESSED
     assert executed_sql == sql_with_view_creation(
-        node, "SELECT * FROM (SELECT 'foo' as `a`)"
+        node, "SELECT * FROM (SELECT 'foo' AS `a`) AS upstream"
     )
 
 

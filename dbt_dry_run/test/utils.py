@@ -1,8 +1,10 @@
 from typing import List, Optional, Union
 from unittest.mock import MagicMock
 
+import sqlglot
 from pydantic import BaseModel, Field
 
+from dbt_dry_run.literals import convert_trees_to_sql
 from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
 from dbt_dry_run.models.manifest import Node, NodeConfig, NodeDependsOn, NodeMeta
 from dbt_dry_run.results import DryRunResult, DryRunStatus
@@ -77,3 +79,17 @@ def assert_result_has_table(expected: Table, actual: DryRunResult) -> None:
     assert (
         actual_field_names == expected_field_names
     ), f"Actual field names: {actual_field_names} did not equal expected: {expected_field_names}"
+
+
+def assert_ast_equivalent(expected: str, actual: str) -> None:
+    expected_ast = [
+        t for t in sqlglot.parse(expected, dialect=sqlglot.dialects.BigQuery) if t
+    ]
+    expected_statement = convert_trees_to_sql(expected_ast)
+    actual_ast = [
+        t for t in sqlglot.parse(actual, dialect=sqlglot.dialects.BigQuery) if t
+    ]
+    actual_statement = convert_trees_to_sql(actual_ast)
+    assert (
+        actual_statement == expected_statement
+    ), f"AST Not Equivalent:\nExpected:{expected}\nActual:{actual}"

@@ -135,7 +135,7 @@ def test_model_with_dependency_inserts_sql_literal() -> None:
 
     executed_sql = get_executed_sql(mock_sql_runner)
     assert result.status == DryRunStatus.SUCCESS
-    assert executed_sql == "SELECT * FROM (SELECT 'foo' as `a`)"
+    assert executed_sql == "SELECT * FROM (SELECT 'foo' AS `a`) AS upstream"
 
 
 def test_model_with_sql_header_executes_header_first() -> None:

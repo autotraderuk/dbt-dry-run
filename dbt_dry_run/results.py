@@ -60,6 +60,10 @@ class DryRunResult:
             linting_status=linting_status,
         )
 
+    @classmethod
+    def successful(cls, node: Node, table: Table) -> "DryRunResult":
+        return cls(node=node, table=table, status=DryRunStatus.SUCCESS, exception=None)
+
 
 class Results:
     def __init__(self) -> None:

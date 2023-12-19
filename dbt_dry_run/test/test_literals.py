@@ -1,15 +1,14 @@
 import re
 from typing import List
 
-import pytest
-
 from dbt_dry_run.literals import (
     enable_test_example_values,
     get_sql_literal_from_table,
     replace_upstream_sql,
 )
 from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
-from dbt_dry_run.test.utils import SimpleNode
+from dbt_dry_run.results import DryRunResult
+from dbt_dry_run.test.utils import SimpleNode, assert_ast_equivalent
 
 enable_test_example_values(True)
 
@@ -103,18 +102,15 @@ def test_replace_upstream_sql_replaces_from() -> None:
     FROM {node.to_table_ref_literal()}
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
-    new_sql = replace_upstream_sql(original_sql, node, table)
+    new_sql = replace_upstream_sql(original_sql, [DryRunResult.successful(node, table)])
 
-    assert (
-        new_sql
-        == """
+    expected = """
     SELECT foo
-    FROM (SELECT 'foo' as `foo`)
+    FROM (SELECT 'foo' as `foo`) AS A
     """
-    )
+    assert_ast_equivalent(expected, new_sql)
 
 
-@pytest.mark.xfail(reason="Need to implement implicit alias. See Issue #11")
 def test_replace_upstream_sql_replaces_from_and_aliases_literal_if_none_provided() -> None:
     node = SimpleNode(unique_id="A", depends_on=[]).to_node()
     original_sql = f"""
@@ -122,15 +118,12 @@ def test_replace_upstream_sql_replaces_from_and_aliases_literal_if_none_provided
     FROM {node.to_table_ref_literal()}
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
-    new_sql = replace_upstream_sql(original_sql, node, table)
-
-    assert (
-        new_sql
-        == f"""
-    SELECT foo
+    new_sql = replace_upstream_sql(original_sql, [DryRunResult.successful(node, table)])
+    expected = f"""
+    SELECT {node.alias}.foo
     FROM (SELECT 'foo' as `foo`) {node.alias}
     """
-    )
+    assert_ast_equivalent(expected, new_sql)
 
 
 def test_replace_upstream_sql_does_not_replace_alias_in_string() -> None:
@@ -141,16 +134,14 @@ def test_replace_upstream_sql_does_not_replace_alias_in_string() -> None:
     FROM {node.to_table_ref_literal()} as bar
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
-    new_sql = replace_upstream_sql(original_sql, node, table)
-
-    assert (
-        new_sql
-        == f"""
+    new_sql = replace_upstream_sql(original_sql, [DryRunResult.successful(node, table)])
+    expected = f"""
     SELECT bar.foo,
            '{node.to_table_ref_literal()}' as the_table
     FROM (SELECT 'foo' as `foo`) as bar
     """
-    )
+
+    assert_ast_equivalent(expected, new_sql)
 
 
 def test_replace_upstream_sql_replaces_from_with_as_alias() -> None:
@@ -160,19 +151,17 @@ def test_replace_upstream_sql_replaces_from_with_as_alias() -> None:
     FROM {node.to_table_ref_literal()} as bar
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
-    new_sql = replace_upstream_sql(original_sql, node, table)
-
-    assert (
-        new_sql
-        == """
+    new_sql = replace_upstream_sql(original_sql, [DryRunResult.successful(node, table)])
+    expected = """
     SELECT bar.foo
     FROM (SELECT 'foo' as `foo`) as bar
     """
-    )
+    assert_ast_equivalent(expected, new_sql)
 
 
 def test_replace_upstream_sql_replaces_from_with_cte_and_from() -> None:
     node = SimpleNode(unique_id="A", depends_on=[]).to_node()
+    table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
     original_sql = f"""
     WITH a_cte AS (
         SELECT cte1.*
@@ -182,12 +171,8 @@ def test_replace_upstream_sql_replaces_from_with_cte_and_from() -> None:
     SELECT bar.foo
     FROM {node.to_table_ref_literal()} as bar
     """
-    table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
-    new_sql = replace_upstream_sql(original_sql, node, table)
-
-    assert (
-        new_sql
-        == """
+    new_sql = replace_upstream_sql(original_sql, [DryRunResult.successful(node, table)])
+    expected = """
     WITH a_cte AS (
         SELECT cte1.*
         FROM (SELECT 'foo' as `foo`) as cte1
@@ -196,7 +181,7 @@ def test_replace_upstream_sql_replaces_from_with_cte_and_from() -> None:
     SELECT bar.foo
     FROM (SELECT 'foo' as `foo`) as bar
     """
-    )
+    assert_ast_equivalent(expected, new_sql)
 
 
 def test_replace_upstream_sql_replaces_from_with_alias() -> None:
@@ -206,15 +191,13 @@ def test_replace_upstream_sql_replaces_from_with_alias() -> None:
     FROM {node.to_table_ref_literal()} bar
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
-    new_sql = replace_upstream_sql(original_sql, node, table)
+    new_sql = replace_upstream_sql(original_sql, [DryRunResult.successful(node, table)])
 
-    assert (
-        new_sql
-        == """
+    expected = """
     SELECT bar.foo
     FROM (SELECT 'foo' as `foo`) bar
     """
-    )
+    assert_ast_equivalent(expected, new_sql)
 
 
 def test_replace_upstream_sql_replaces_join() -> None:
@@ -225,16 +208,14 @@ def test_replace_upstream_sql_replaces_join() -> None:
     JOIN {node.to_table_ref_literal()}
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
-    new_sql = replace_upstream_sql(original_sql, node, table)
+    new_sql = replace_upstream_sql(original_sql, [DryRunResult.successful(node, table)])
 
-    assert (
-        new_sql
-        == """
+    expected = """
     SELECT foo
     FROM `a`.`b`.`c`
-    JOIN (SELECT 'foo' as `foo`)
+    JOIN (SELECT 'foo' as `foo`) AS A
     """
-    )
+    assert_ast_equivalent(expected, new_sql)
 
 
 def test_replace_upstream_sql_replaces_from_newline() -> None:
@@ -245,16 +226,14 @@ def test_replace_upstream_sql_replaces_from_newline() -> None:
         {node.to_table_ref_literal()}
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
-    new_sql = replace_upstream_sql(original_sql, node, table)
+    new_sql = replace_upstream_sql(original_sql, [DryRunResult.successful(node, table)])
 
-    assert (
-        new_sql
-        == """
+    expected = """
     SELECT foo
     FROM
-        (SELECT 'foo' as `foo`)
+        (SELECT 'foo' as `foo`) AS A
     """
-    )
+    assert_ast_equivalent(expected, new_sql)
 
 
 def test_ignores_quoted_literals() -> None:
@@ -265,16 +244,14 @@ def test_ignores_quoted_literals() -> None:
     FROM {node.to_table_ref_literal()}
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
-    new_sql = replace_upstream_sql(original_sql, node, table)
+    new_sql = replace_upstream_sql(original_sql, [DryRunResult.successful(node, table)])
 
-    assert (
-        new_sql
-        == f"""
+    expected = f"""
     SELECT foo,
            '{node.to_table_ref_literal()}' AS original_table
-    FROM (SELECT 'foo' as `foo`)
+    FROM (SELECT 'foo' as `foo`) AS A
     """
-    )
+    assert_ast_equivalent(expected, new_sql)
 
 
 def test_handles_comments() -> None:
@@ -285,19 +262,16 @@ def test_handles_comments() -> None:
         {node.to_table_ref_literal()}
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
-    new_sql = replace_upstream_sql(original_sql, node, table)
+    new_sql = replace_upstream_sql(original_sql, [DryRunResult.successful(node, table)])
 
-    assert (
-        new_sql
-        == """
+    expected = """
     SELECT foo
     FROM -- test
-        (SELECT 'foo' as `foo`)
+        (SELECT 'foo' as `foo`) AS A
     """
-    )
+    assert_ast_equivalent(expected, new_sql)
 
 
-@pytest.mark.xfail(reason="Need better regex/full SQL parsing")
 def test_handles_multiple_comments() -> None:
     node = SimpleNode(unique_id="A", depends_on=[]).to_node()
     original_sql = f"""
@@ -307,14 +281,34 @@ def test_handles_multiple_comments() -> None:
         {node.to_table_ref_literal()}
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
-    new_sql = replace_upstream_sql(original_sql, node, table)
+    new_sql = replace_upstream_sql(original_sql, [DryRunResult.successful(node, table)])
 
-    assert (
-        new_sql
-        == """
+    expected = """
     SELECT foo
     FROM -- test
          -- test2
-        (SELECT 'foo' as `foo`)
+        (SELECT 'foo' as `foo`) AS A
     """
-    )
+    assert_ast_equivalent(expected, new_sql)
+
+
+def test_handles_multiple_statements() -> None:
+    node = SimpleNode(unique_id="A", depends_on=[]).to_node()
+    original_sql = f"""
+    declare my_var numeric default 1;
+    SELECT foo
+    FROM -- test
+         -- test2
+        {node.to_table_ref_literal()}
+    """
+    table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
+    new_sql = replace_upstream_sql(original_sql, [DryRunResult.successful(node, table)])
+
+    expected = """
+    declare my_var numeric default 1;
+    SELECT foo
+    FROM -- test
+         -- test2
+        (SELECT 'foo' as `foo`) AS A
+    """
+    assert_ast_equivalent(expected, new_sql)
