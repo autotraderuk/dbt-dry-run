@@ -1,5 +1,13 @@
 ## Changelog
 
+# dbt-dry-run v0.7.3
+
+## Bugfixes
+
+- Incremental models now correctly predict the column order if the table already exists in the target environment
+- External tables no longer always require defining the schema twice in the YAML if the table source allows it
+- Incremental models no longer cause a syntax error when they use `with recursive` CTEs
+
 # dbt-dry-run v0.7.2
 
 ## Bugfixes
