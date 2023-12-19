@@ -144,6 +144,22 @@ def test_column_order_preserved_on_schema_change_ignore(
         assert_report_node_has_columns_in_order(report_node, ["col_2", "col_1"])
 
 
+def test_recursive_cte_does_not_check_merge_compatibility(
+    compiled_project: ProjectContext,
+):
+    node_id = "model.test_incremental.recursive_cte"
+    manifest_node = compiled_project.manifest.nodes[node_id]
+    columns = ["my_string NUMERIC"]
+    with compiled_project.create_state(manifest_node, columns):
+        run_result = compiled_project.dry_run()
+        assert_report_produced(run_result)
+        report_node = get_report_node_by_id(
+            run_result.report,
+            node_id,
+        )
+        assert_report_node_has_columns(report_node, {"my_string"})
+
+
 def test_column_order_preserved_on_schema_change_append_new_columns(
     compiled_project: ProjectContext,
 ):
