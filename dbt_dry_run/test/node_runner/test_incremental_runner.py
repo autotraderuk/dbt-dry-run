@@ -1,6 +1,8 @@
 from typing import List, Optional
 from unittest.mock import MagicMock, call
 
+import pytest
+
 from dbt_dry_run import flags
 from dbt_dry_run.exception import SchemaChangeException
 from dbt_dry_run.literals import enable_test_example_values
@@ -10,6 +12,7 @@ from dbt_dry_run.node_runner.incremental_runner import (
     IncrementalRunner,
     append_new_columns_handler,
     get_merge_sql,
+    sql_has_recursive_ctes,
     sync_all_columns_handler,
 )
 from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
@@ -539,3 +542,35 @@ def test_sync_handler_preserves_existing_column_order() -> None:
     )
 
     assert actual_result.table == expected_table
+
+
+@pytest.mark.parametrize(
+    "code, has_ctes",
+    [
+        (
+            """WITH RECURSIVE my_foo as (SELECT * FROM foo)""",
+            True,
+        ),
+        (
+            """with recursive my_foo as (SELECT * FROM foo)""",
+            True,
+        ),
+        (
+            """  with   recursive    my_foo as (SELECT * FROM foo)""",
+            True,
+        ),
+        (
+            """  with
+                  RECURSIVE 
+                     my_foo as (SELECT * FROM foo)""",
+            True,
+        ),
+        (
+            """  with
+                     my_foo as (SELECT recursive FROM foo)""",
+            False,
+        ),
+    ],
+)
+def test_sql_has_recursive_ctes(code: str, has_ctes: bool) -> None:
+    assert sql_has_recursive_ctes(code) == has_ctes

@@ -116,6 +116,14 @@ def get_merge_sql(
     )
 
 
+def sql_has_recursive_ctes(code: str) -> bool:
+    code_tokens = code.lower().split()
+    for index in range(0, len(code_tokens) - 1):
+        if code_tokens[index : index + 2] == ["with", "recursive"]:
+            return True
+    return False
+
+
 class IncrementalRunner(NodeRunner):
     resource_type = ("model",)
 
@@ -126,7 +134,7 @@ class IncrementalRunner(NodeRunner):
         initial_result: DryRunResult,
         target_table: Table,
     ) -> DryRunResult:
-        if not initial_result.table:
+        if not initial_result.table or sql_has_recursive_ctes(node.compiled_code):
             return initial_result
         common_field_names = get_common_field_names(initial_result.table, target_table)
         if not common_field_names:
@@ -135,8 +143,8 @@ class IncrementalRunner(NodeRunner):
         status, model_schema, exception = self._sql_runner.query(sql_statement)
         if status == DryRunStatus.SUCCESS:
             return initial_result
-
-        return DryRunResult(node, model_schema, status, exception)
+        else:
+            return DryRunResult(node, None, status, exception)
 
     def _modify_sql(self, node: Node, sql_statement: str) -> str:
         if node.config.sql_header:
@@ -178,6 +186,7 @@ class IncrementalRunner(NodeRunner):
                 result = self._verify_merge_type_compatibility(
                     node, run_sql, result, target_table
                 )
-                result = handler(result, target_table)
+                if result.status == DryRunStatus.SUCCESS:
+                    result = handler(result, target_table)
 
         return result
