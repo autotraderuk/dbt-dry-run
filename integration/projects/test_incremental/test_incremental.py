@@ -4,6 +4,7 @@ from integration.utils import (
     get_report_node_by_id,
     assert_node_failed_with_error,
     assert_report_produced,
+    assert_report_node_has_columns_in_order,
 )
 
 
@@ -125,3 +126,35 @@ def test_no_full_refresh_on_the_model_use_the_target_schema(
             node_id,
         )
         assert_report_node_has_columns(report_node, {"existing_column"})
+
+
+def test_column_order_preserved_on_schema_change_ignore(
+    compiled_project: ProjectContext,
+):
+    node_id = "model.test_incremental.column_order_preserved_osc_ignore"
+    manifest_node = compiled_project.manifest.nodes[node_id]
+    columns = ["col_2 STRING", "col_1 STRING"]
+    with compiled_project.create_state(manifest_node, columns):
+        run_result = compiled_project.dry_run()
+        assert_report_produced(run_result)
+        report_node = get_report_node_by_id(
+            run_result.report,
+            node_id,
+        )
+        assert_report_node_has_columns_in_order(report_node, ["col_2", "col_1"])
+
+
+def test_column_order_preserved_on_schema_change_append_new_columns(
+    compiled_project: ProjectContext,
+):
+    node_id = "model.test_incremental.column_order_preserved_osc_append"
+    manifest_node = compiled_project.manifest.nodes[node_id]
+    columns = ["col_2 STRING", "col_1 STRING"]
+    with compiled_project.create_state(manifest_node, columns):
+        run_result = compiled_project.dry_run()
+        assert_report_produced(run_result)
+        report_node = get_report_node_by_id(
+            run_result.report,
+            node_id,
+        )
+        assert_report_node_has_columns_in_order(report_node, ["col_2", "col_1"])

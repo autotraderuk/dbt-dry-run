@@ -1,5 +1,5 @@
 from itertools import groupby
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Tuple
 
 from dbt_dry_run.exception import InvalidColumnSpecification, UnknownDataTypeException
 from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
@@ -22,7 +22,7 @@ def _extract_fields(
     return field_names
 
 
-def expand_table_fields(table: Table) -> Set[str]:
+def expand_table_fields(table: Table) -> List[str]:
     """
     Expand table fields to dot notation (like in dbt metadata)
 
@@ -30,7 +30,7 @@ def expand_table_fields(table: Table) -> Set[str]:
     Returns: ["a", "a.a1"]
     """
     name_type_pairs = _extract_fields(table.fields)
-    return set(name for name, _ in name_type_pairs)
+    return [name for name, _ in name_type_pairs]
 
 
 def expand_table_fields_with_types(table: Table) -> Dict[str, BigQueryFieldType]:

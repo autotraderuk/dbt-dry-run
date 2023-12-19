@@ -19,20 +19,36 @@ def append_new_columns_handler(
 ) -> DryRunResult:
     if dry_run_result.table is None:
         return dry_run_result
-    mapped_predicted_table = {
-        field.name: field for field in dry_run_result.table.fields
-    }
-    mapped_target_table = {field.name: field for field in target_table.fields}
-    mapped_predicted_table.update(mapped_target_table)
-    return dry_run_result.replace_table(
-        Table(fields=list(mapped_predicted_table.values()))
-    )
+
+    target_column_names = set(field.name for field in target_table.fields)
+    new_columns = [
+        new_field
+        for new_field in dry_run_result.table.fields
+        if new_field.name not in target_column_names
+    ]
+    final_fields = target_table.fields + new_columns
+    return dry_run_result.replace_table(Table(fields=final_fields))
 
 
 def sync_all_columns_handler(
     dry_run_result: DryRunResult, target_table: Table
 ) -> DryRunResult:
-    return dry_run_result
+    if dry_run_result.table is None:
+        return dry_run_result
+    predicted_column_names = set(field.name for field in dry_run_result.table.fields)
+    target_column_names = set(field.name for field in target_table.fields)
+    new_columns = [
+        new_field
+        for new_field in dry_run_result.table.fields
+        if new_field.name not in target_column_names
+    ]
+    existing_columns = [
+        existing_field
+        for existing_field in target_table.fields
+        if existing_field.name in predicted_column_names
+    ]
+    final_fields = existing_columns + new_columns
+    return dry_run_result.replace_table(Table(fields=final_fields))
 
 
 def fail_handler(dry_run_result: DryRunResult, target_table: Table) -> DryRunResult:
