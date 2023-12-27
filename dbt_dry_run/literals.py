@@ -1,5 +1,4 @@
-import re
-from typing import Callable, Dict, List, Optional, cast
+from typing import Callable, Dict, List, Optional
 from uuid import uuid4
 
 import sqlglot
@@ -85,17 +84,6 @@ def get_sql_literal_from_table(table: Table) -> str:
     literal_fields = ",".join(map(get_sql_literal_from_field, table.fields))
     select_literal = f"(SELECT {literal_fields})"
     return select_literal
-
-
-def replace_upstream_sql_old(node_sql: str, node: Node, table: Table) -> str:
-    upstream_table_ref = node.to_table_ref_literal()
-    regex = re.compile(
-        rf"((?:from|join)(?:\s--.*)?[\r\n\s]*)({upstream_table_ref})",
-        flags=re.IGNORECASE | re.MULTILINE,
-    )
-    select_literal = get_sql_literal_from_table(table)
-    new_node_sql = regex.sub(r"\1" + select_literal, node_sql)
-    return new_node_sql
 
 
 def convert_trees_to_sql(trees: List[sqlglot.Expression]) -> str:
