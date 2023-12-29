@@ -81,10 +81,15 @@ class ManifestColumn(BaseModel):
 class ExternalConfig(BaseModel):
     location: str
     dry_run_columns: List[ManifestColumn] = Field(default_factory=lambda: list())
+    partitions: List[ManifestColumn] = Field(default_factory=lambda: list())
 
     @property
     def dry_run_columns_map(self) -> Dict[str, ManifestColumn]:
         return {c.name: c for c in self.dry_run_columns}
+
+    @property
+    def dry_run_partitions_map(self) -> Dict[str, ManifestColumn]:
+        return {c.name: c for c in self.partitions}
 
 
 class Node(BaseModel):
