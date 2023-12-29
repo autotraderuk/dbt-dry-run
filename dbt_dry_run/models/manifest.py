@@ -88,7 +88,7 @@ class ExternalConfig(BaseModel):
         return {c.name: c for c in self.dry_run_columns}
 
     @property
-    def dry_run_partitions_map(self) -> Dict[str, ManifestColumn]:
+    def partitions_map(self) -> Dict[str, ManifestColumn]:
         return {c.name: c for c in self.partitions}
 
 

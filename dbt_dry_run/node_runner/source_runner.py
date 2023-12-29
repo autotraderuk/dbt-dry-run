@@ -24,7 +24,7 @@ class SourceRunner(NodeRunner):
                 columns_to_map = (
                     external_config.dry_run_columns_map
                     if external_config.dry_run_columns
-                    else {**external_config.dry_run_partitions_map, **node.columns}
+                    else {**external_config.partitions_map, **node.columns}
                 )
                 predicted_table = map_columns_to_table(columns_to_map)
             except (InvalidColumnSpecification, UnknownDataTypeException) as e:
