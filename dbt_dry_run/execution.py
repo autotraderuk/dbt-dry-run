@@ -24,6 +24,7 @@ from dbt_dry_run.sql_runner.big_query_sql_runner import BigQuerySQLRunner
 
 def should_check_columns(node: Node) -> bool:
     check_column = node.get_combined_metadata("dry_run.check_columns")
+
     if check_column is not None:
         return bool(check_column)
 

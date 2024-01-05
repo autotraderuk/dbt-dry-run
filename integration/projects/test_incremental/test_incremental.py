@@ -174,3 +174,21 @@ def test_column_order_preserved_on_schema_change_append_new_columns(
             node_id,
         )
         assert_report_node_has_columns_in_order(report_node, ["col_2", "col_1"])
+
+
+def test_required_partition_filter(
+    compiled_project: ProjectContext,
+):
+    node_id = "model.test_incremental.required_partition_filter"
+    manifest_node = compiled_project.manifest.nodes[node_id]
+    columns = ["col_1 STRING", "col_2 STRING", "snapshot_date DATE"]
+    with compiled_project.create_state(manifest_node, columns, "snapshot_date", True):
+        run_result = compiled_project.dry_run()
+        assert_report_produced(run_result)
+        report_node = get_report_node_by_id(
+            run_result.report,
+            node_id,
+        )
+        assert_report_node_has_columns_in_order(
+            report_node, ["col_1", "col_2", "snapshot_date"]
+        )
