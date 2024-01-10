@@ -1,5 +1,11 @@
 ## Changelog
 
+# dbt-dry-run v0.7.4
+
+## Bugfixes
+
+- Fix false failure when incremental models use `require_partition_filter=True`
+
 # dbt-dry-run v0.7.3
 
 ## Bugfixes
