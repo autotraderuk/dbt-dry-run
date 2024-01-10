@@ -108,7 +108,7 @@ def get_merge_sql(
                 USING (
                   {select_statement}
                 )
-                ON True
+                ON False
                 WHEN NOT MATCHED THEN 
                 INSERT ({values_csv}) 
                 VALUES ({values_csv})

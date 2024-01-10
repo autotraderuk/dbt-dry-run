@@ -37,15 +37,26 @@ class ProjectContext:
 
     @contextmanager
     def create_state(
-        self, node: Node, columns: Iterable[str]
+        self,
+        node: Node,
+        columns: Iterable[str],
+        partition_by: Optional[str] = None,
+        require_partition_by: bool = False,
     ) -> Generator[None, None, None]:
         node_name = node.to_table_ref_literal()
         schema_csv = ",\n".join(columns)
+        partition_by_clause = f"""
+        PARTITION BY {partition_by}
+        OPTIONS (require_partition_filter = {require_partition_by})
+        """
+        if not partition_by:
+            partition_by_clause = ""
         create_ddl = f"""
-            CREATE OR REPLACE TABLE {node_name}
+        CREATE OR REPLACE TABLE {node_name}
             (
                 {schema_csv}
-            );
+            )
+            {partition_by_clause};
         """
         client: Client = self._project.get_connection().handle
         client.query(create_ddl)
