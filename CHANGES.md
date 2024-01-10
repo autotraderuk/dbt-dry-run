@@ -1,5 +1,11 @@
 ## Changelog
 
+# dbt-dry-run v0.7.5
+
+## Bugfixes
+
+- Fix issue with incremental models where `sql_header` is set
+
 # dbt-dry-run v0.7.4
 
 ## Bugfixes

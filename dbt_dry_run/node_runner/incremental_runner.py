@@ -139,7 +139,10 @@ class IncrementalRunner(NodeRunner):
         common_field_names = get_common_field_names(initial_result.table, target_table)
         if not common_field_names:
             return initial_result
-        sql_statement = get_merge_sql(node, common_field_names, sql_statement)
+        sql_statement_with_merge = get_merge_sql(
+            node, common_field_names, sql_statement
+        )
+        sql_statement = self._modify_sql(node, sql_statement_with_merge)
         status, model_schema, exception = self._sql_runner.query(sql_statement)
         if status == DryRunStatus.SUCCESS:
             return initial_result
@@ -167,11 +170,10 @@ class IncrementalRunner(NodeRunner):
 
     def run(self, node: Node) -> DryRunResult:
         try:
-            run_sql = insert_dependant_sql_literals(node, self._results)
+            sql_with_literals = insert_dependant_sql_literals(node, self._results)
         except UpstreamFailedException as e:
             return DryRunResult(node, None, DryRunStatus.FAILURE, e)
-
-        run_sql = self._modify_sql(node, run_sql)
+        run_sql = self._modify_sql(node, sql_with_literals)
         status, model_schema, exception = self._sql_runner.query(run_sql)
 
         result = DryRunResult(node, model_schema, status, exception)
@@ -184,7 +186,7 @@ class IncrementalRunner(NodeRunner):
                 on_schema_change = node.config.on_schema_change or OnSchemaChange.IGNORE
                 handler = ON_SCHEMA_CHANGE_TABLE_HANDLER[on_schema_change]
                 result = self._verify_merge_type_compatibility(
-                    node, run_sql, result, target_table
+                    node, sql_with_literals, result, target_table
                 )
                 if result.status == DryRunStatus.SUCCESS:
                     result = handler(result, target_table)

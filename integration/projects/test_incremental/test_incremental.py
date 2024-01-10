@@ -192,3 +192,21 @@ def test_required_partition_filter(
         assert_report_node_has_columns_in_order(
             report_node, ["col_1", "col_2", "snapshot_date"]
         )
+
+
+def test_sql_header_and_max_partition(
+    compiled_project: ProjectContext,
+):
+    node_id = "model.test_incremental.with_sql_header_and_dbt_max_partition"
+    manifest_node = compiled_project.manifest.nodes[node_id]
+    columns = ["snapshot_date", "my_string STRING", "my_func_output STRING"]
+    with compiled_project.create_state(manifest_node, columns, "snapshot_date", True):
+        run_result = compiled_project.dry_run()
+        assert_report_produced(run_result)
+        report_node = get_report_node_by_id(
+            run_result.report,
+            node_id,
+        )
+        assert_report_node_has_columns_in_order(
+            report_node, ["snapshot_date", "my_string", "my_func_output"]
+        )
