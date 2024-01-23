@@ -22,6 +22,8 @@ tenacity = "^8.2"
 networkx = "^2.6"
 pyyaml = "~6"
 typer = "^0.6.1"
+dbt-bigquery = "~1.7"
+
 
 [tool.poetry.dev-dependencies]
 black = "^22"
@@ -33,7 +35,6 @@ pytest-cov = "^4.0.0"
 twine = "^3.8.0"
 types-setuptools = "^57.4.9"
 pytest-mock = "^3.7.0"
-dbt-bigquery = "^1.6.0"
 
 [build-system]
 requires = ["poetry-core>=1.5.0"]

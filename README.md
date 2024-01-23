@@ -19,6 +19,12 @@ The dry runner can be installed via pip:
 pip install dbt-dry-run
 `
 
+## dbt Version Compatibility
+
+The dry runner requires `dbt-bigquery 1.7` to be installed as well.
+
+Previous versions `< 0.8` of the dry runner would not specify `dbt-bigquery` as a dependency of the package.
+
 ### Running
 
 The dry runner has a single command called `dbt-dry-run` in order for it to run you must first compile a dbt manifest
