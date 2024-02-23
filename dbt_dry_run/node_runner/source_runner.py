@@ -13,8 +13,6 @@ from dbt_dry_run.results import DryRunResult, DryRunStatus
 
 
 class SourceRunner(NodeRunner):
-    resource_type = ("source",)
-
     def run(self, node: Node) -> DryRunResult:
         exception: Optional[Exception] = None
         predicted_table: Optional[Table] = None
@@ -22,9 +20,13 @@ class SourceRunner(NodeRunner):
         if node.is_external_source():
             external_config = cast(ExternalConfig, node.external)
             try:
-                predicted_table = map_columns_to_table(
+                # Use columns schema if dry_run_columns is not specified
+                columns_to_map = (
                     external_config.dry_run_columns_map
+                    if external_config.dry_run_columns
+                    else node.columns
                 )
+                predicted_table = map_columns_to_table(columns_to_map)
             except (InvalidColumnSpecification, UnknownDataTypeException) as e:
                 status = DryRunStatus.FAILURE
                 exception = e
@@ -36,3 +38,6 @@ class SourceRunner(NodeRunner):
                 )
 
         return DryRunResult(node, predicted_table, status, exception)
+
+    def validate_node(self, node: Node) -> Optional[DryRunResult]:
+        return None

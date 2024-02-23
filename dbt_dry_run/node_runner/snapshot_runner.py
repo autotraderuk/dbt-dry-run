@@ -39,8 +39,6 @@ DBT_SNAPSHOT_FIELDS = [
 
 
 class SnapshotRunner(NodeRunner):
-    resource_type = ("snapshot",)
-
     @staticmethod
     def _validate_snapshot_config(node: Node, result: DryRunResult) -> DryRunResult:
         if not result.table:

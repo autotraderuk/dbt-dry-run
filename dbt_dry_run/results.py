@@ -11,6 +11,7 @@ from dbt_dry_run.models.table import Table
 class DryRunStatus(str, Enum):
     SUCCESS = "SUCCESS"
     FAILURE = "FAILURE"
+    SKIPPED = "SKIPPED"
 
 
 class LintingStatus(str, Enum):

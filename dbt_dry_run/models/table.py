@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import List, Optional, Set
 
+import pydantic
 from google.cloud.bigquery import SchemaField
 from google.cloud.bigquery.table import Table as BigQueryTable
 from pydantic import Field
@@ -26,19 +27,25 @@ class BigQueryFieldType(str, Enum):
     DATE = "DATE"
     TIME = "TIME"
     DATETIME = "DATETIME"
+    INTERVAL = "INTERVAL"
     GEOGRAPHY = "GEOGRAPHY"
     NUMERIC = "NUMERIC"
     BIGNUMERIC = "BIGNUMERIC"
-    RECORD = "RECORD"
     STRUCT = "STRUCT"
+    JSON = "JSON"
+    RECORD = "RECORD"
 
 
 class TableField(BaseModel):
     name: str
     type_: BigQueryFieldType = Field(..., alias="type")
     mode: Optional[BigQueryFieldMode]
-    fields: Optional[List["TableField"]]
+    fields: Optional[List["TableField"]] = None
     description: Optional[str]
+
+    @pydantic.validator("type_", pre=True)
+    def validate_type_field(cls, field: str) -> BigQueryFieldType:
+        return BigQueryFieldType(field)
 
 
 TableField.update_forward_refs()

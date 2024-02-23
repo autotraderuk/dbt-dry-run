@@ -1,10 +1,12 @@
 from concurrent import futures
 from concurrent.futures.thread import ThreadPoolExecutor
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, Generator, List, Optional, Tuple
 
+from dbt_dry_run import flags
 from dbt_dry_run.adapter.service import ProjectService
 from dbt_dry_run.linting.column_linting import lint_columns
+from dbt_dry_run.node_dispatch import RUNNERS, RunnerKey, dispatch_node
 from dbt_dry_run.sql_runner import SQLRunner
 
 if TYPE_CHECKING:
@@ -12,60 +14,39 @@ if TYPE_CHECKING:
 else:
     from typing import Awaitable as Future
 
-from dbt_dry_run.exception import (
-    ManifestValidationError,
-    NodeExecutionException,
-    NotCompiledException,
-)
+from dbt_dry_run.exception import ManifestValidationError, NodeExecutionException
 from dbt_dry_run.models.manifest import Manifest, Node
-from dbt_dry_run.node_runner import NodeRunner, get_runner_map
-from dbt_dry_run.node_runner.model_runner import ModelRunner
-from dbt_dry_run.node_runner.node_test_runner import NodeTestRunner
-from dbt_dry_run.node_runner.seed_runner import SeedRunner
-from dbt_dry_run.node_runner.snapshot_runner import SnapshotRunner
-from dbt_dry_run.node_runner.source_runner import SourceRunner
-from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
+from dbt_dry_run.node_runner import NodeRunner
+from dbt_dry_run.results import Results
 from dbt_dry_run.scheduler import ManifestScheduler
 from dbt_dry_run.sql_runner.big_query_sql_runner import BigQuerySQLRunner
 
-CONCURRENCY = 8
 
-_RUNNER_CLASSES: List[Any] = [
-    ModelRunner,
-    SeedRunner,
-    SnapshotRunner,
-    NodeTestRunner,
-    SourceRunner,
-]
+def should_check_columns(node: Node) -> bool:
+    check_column = node.get_combined_metadata("dry_run.check_columns")
 
-_RUNNERS = get_runner_map(_RUNNER_CLASSES)
+    if check_column is not None:
+        return bool(check_column)
 
+    if flags.EXTRA_CHECK_COLUMNS_METADATA_KEY is not None:
+        extra_check_column = node.get_combined_metadata(
+            flags.EXTRA_CHECK_COLUMNS_METADATA_KEY
+        )
+        return bool(extra_check_column) if extra_check_column is not None else False
 
-def dispatch_node(node: Node, runners: Dict[str, NodeRunner]) -> DryRunResult:
-    try:
-        runner = runners[node.resource_type]
-    except KeyError:
-        raise ValueError(f"Unknown resource type '{node.resource_type}'")
-    return runner.run(node)
+    return False
 
 
-def dry_run_node(runners: Dict[str, NodeRunner], node: Node, results: Results) -> None:
+def dry_run_node(
+    runners: Dict[RunnerKey, NodeRunner], node: Node, results: Results
+) -> None:
     """
     This method must be thread safe
     """
-    if node.compiled or node.is_external_source():
-        dry_run_result = dispatch_node(node, runners)
-        if node.get_should_check_columns():
-            dry_run_result = lint_columns(node, dry_run_result)
-        results.add_result(node.unique_id, dry_run_result)
-    else:
-        not_compiled_result = DryRunResult(
-            node=node,
-            table=None,
-            status=DryRunStatus.FAILURE,
-            exception=NotCompiledException(f"Node {node.unique_id} was not compiled"),
-        )
-        results.add_result(node.unique_id, not_compiled_result)
+    dry_run_result = dispatch_node(node, runners)
+    if should_check_columns(node):
+        dry_run_result = lint_columns(node, dry_run_result)
+    results.add_result(node.unique_id, dry_run_result)
 
 
 @contextmanager
@@ -107,7 +88,7 @@ def dry_run_manifest(project: ProjectService, tags: str) -> Results:
     executor: ThreadPoolExecutor
     with create_context(project) as (sql_runner, executor):
         results = Results()
-        runners = {t: runner(sql_runner, results) for t, runner in _RUNNERS.items()}
+        runners = {t: runner(sql_runner, results) for t, runner in RUNNERS.items()}
         manifest = project.get_dbt_manifest()
 
         validate_manifest_compatibility(manifest)

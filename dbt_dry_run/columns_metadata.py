@@ -1,5 +1,5 @@
 from itertools import groupby
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Tuple
 
 from dbt_dry_run.exception import InvalidColumnSpecification, UnknownDataTypeException
 from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
@@ -10,24 +10,38 @@ STRUCT_SEPERATOR = "."
 STRUCT_SEPERATOR_LENGTH = len(STRUCT_SEPERATOR)
 
 
-def _extract_fields(table_fields: List[TableField], prefix: str = "") -> List[str]:
+def _extract_fields(
+    table_fields: List[TableField], prefix: str = ""
+) -> List[Tuple[str, BigQueryFieldType]]:
     field_names = []
     for field in table_fields:
-        field_names.append(f"{prefix}{field.name}")
+        field_names.append((f"{prefix}{field.name}", field.type_))
         if field.fields:
             new_prefix = f"{prefix}{field.name}."
             field_names.extend(_extract_fields(field.fields, prefix=new_prefix))
     return field_names
 
 
-def expand_table_fields(table: Table) -> Set[str]:
+def expand_table_fields(table: Table) -> List[str]:
     """
     Expand table fields to dot notation (like in dbt metadata)
 
     Eg: TableField(name="a", fields=[TableField(name="a1")])
     Returns: ["a", "a.a1"]
     """
-    return set(_extract_fields(table.fields))
+    name_type_pairs = _extract_fields(table.fields)
+    return [name for name, _ in name_type_pairs]
+
+
+def expand_table_fields_with_types(table: Table) -> Dict[str, BigQueryFieldType]:
+    """
+    Expand table fields to dot notation (like in dbt metadata)
+
+    Eg: TableField(name="a", fields=[TableField(name="a1")])
+    Returns: ["a", "a.a1"]
+    """
+    name_type_pairs = _extract_fields(table.fields)
+    return {name: type_ for name, type_ in name_type_pairs}
 
 
 def _column_is_repeated(data_type: str) -> bool:

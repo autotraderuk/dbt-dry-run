@@ -6,8 +6,6 @@ from dbt_dry_run.results import DryRunResult, DryRunStatus
 
 
 class NodeTestRunner(NodeRunner):
-    resource_type = ("test",)
-
     def run(self, node: Node) -> DryRunResult:
         try:
             run_sql = insert_dependant_sql_literals(node, self._results)

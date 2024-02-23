@@ -1,5 +1,93 @@
 ## Changelog
 
+# dbt-dry-run v0.7.5
+
+## Bugfixes
+
+- Fix issue with incremental models where `sql_header` is set
+
+# dbt-dry-run v0.7.4
+
+## Bugfixes
+
+- Fix false failure when incremental models use `require_partition_filter=True`
+
+# dbt-dry-run v0.7.3
+
+## Bugfixes
+
+- Incremental models now correctly predict the column order if the table already exists in the target environment
+- External tables no longer always require defining the schema twice in the YAML if the table source allows it
+- Incremental models no longer cause a syntax error when they use `with recursive` CTEs
+
+# dbt-dry-run v0.7.2
+
+## Bugfixes
+
+- Seed files now get their schema using type inference from the adapter so always line up with what dbt will produces
+- Seed file `column_type` configuration is respected
+
+# dbt-dry-run v0.7.1
+
+## Bugfixes
+
+- Fix dry runner falsely reporting success if incremental has incompatible type change for existing column
+
+# dbt-dry-run v0.7.0
+
+## Improvements
+
+- Adds `--full-refresh` support. Dry running with full refresh will make use of predicted schema. This option aligns with the dbt cli 
+- Adds `--target-path` support. This option aligns with the dbt cli
+
+# dbt-dry-run v0.6.8
+
+- Compatibility with dbt v1.6
+
+# dbt-dry-run v0.6.7
+
+- Compatibility with dbt v1.5
+
+- Adds `--threads` option as an override
+
+# dbt-dry-run v0.6.6
+
+## Bugfixes & Improvements
+
+- Added `--extra-check-columns-metadata-key` CLI option. Specifying this will mean that you can use another metadata 
+  key instead of just `dry_run.check_columns`. `dry_run.check_columns` will always take priority over the extra key.
+  This is useful if you have an existing metadata key such as `governance.is_odp` that you want to enable metadata 
+  checking for
+
+- Added `--version` CLI option to print the installed version of `dbt-dry-run`
+
+- Added support for Python 3.11 ([zachary-povey](https://github.com/zachary-povey))
+
+# dbt-dry-run v0.6.5
+
+## Bugfixes & Improvements
+
+- Added command line flag `--skip-not-compiled` which will override the default behaviour of raising a `NotCompiledExceptipon`
+  if a node is in the manifest that should be compiled. This should only be used in certain circumstances where you want 
+  to skip an entire section of your dbt project from the dry run. Or if you don't want to dry run tests
+  
+- Added `status` to the report artefact which can be `SUCCESS`, `FAILED`, `SKIPPED`
+
+# dbt-dry-run v0.6.4
+
+## Bugfixes & Improvements
+
+- Add support for dbt 1.4
+
+# dbt-dry-run v0.6.3
+
+## Bugfixes & Improvements
+
+- Add support for INTERVAL and JSON types.
+
+- Improved error handling when parsing the predicted schema of the dry run queries. Error message will now raise an
+  `UnknownSchemaException` detailing the field type returned by BigQuery that it does not recognise
+
 # dbt-dry-run v0.6.2
 
 ## Bugfixes

@@ -1,9 +1,11 @@
 from typing import List, Optional, Union
+from unittest.mock import MagicMock
 
 from pydantic import BaseModel, Field
 
-from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, TableField
+from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
 from dbt_dry_run.models.manifest import Node, NodeConfig, NodeDependsOn, NodeMeta
+from dbt_dry_run.results import DryRunResult, DryRunStatus
 from dbt_dry_run.scheduler import ManifestScheduler
 
 A_SQL_QUERY = "SELECT * FROM `foo`"
@@ -56,3 +58,22 @@ def field_with_name(
     fields: Optional[List[TableField]] = None,
 ) -> TableField:
     return TableField(name=name, type=type_, mode=mode, fields=fields)
+
+
+def get_executed_sql(mock: MagicMock) -> str:
+    call_args = mock.query.call_args_list
+    assert len(call_args) == 1
+    executed_sql = call_args[0].args[0]
+    return executed_sql
+
+
+def assert_result_has_table(expected: Table, actual: DryRunResult) -> None:
+    assert actual.status == DryRunStatus.SUCCESS
+    assert actual.table
+
+    actual_field_names = set([field.name for field in actual.table.fields])
+    expected_field_names = set([field.name for field in expected.fields])
+
+    assert (
+        actual_field_names == expected_field_names
+    ), f"Actual field names: {actual_field_names} did not equal expected: {expected_field_names}"

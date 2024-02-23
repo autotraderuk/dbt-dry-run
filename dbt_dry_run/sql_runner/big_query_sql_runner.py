@@ -1,14 +1,14 @@
-from contextlib import contextmanager
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 from google.cloud.bigquery import (
     Client,
     DatasetReference,
-    QueryJob,
     QueryJobConfig,
+    SchemaField,
     TableReference,
 )
 from google.cloud.exceptions import BadRequest, Forbidden, NotFound
+from pydantic import ValidationError
 from tenacity import (
     retry,
     retry_if_exception_type,
@@ -17,6 +17,7 @@ from tenacity import (
 )
 
 from dbt_dry_run.adapter.service import ProjectService
+from dbt_dry_run.exception import UnknownSchemaException
 from dbt_dry_run.models import Table, TableField
 from dbt_dry_run.models.manifest import Node
 from dbt_dry_run.results import DryRunStatus
@@ -63,7 +64,7 @@ class BigQuerySQLRunner(SQLRunner):
         client = self.get_client()
         try:
             query_job = client.query(sql, job_config=self.JOB_CONFIG)
-            table = self.get_schema_from_query_job(query_job)
+            table = self.get_schema_from_schema_fields(query_job.schema or [])
             status = DryRunStatus.SUCCESS
         except (Forbidden, BadRequest, NotFound) as e:
             status = DryRunStatus.FAILURE
@@ -73,9 +74,27 @@ class BigQuerySQLRunner(SQLRunner):
         return status, table, exception
 
     @staticmethod
-    def get_schema_from_query_job(query_job: QueryJob) -> Table:
-        job_fields_raw = query_job._properties["statistics"]["query"]["schema"][
-            "fields"
-        ]
-        job_fields = [TableField.parse_obj(field) for field in job_fields_raw]
+    def get_schema_from_schema_fields(schema_fields: List[SchemaField]) -> Table:
+        def _map_schema_fields_to_table_field(schema_field: SchemaField) -> TableField:
+            try:
+                parsed_fields = (
+                    BigQuerySQLRunner.get_schema_from_schema_fields(
+                        schema_field.fields
+                    ).fields
+                    if schema_field.fields
+                    else None
+                )
+                return TableField(
+                    name=schema_field.name,
+                    mode=schema_field.mode,
+                    type=schema_field.field_type,
+                    description=schema_field.description,
+                    fields=parsed_fields,
+                )
+            except ValidationError as e:
+                raise UnknownSchemaException.from_validation_error(
+                    schema_field, e
+                ) from e
+
+        job_fields = list(map(_map_schema_fields_to_table_field, schema_fields))
         return Table(fields=job_fields)

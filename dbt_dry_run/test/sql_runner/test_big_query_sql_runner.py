@@ -9,6 +9,7 @@ from google.cloud.exceptions import NotFound
 from tenacity import RetryError, wait_none
 
 from dbt_dry_run.adapter.service import ProjectService
+from dbt_dry_run.exception import UnknownSchemaException
 from dbt_dry_run.results import DryRunStatus
 from dbt_dry_run.sql_runner.big_query_sql_runner import (
     MAX_ATTEMPT_NUMBER,
@@ -104,3 +105,13 @@ def test_get_node_schema_returns_table_schema() -> None:
 
     table_column_names = set(field.name for field in table.fields)
     assert table_column_names == set("a")
+
+
+def test_get_schema_from_schema_fields_raises_error_if_unknown_field_type() -> None:
+    invalid_field_type = "INVALID_FIELD_TYPE"
+    invalid_field_name = "a"
+    expected_error_message = f"BigQuery dry run field '{invalid_field_name}' returned unknown column types: '{invalid_field_type}' is not a valid BigQueryFieldType"
+    with pytest.raises(UnknownSchemaException, match=expected_error_message):
+        BigQuerySQLRunner.get_schema_from_schema_fields(
+            [SchemaField(name=invalid_field_name, field_type=invalid_field_type)]
+        )

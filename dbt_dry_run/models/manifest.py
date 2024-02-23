@@ -1,7 +1,7 @@
 import json
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field, root_validator
 
@@ -37,7 +37,21 @@ class PartitionBy(BaseModel):
 
 
 class NodeMeta(BaseModel):
-    check_columns: bool = Field(False, alias="dry_run.check_columns")
+    DEFAULT_CHECK_COLUMNS_KEY: ClassVar[str] = "dry_run.check_columns"
+
+    __root__: Dict[str, Any]
+
+    def get(self, key: str) -> Optional[Any]:
+        return self.__root__.get(key)
+
+    def __getitem__(self, key: str) -> Any:
+        try:
+            return self.__root__[key]
+        except KeyError:
+            raise KeyError(f"Node does not have metadata '{key}'")
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.__root__
 
     class Config:
         allow_population_by_field_name = True
@@ -54,6 +68,8 @@ class NodeConfig(BaseModel):
     check_cols: Optional[Union[Literal["all"], List[str]]]
     partition_by: Optional[PartitionBy]
     meta: Optional[NodeMeta]
+    full_refresh: Optional[bool]
+    column_types: Dict[str, str] = Field(default_factory=dict)
 
 
 class ManifestColumn(BaseModel):
@@ -80,11 +96,11 @@ class Node(BaseModel):
     compiled_code: str = ""
     database: str
     db_schema: str = Field(..., alias="schema")
-    alias: Optional[str]
+    alias: str
     language: Optional[str] = None
     resource_type: str
     original_file_path: str
-    root_path: str
+    root_path: Optional[str] = None
     columns: Dict[str, ManifestColumn]
     meta: Optional[NodeMeta]
     external: Optional[ExternalConfig]
@@ -96,6 +112,11 @@ class Node(BaseModel):
             **data,
         )
 
+    @root_validator(pre=True)
+    def default_alias(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        values["alias"] = values.get("alias") or values["name"]
+        return values
+
     def to_table_ref_literal(self) -> str:
         if self.alias:
             sql = f"`{self.database}`.`{self.db_schema}`.`{self.alias}`"
@@ -103,24 +124,21 @@ class Node(BaseModel):
             sql = f"`{self.database}`.`{self.db_schema}`.`{self.name}`"
         return sql
 
-    def get_should_check_columns(self) -> bool:
-        node_check_columns: bool = self.meta.check_columns if self.meta else False
-        config_check_columns: Optional[bool] = (
-            self.config.meta.check_columns if self.config.meta else None
-        )
-        merged_check_columns = (
-            config_check_columns
-            if config_check_columns is not None
-            else node_check_columns
-        )
-        return merged_check_columns
+    def get_combined_metadata(self, key: str) -> Optional[Any]:
+        node_meta = self.meta.get(key) if self.meta else None
+        config_meta = self.config.meta.get(key) if self.config.meta else None
+        merged_meta = config_meta if config_meta is not None else node_meta
+        return merged_meta
 
     def is_external_source(self) -> bool:
         return self.external is not None and self.resource_type == "source"
 
+    @property
+    def is_seed(self) -> bool:
+        return self.resource_type == "seed"
+
 
 class Macro(BaseModel):
-    root_path: Path
     original_file_path: Path
 
 

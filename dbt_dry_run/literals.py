@@ -21,8 +21,10 @@ _EXAMPLE_VALUES: Dict[BigQueryFieldType, Callable[[], str]] = {
     BigQueryFieldType.TIME: lambda: "TIME(12,0,0)",
     BigQueryFieldType.DATETIME: lambda: "DATETIME(2021,1,1,12,0,0)",
     BigQueryFieldType.GEOGRAPHY: lambda: "ST_GeogPoint(0.0, 0.0)",
+    BigQueryFieldType.INTERVAL: lambda: "MAKE_INTERVAL(1)",
     BigQueryFieldType.NUMERIC: lambda: "CAST(1 AS NUMERIC)",
     BigQueryFieldType.BIGNUMERIC: lambda: "CAST(2 AS BIGNUMERIC)",
+    BigQueryFieldType.JSON: lambda: "PARSE_JSON('{\"a\": 1}')",
 }
 
 _EXAMPLE_VALUES_TEST: Dict[BigQueryFieldType, Callable[[], str]] = {
@@ -38,9 +40,11 @@ _EXAMPLE_VALUES_TEST: Dict[BigQueryFieldType, Callable[[], str]] = {
     BigQueryFieldType.DATE: lambda: "DATE('2021-01-01')",
     BigQueryFieldType.TIME: lambda: "TIME(12,0,0)",
     BigQueryFieldType.DATETIME: lambda: "DATETIME(2021,1,1,12,0,0)",
+    BigQueryFieldType.INTERVAL: lambda: "MAKE_INTERVAL(1)",
     BigQueryFieldType.GEOGRAPHY: lambda: "ST_GeogPoint(0.0, 0.0)",
     BigQueryFieldType.NUMERIC: lambda: "CAST(1 AS NUMERIC)",
     BigQueryFieldType.BIGNUMERIC: lambda: "CAST(2 AS BIGNUMERIC)",
+    BigQueryFieldType.JSON: lambda: "PARSE_JSON('{\"a\": 1}')",
 }
 
 _ACTIVE_EXAMPLE_VALUES = _EXAMPLE_VALUES
@@ -101,7 +105,10 @@ def insert_dependant_sql_literals(node: Node, results: Results) -> str:
         raise KeyError(f"deep_nodes have not been created for {node.unique_id}")
     failed_upstreams = [r for r in upstream_results if r.status != DryRunStatus.SUCCESS]
     if failed_upstreams:
-        msg = f"Can't insert SELECT literals for {node.unique_id} because {[f.node.unique_id for f in failed_upstreams]} failed"
+        failed_upstreams_messages = ", ".join(
+            [f"{f.node.unique_id} : {f.status}" for f in failed_upstreams]
+        )
+        msg = f"Can't insert SELECT literals for {node.unique_id}. Upstreams did not run with status: {failed_upstreams_messages}"
         raise UpstreamFailedException(msg)
     completed_upstreams = [r for r in upstream_results if r.table]
 

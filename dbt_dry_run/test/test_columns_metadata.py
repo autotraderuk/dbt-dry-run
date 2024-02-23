@@ -36,7 +36,7 @@ def field_type_as_repeated(field_type: BigQueryFieldType) -> str:
 def test_expand_table_fields_with_column_names_with_no_nesting() -> None:
     table = Table(fields=[field_with_name("a"), field_with_name("b")])
 
-    expected = {"a", "b"}
+    expected = ["a", "b"]
     actual = expand_table_fields(table)
     assert actual == expected
 
@@ -52,7 +52,7 @@ def test_expand_table_fields_with_struct() -> None:
         ]
     )
 
-    expected = {"a", "struct", "struct.struct_1", "struct.struct_2"}
+    expected = ["a", "struct", "struct.struct_1", "struct.struct_2"]
     actual = expand_table_fields(table)
     assert actual == expected
 
@@ -70,7 +70,7 @@ def test_expand_table_fields_with_nested_struct() -> None:
         ]
     )
 
-    expected = {"a", "struct", "struct.struct_1", "struct.struct_1.struct_1_1"}
+    expected = ["a", "struct", "struct.struct_1", "struct.struct_1.struct_1_1"]
     actual = expand_table_fields(table)
     assert actual == expected
 
