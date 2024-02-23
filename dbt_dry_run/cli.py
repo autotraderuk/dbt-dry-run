@@ -119,6 +119,7 @@ def run(
     exit_code = dry_run(
         project_dir,
         profiles_dir,
+        tags,
         target,
         target_path,
         verbose,
