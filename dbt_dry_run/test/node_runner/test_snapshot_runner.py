@@ -41,7 +41,7 @@ def test_snapshot_with_check_all_strategy_runs_sql_with_id() -> None:
             )
         ]
     )
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, None)
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, 0, None)
 
     node = SimpleNode(
         unique_id="node1",
@@ -76,7 +76,7 @@ def test_snapshot_with_check_all_strategy_fails_without_id() -> None:
             )
         ]
     )
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, None)
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, 0, None)
 
     node = SimpleNode(
         unique_id="node1",
@@ -114,7 +114,7 @@ def test_snapshot_with_check_all_strategy_runs_sql_with_matching_columns() -> No
             ),
         ]
     )
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, None)
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, 0, None)
 
     node = SimpleNode(
         unique_id="node1",
@@ -152,7 +152,7 @@ def test_snapshot_with_check_cols_strategy_fails_with_missing_column() -> None:
             )
         ]
     )
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, None)
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, 0, None)
 
     node = SimpleNode(
         unique_id="node1",
@@ -187,7 +187,7 @@ def test_snapshot_with_timestamp_strategy_with_updated_at_column() -> None:
             TableField(name="last_updated_col", type=BigQueryFieldType.TIMESTAMP),
         ]
     )
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, None)
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, 0, None)
 
     node = SimpleNode(
         unique_id="node1",
@@ -222,7 +222,7 @@ def test_snapshot_with_timestamp_strategy_with_missing_updated_at_column() -> No
             TableField(name="last_updated_col", type=BigQueryFieldType.TIMESTAMP),
         ]
     )
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, None)
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, 0, None)
 
     node = SimpleNode(
         unique_id="node1",
@@ -261,7 +261,7 @@ def test_snapshot_with_list_of_unique_key_columns_raises_error() -> None:
             TableField(name="last_updated_col", type=BigQueryFieldType.TIMESTAMP),
         ]
     )
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, None)
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, 0, None)
 
     node = SimpleNode(
         unique_id="node1",

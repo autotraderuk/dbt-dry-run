@@ -30,6 +30,8 @@ A_SIMPLE_TABLE = Table(
     ]
 )
 
+A_TOTAL_BYTES_PROCESSED = 1000
+
 A_NODE = SimpleNode(
     unique_id="node1", depends_on=[], resource_type=ManifestScheduler.MODEL
 ).to_node()
@@ -58,7 +60,7 @@ def get_mock_sql_runner_with(
     model_schema: Table, target_schema: Optional[Table]
 ) -> MagicMock:
     mock_sql_runner = MagicMock()
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, model_schema, None)
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, model_schema, 0, None)
     mock_sql_runner.get_node_schema.return_value = target_schema
     return mock_sql_runner
 
@@ -68,7 +70,12 @@ def test_partitioned_incremental_model_declares_dbt_max_partition_variable() -> 
         "declare _dbt_max_partition timestamp default CURRENT_TIMESTAMP();"
     )
     mock_sql_runner = MagicMock()
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, A_SIMPLE_TABLE, None)
+    mock_sql_runner.query.return_value = (
+        DryRunStatus.SUCCESS,
+        A_SIMPLE_TABLE,
+        A_TOTAL_BYTES_PROCESSED,
+        None,
+    )
 
     node = SimpleNode(
         unique_id="node1",
@@ -463,7 +470,12 @@ def test_node_with_false_full_refresh_does_not_full_refresh_when_flag_is_true(
 
 def test_model_with_sql_header_executes_header_first() -> None:
     mock_sql_runner = MagicMock()
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, A_SIMPLE_TABLE, None)
+    mock_sql_runner.query.return_value = (
+        DryRunStatus.SUCCESS,
+        A_SIMPLE_TABLE,
+        A_TOTAL_BYTES_PROCESSED,
+        None,
+    )
 
     pre_header_value = "DECLARE x INT64;"
 
@@ -492,7 +504,11 @@ def test_append_handler_preserves_existing_column_order() -> None:
         ]
     )
     dry_run_result = DryRunResult(
-        node=A_NODE, status=DryRunStatus.SUCCESS, table=model_table, exception=None
+        node=A_NODE,
+        status=DryRunStatus.SUCCESS,
+        table=model_table,
+        total_bytes_processed=0,
+        exception=None,
     )
     target_table = Table(
         fields=[
@@ -522,7 +538,11 @@ def test_sync_handler_preserves_existing_column_order() -> None:
         ]
     )
     dry_run_result = DryRunResult(
-        node=A_NODE, status=DryRunStatus.SUCCESS, table=model_table, exception=None
+        node=A_NODE,
+        status=DryRunStatus.SUCCESS,
+        table=model_table,
+        total_bytes_processed=0,
+        exception=None,
     )
     target_table = Table(
         fields=[

@@ -56,7 +56,7 @@ def test_error_query_does_not_retry() -> None:
     sql_runner = BigQuerySQLRunner(cast(ProjectService, mock_project))
 
     expected_sql = "SELECT * FROM foo"
-    status, _, exc = sql_runner.query(expected_sql)
+    status, _, _, exc = sql_runner.query(expected_sql)
 
     assert status == DryRunStatus.FAILURE
     assert exc is raised_exception

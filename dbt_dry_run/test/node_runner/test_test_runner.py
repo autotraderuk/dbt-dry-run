@@ -38,7 +38,7 @@ def test_test_runs_sql() -> None:
             )
         ]
     )
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, None)
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, 0, None)
 
     test_node = SimpleNode(
         unique_id="test1", depends_on=[], resource_type=ManifestScheduler.TEST

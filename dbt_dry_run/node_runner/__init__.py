@@ -30,13 +30,18 @@ class NodeRunner(metaclass=ABCMeta):
                     node=node,
                     table=None,
                     status=DryRunStatus.FAILURE,
+                    total_bytes_processed=0,
                     exception=NotCompiledException(
                         f"Node {node.unique_id} was not compiled"
                     ),
                 )
             else:
                 return DryRunResult(
-                    node, table=None, status=DryRunStatus.SKIPPED, exception=None
+                    node,
+                    table=None,
+                    status=DryRunStatus.SKIPPED,
+                    total_bytes_processed=0,
+                    exception=None,
                 )
         else:
             return None
