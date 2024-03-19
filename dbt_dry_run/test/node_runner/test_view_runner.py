@@ -21,6 +21,8 @@ A_SIMPLE_TABLE = Table(
     ]
 )
 
+A_TOTAL_BYTES_PROCESSED = 1000
+
 
 def sql_with_view_creation(node: Node, sql_statement: str) -> str:
     return f"CREATE OR REPLACE VIEW `{node.database}`.`{node.db_schema}`.`{node.alias}` AS (\n{sql_statement}\n)"
@@ -36,7 +38,7 @@ def test_model_with_no_dependencies_runs_sql() -> None:
             )
         ]
     )
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, None)
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, 0, None)
 
     node = SimpleNode(
         unique_id="node1", depends_on=[], resource_type=ManifestScheduler.SEED
@@ -52,13 +54,19 @@ def test_model_with_no_dependencies_runs_sql() -> None:
         sql_with_view_creation(node, node.compiled_code)
     )
     assert result.status == DryRunStatus.SUCCESS
+    assert result.total_bytes_processed == 0
     assert result.table
     assert result.table.fields[0].name == expected_table.fields[0].name
 
 
 def test_model_as_view_runs_create_view() -> None:
     mock_sql_runner = MagicMock()
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, A_SIMPLE_TABLE, None)
+    mock_sql_runner.query.return_value = (
+        DryRunStatus.SUCCESS,
+        A_SIMPLE_TABLE,
+        A_TOTAL_BYTES_PROCESSED,
+        None,
+    )
 
     node = SimpleNode(
         unique_id="node1", depends_on=[], resource_type=ManifestScheduler.MODEL
@@ -78,7 +86,12 @@ def test_model_as_view_runs_create_view() -> None:
 
 def test_model_with_failed_dependency_raises_upstream_failed_exception() -> None:
     mock_sql_runner = MagicMock()
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, A_SIMPLE_TABLE, None)
+    mock_sql_runner.query.return_value = (
+        DryRunStatus.SUCCESS,
+        A_SIMPLE_TABLE,
+        A_TOTAL_BYTES_PROCESSED,
+        None,
+    )
 
     upstream_simple_node = SimpleNode(unique_id="upstream", depends_on=[])
     upstream_node = upstream_simple_node.to_node()
@@ -98,6 +111,7 @@ def test_model_with_failed_dependency_raises_upstream_failed_exception() -> None
             node=upstream_node,
             status=DryRunStatus.FAILURE,
             table=None,
+            total_bytes_processed=0,
             exception=Exception("BOOM"),
         ),
     )
@@ -105,12 +119,18 @@ def test_model_with_failed_dependency_raises_upstream_failed_exception() -> None
     model_runner = ViewRunner(mock_sql_runner, results)
     result = model_runner.run(node)
     assert result.status == DryRunStatus.FAILURE
+    assert result.total_bytes_processed == 0
     assert isinstance(result.exception, UpstreamFailedException)
 
 
 def test_model_with_dependency_inserts_sql_literal() -> None:
     mock_sql_runner = MagicMock()
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, A_SIMPLE_TABLE, None)
+    mock_sql_runner.query.return_value = (
+        DryRunStatus.SUCCESS,
+        A_SIMPLE_TABLE,
+        A_TOTAL_BYTES_PROCESSED,
+        None,
+    )
 
     upstream_simple_node = SimpleNode(unique_id="upstream", depends_on=[])
     upstream_node = upstream_simple_node.to_node()
@@ -133,6 +153,7 @@ def test_model_with_dependency_inserts_sql_literal() -> None:
             node=upstream_node,
             status=DryRunStatus.SUCCESS,
             table=A_SIMPLE_TABLE,
+            total_bytes_processed=0,
             exception=Exception("BOOM"),
         ),
     )
@@ -142,6 +163,7 @@ def test_model_with_dependency_inserts_sql_literal() -> None:
 
     executed_sql = get_executed_sql(mock_sql_runner)
     assert result.status == DryRunStatus.SUCCESS
+    assert result.total_bytes_processed == A_TOTAL_BYTES_PROCESSED
     assert executed_sql == sql_with_view_creation(
         node, "SELECT * FROM (SELECT 'foo' as `a`)"
     )
@@ -149,7 +171,12 @@ def test_model_with_dependency_inserts_sql_literal() -> None:
 
 def test_model_with_sql_header_executes_header_first() -> None:
     mock_sql_runner = MagicMock()
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, A_SIMPLE_TABLE, None)
+    mock_sql_runner.query.return_value = (
+        DryRunStatus.SUCCESS,
+        A_SIMPLE_TABLE,
+        A_TOTAL_BYTES_PROCESSED,
+        None,
+    )
 
     pre_header_value = "DECLARE x INT64;"
 

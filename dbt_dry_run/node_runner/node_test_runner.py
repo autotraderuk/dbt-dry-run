@@ -10,9 +10,16 @@ class NodeTestRunner(NodeRunner):
         try:
             run_sql = insert_dependant_sql_literals(node, self._results)
         except UpstreamFailedException as e:
-            return DryRunResult(node, None, DryRunStatus.FAILURE, e)
+            return DryRunResult(node, None, DryRunStatus.FAILURE, 0, e)
 
-        status, predicted_table, exception = self._sql_runner.query(run_sql)
+        (
+            status,
+            predicted_table,
+            total_bytes_processed,
+            exception,
+        ) = self._sql_runner.query(run_sql)
 
-        result = DryRunResult(node, predicted_table, status, exception)
+        result = DryRunResult(
+            node, predicted_table, status, total_bytes_processed, exception
+        )
         return result

@@ -21,6 +21,7 @@ def successful_result() -> DryRunResult:
         table=Table(fields=[]),
         status=DryRunStatus.SUCCESS,
         exception=None,
+        total_bytes_processed=1000,
         linting_status=LintingStatus.SKIPPED,
     )
 
@@ -31,6 +32,7 @@ def failed_result() -> DryRunResult:
         node=SimpleNode(unique_id="B", depends_on=[]).to_node(),
         table=Table(fields=[]),
         status=DryRunStatus.FAILURE,
+        total_bytes_processed=0,
         exception=Exception("Oh no!"),
         linting_status=LintingStatus.SKIPPED,
     )
@@ -42,6 +44,7 @@ def failed_linting_result() -> DryRunResult:
         node=SimpleNode(unique_id="B", depends_on=[]).to_node(),
         table=Table(fields=[]),
         status=DryRunStatus.SUCCESS,
+        total_bytes_processed=1000,
         exception=None,
         linting_status=LintingStatus.FAILURE,
         linting_errors=[

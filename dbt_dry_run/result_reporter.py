@@ -63,6 +63,7 @@ class ResultReporter:
                 status=result.status,
                 error_message=exception_type,
                 table=result.table,
+                total_bytes_processed=result.total_bytes_processed,
                 linting_status=result.linting_status,
                 linting_errors=_map_column_errors(result.linting_errors),
             )

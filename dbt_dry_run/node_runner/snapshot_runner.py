@@ -56,6 +56,7 @@ class SnapshotRunner(NodeRunner):
                 node=result.node,
                 table=result.table,
                 status=DryRunStatus.FAILURE,
+                total_bytes_processed=0,
                 exception=exception,
             )
         if node.config.strategy == "timestamp":
@@ -67,6 +68,7 @@ class SnapshotRunner(NodeRunner):
                     node=result.node,
                     table=result.table,
                     status=DryRunStatus.FAILURE,
+                    total_bytes_processed=0,
                     exception=exception,
                 )
         elif node.config.strategy == "check":
@@ -78,6 +80,7 @@ class SnapshotRunner(NodeRunner):
                     node=result.node,
                     table=result.table,
                     status=DryRunStatus.FAILURE,
+                    total_bytes_processed=0,
                     exception=exception,
                 )
         else:
@@ -88,10 +91,17 @@ class SnapshotRunner(NodeRunner):
         try:
             run_sql = insert_dependant_sql_literals(node, self._results)
         except UpstreamFailedException as e:
-            return DryRunResult(node, None, DryRunStatus.FAILURE, e)
+            return DryRunResult(node, None, DryRunStatus.FAILURE, 0, e)
 
-        status, predicted_table, exception = self._sql_runner.query(run_sql)
-        result = DryRunResult(node, predicted_table, status, exception)
+        (
+            status,
+            predicted_table,
+            total_bytes_processed,
+            exception,
+        ) = self._sql_runner.query(run_sql)
+        result = DryRunResult(
+            node, predicted_table, status, total_bytes_processed, exception
+        )
         if result.status == DryRunStatus.SUCCESS and result.table:
             result.table.fields = [*result.table.fields, *DBT_SNAPSHOT_FIELDS]
             result = self._validate_snapshot_config(node, result)

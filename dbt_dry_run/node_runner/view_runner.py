@@ -16,10 +16,14 @@ class ViewRunner(NodeRunner):
         try:
             run_sql = insert_dependant_sql_literals(node, self._results)
         except UpstreamFailedException as e:
-            return DryRunResult(node, None, DryRunStatus.FAILURE, e)
+            return DryRunResult(node, None, DryRunStatus.FAILURE, 0, e)
 
         run_sql = self._modify_sql(node, run_sql)
-        status, model_schema, exception = self._sql_runner.query(run_sql)
+        status, model_schema, total_bytes_processed, exception = self._sql_runner.query(
+            run_sql
+        )
 
-        result = DryRunResult(node, model_schema, status, exception)
+        result = DryRunResult(
+            node, model_schema, status, total_bytes_processed, exception
+        )
         return result

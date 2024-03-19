@@ -58,20 +58,22 @@ class BigQuerySQLRunner(SQLRunner):
     )
     def query(
         self, sql: str
-    ) -> Tuple[DryRunStatus, Optional[Table], Optional[Exception]]:
+    ) -> Tuple[DryRunStatus, Optional[Table], Optional[int], Optional[Exception]]:
         exception = None
         table = None
+        total_bytes_processed = None
         client = self.get_client()
         try:
             query_job = client.query(sql, job_config=self.JOB_CONFIG)
             table = self.get_schema_from_schema_fields(query_job.schema or [])
+            total_bytes_processed = query_job.total_bytes_processed
             status = DryRunStatus.SUCCESS
         except (Forbidden, BadRequest, NotFound) as e:
             status = DryRunStatus.FAILURE
             if QUERY_TIMED_OUT in str(e):
                 raise
             exception = e
-        return status, table, exception
+        return status, table, total_bytes_processed, exception
 
     @staticmethod
     def get_schema_from_schema_fields(schema_fields: List[SchemaField]) -> Table:

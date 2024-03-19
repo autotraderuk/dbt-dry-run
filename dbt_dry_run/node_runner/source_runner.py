@@ -16,6 +16,7 @@ class SourceRunner(NodeRunner):
     def run(self, node: Node) -> DryRunResult:
         exception: Optional[Exception] = None
         predicted_table: Optional[Table] = None
+        total_bytes_processed: Optional[int] = 0
         status = DryRunStatus.SUCCESS
         if node.is_external_source():
             external_config = cast(ExternalConfig, node.external)
@@ -37,7 +38,9 @@ class SourceRunner(NodeRunner):
                     f"Could not find source in target environment for node '{node.unique_id}'"
                 )
 
-        return DryRunResult(node, predicted_table, status, exception)
+        return DryRunResult(
+            node, predicted_table, status, total_bytes_processed, exception
+        )
 
     def validate_node(self, node: Node) -> Optional[DryRunResult]:
         return None

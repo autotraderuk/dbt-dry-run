@@ -18,6 +18,7 @@ class ReportNode(BaseModel):
     status: DryRunStatus
     error_message: Optional[str]
     table: Optional[Table]
+    total_bytes_processed: Optional[int]
     linting_status: LintingStatus
     linting_errors: List[ReportLintingError]
 

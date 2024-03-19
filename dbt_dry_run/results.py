@@ -31,13 +31,18 @@ class DryRunResult:
     node: Node
     table: Optional[Table]
     status: DryRunStatus
+    total_bytes_processed: Optional[int]
     exception: Optional[Exception]
     linting_status: LintingStatus = LintingStatus.SKIPPED
     linting_errors: List[LintingError] = field(default_factory=lambda: [])
 
     def replace_table(self, table: Table) -> "DryRunResult":
         return DryRunResult(
-            node=self.node, table=table, status=self.status, exception=self.exception
+            node=self.node,
+            table=table,
+            status=self.status,
+            total_bytes_processed=self.total_bytes_processed,
+            exception=self.exception,
         )
 
     def with_linting_errors(self, linting_errors: List[LintingError]) -> "DryRunResult":
@@ -49,6 +54,7 @@ class DryRunResult:
             node=self.node,
             table=self.table,
             status=self.status,
+            total_bytes_processed=self.total_bytes_processed,
             exception=self.exception,
             linting_errors=linting_errors,
             linting_status=linting_status,

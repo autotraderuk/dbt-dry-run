@@ -28,7 +28,7 @@ class SQLRunner(metaclass=ABCMeta):
     @abstractmethod
     def query(
         self, sql: str
-    ) -> Tuple[DryRunStatus, Optional[Table], Optional[Exception]]:
+    ) -> Tuple[DryRunStatus, Optional[Table], Optional[int], Optional[Exception]]:
         ...
 
     def convert_agate_type(
