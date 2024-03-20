@@ -60,6 +60,9 @@ def assert_node_failed(report: Report, unique_id: str) -> None:
 
 
 def assert_report_node_has_columns(node: ReportNode, columns: Set[str]) -> None:
+    assert (
+        node.table
+    ), f"Node {node.unique_id} does not have a table: {node.error_message}"
     column_names = set(expand_table_fields(node.table))
     assert (
         column_names == columns
