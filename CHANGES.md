@@ -1,5 +1,11 @@
 ## Changelog
 
+# dbt-dry-run v0.7.6
+
+## Improvements
+
+- Add `total_bytes_processed` to report artefact
+
 # dbt-dry-run v0.7.5
 
 ## Bugfixes
