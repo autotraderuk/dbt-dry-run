@@ -12,10 +12,12 @@ class NodeTestRunner(NodeRunner):
         except UpstreamFailedException as e:
             return DryRunResult(node, None, DryRunStatus.FAILURE, 0, e)
 
+        # Run the compiled code to get the total bytes processed
+        _, _, total_bytes_processed, _ = self._sql_runner.query(node.compiled_code)
         (
             status,
             predicted_table,
-            total_bytes_processed,
+            _,
             exception,
         ) = self._sql_runner.query(run_sql)
 

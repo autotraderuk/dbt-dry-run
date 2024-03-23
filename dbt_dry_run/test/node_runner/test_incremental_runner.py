@@ -101,7 +101,16 @@ def test_partitioned_incremental_model_declares_dbt_max_partition_variable() -> 
     model_runner = IncrementalRunner(mock_sql_runner, results)
     model_runner.run(node)
 
-    executed_sql = get_executed_sql(mock_sql_runner)
+    call_args = mock_sql_runner.query.call_args_list
+    assert len(call_args) == 2
+
+    executed_sql_for_total_bytes_processed = call_args[0].args[0]
+    assert executed_sql_for_total_bytes_processed.startswith(
+        dbt_max_partition_declaration
+    )
+    assert node.compiled_code in executed_sql_for_total_bytes_processed
+
+    executed_sql = call_args[1].args[0]
     assert executed_sql.startswith(dbt_max_partition_declaration)
     assert node.compiled_code in executed_sql
 
@@ -490,7 +499,14 @@ def test_model_with_sql_header_executes_header_first() -> None:
     model_runner = IncrementalRunner(mock_sql_runner, results)
     model_runner.run(node)
 
-    executed_sql = get_executed_sql(mock_sql_runner)
+    call_args = mock_sql_runner.query.call_args_list
+    assert len(call_args) == 2
+
+    executed_sql_for_total_bytes_processed = call_args[0].args[0]
+    assert executed_sql_for_total_bytes_processed.startswith(pre_header_value)
+    assert node.compiled_code in executed_sql_for_total_bytes_processed
+
+    executed_sql = call_args[1].args[0]
     assert executed_sql.startswith(pre_header_value)
     assert node.compiled_code in executed_sql
 

@@ -144,13 +144,18 @@ class IncrementalRunner(NodeRunner):
         common_field_names = get_common_field_names(initial_result.table, target_table)
         if not common_field_names:
             return initial_result
+        # Run the compiled code to get the total bytes processed
+        compiled_sql_statement_with_merge = get_merge_sql(
+            node, common_field_names, node.compiled_code
+        )
+        compiled_sql = self._modify_sql(node, compiled_sql_statement_with_merge)
+        _, _, total_bytes_processed, _ = self._sql_runner.query(compiled_sql)
+
         sql_statement_with_merge = get_merge_sql(
             node, common_field_names, sql_statement
         )
         sql_statement = self._modify_sql(node, sql_statement_with_merge)
-        status, model_schema, total_bytes_processed, exception = self._sql_runner.query(
-            sql_statement
-        )
+        status, model_schema, _, exception = self._sql_runner.query(sql_statement)
         if status == DryRunStatus.SUCCESS:
             return initial_result
         else:
@@ -180,10 +185,13 @@ class IncrementalRunner(NodeRunner):
             sql_with_literals = insert_dependant_sql_literals(node, self._results)
         except UpstreamFailedException as e:
             return DryRunResult(node, None, DryRunStatus.FAILURE, 0, e)
+
+        # Run the compiled code to get the total bytes processed
+        compiled_sql = self._modify_sql(node, node.compiled_code)
+        _, _, total_bytes_processed, _ = self._sql_runner.query(compiled_sql)
+
         run_sql = self._modify_sql(node, sql_with_literals)
-        status, model_schema, total_bytes_processed, exception = self._sql_runner.query(
-            run_sql
-        )
+        status, model_schema, _, exception = self._sql_runner.query(run_sql)
 
         result = DryRunResult(
             node, model_schema, status, total_bytes_processed, exception
