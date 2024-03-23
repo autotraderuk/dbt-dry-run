@@ -79,7 +79,13 @@ def test_model_as_view_runs_create_view() -> None:
     model_runner = ViewRunner(mock_sql_runner, results)
     model_runner.run(node)
 
-    executed_sql = get_executed_sql(mock_sql_runner)
+    call_args = mock_sql_runner.query.call_args_list
+    assert len(call_args) == 2
+
+    executed_sql_for_total_bytes_processed = call_args[0].args[0]
+    assert executed_sql_for_total_bytes_processed == node.compiled_code
+
+    executed_sql = call_args[1].args[0]
     assert executed_sql.startswith(VIEW_CREATION_SQL)
     assert node.compiled_code in executed_sql
 
@@ -161,7 +167,13 @@ def test_model_with_dependency_inserts_sql_literal() -> None:
     model_runner = ViewRunner(mock_sql_runner, results)
     result = model_runner.run(node)
 
-    executed_sql = get_executed_sql(mock_sql_runner)
+    call_args = mock_sql_runner.query.call_args_list
+    assert len(call_args) == 2
+
+    executed_sql_for_total_bytes_processed = call_args[0].args[0]
+    assert executed_sql_for_total_bytes_processed == node.compiled_code
+
+    executed_sql = call_args[1].args[0]
     assert result.status == DryRunStatus.SUCCESS
     assert result.total_bytes_processed == A_TOTAL_BYTES_PROCESSED
     assert executed_sql == sql_with_view_creation(
@@ -193,6 +205,13 @@ def test_model_with_sql_header_executes_header_first() -> None:
     model_runner = ViewRunner(mock_sql_runner, results)
     model_runner.run(node)
 
-    executed_sql = get_executed_sql(mock_sql_runner)
+    call_args = mock_sql_runner.query.call_args_list
+    assert len(call_args) == 2
+
+    executed_sql_for_total_bytes_processed = call_args[0].args[0]
+    assert executed_sql_for_total_bytes_processed.startswith(pre_header_value)
+    assert node.compiled_code in executed_sql_for_total_bytes_processed
+
+    executed_sql = call_args[1].args[0]
     assert executed_sql.startswith(pre_header_value)
     assert node.compiled_code in executed_sql

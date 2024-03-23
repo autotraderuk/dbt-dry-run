@@ -18,10 +18,14 @@ class ViewRunner(NodeRunner):
         except UpstreamFailedException as e:
             return DryRunResult(node, None, DryRunStatus.FAILURE, 0, e)
 
+        # Run the compiled code to get the total bytes processed
+        compiled_sql = node.compiled_code
+        if node.config.sql_header:
+            compiled_sql = f"{node.config.sql_header}\n{compiled_sql}"
+        _, _, total_bytes_processed, _ = self._sql_runner.query(compiled_sql)
+
         run_sql = self._modify_sql(node, run_sql)
-        status, model_schema, total_bytes_processed, exception = self._sql_runner.query(
-            run_sql
-        )
+        status, model_schema, _, exception = self._sql_runner.query(run_sql)
 
         result = DryRunResult(
             node, model_schema, status, total_bytes_processed, exception

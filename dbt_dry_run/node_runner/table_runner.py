@@ -17,10 +17,12 @@ class TableRunner(NodeRunner):
         except UpstreamFailedException as e:
             return DryRunResult(node, None, DryRunStatus.FAILURE, 0, e)
 
+        # Run the compiled code to get the total bytes processed
+        compiled_sql = self._modify_sql(node, node.compiled_code)
+        _, _, total_bytes_processed, _ = self._sql_runner.query(compiled_sql)
+
         run_sql = self._modify_sql(node, run_sql)
-        status, model_schema, total_bytes_processed, exception = self._sql_runner.query(
-            run_sql
-        )
+        status, model_schema, _, exception = self._sql_runner.query(run_sql)
 
         result = DryRunResult(
             node, model_schema, status, total_bytes_processed, exception
