@@ -1,5 +1,11 @@
 ## Changelog
 
+# dbt-dry-run v0.7.7
+
+## Improvements
+
+- Official compatibility with dbt v1.7
+
 # dbt-dry-run v0.7.6
 
 ## Improvements
