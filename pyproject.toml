@@ -15,13 +15,13 @@ dbt-dry-run = "dbt_dry_run.__main__:main"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
-agate = "^1.6"
+agate = ">=1.7.0,<1.10"
 google-cloud-bigquery = "^3"
 pydantic = "^1.9.0"
 tenacity = "^8.2"
-networkx = "^2.6"
+networkx = ">=2.3,<4.0"
 pyyaml = "~6"
-typer = "^0.6.1"
+typer = "~0"
 
 [tool.poetry.dev-dependencies]
 black = "^22"
@@ -33,7 +33,7 @@ pytest-cov = "^4.0.0"
 twine = "^3.8.0"
 types-setuptools = "^57.4.9"
 pytest-mock = "^3.7.0"
-dbt-bigquery = "^1.6.0"
+dbt-bigquery = "~1.7.0"
 
 [build-system]
 requires = ["poetry-core>=1.5.0"]
@@ -48,7 +48,8 @@ filterwarnings = [
     "ignore:invalid escape sequence",
     "ignore:unclosed",
     "ignore:'cgi' is deprecated and slated for removal",
-    "ignore:Your application has authenticated using end user credentials"
+    "ignore:Your application has authenticated using end user credentials",
+    "ignore::UserWarning"
 ]
 pythonpath = [
   "."
