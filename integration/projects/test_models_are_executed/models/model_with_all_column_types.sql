@@ -38,6 +38,7 @@ simple_column_types AS (
         CAST(1 AS NUMERIC) AS my_numeric,
         CAST(2 AS BIGNUMERIC) AS my_bignumeric,
         PARSE_JSON('{"a": 1}') AS my_json,
+        RANGE(DATE '2022-12-01', DATE '2022-12-31') as my_range
 ),
 all_column_types AS (
     SELECT * FROM simple_column_types
@@ -65,4 +66,5 @@ SELECT
     my_json,
     my_struct,
     my_array_of_records,
+    my_range
 FROM all_column_types
