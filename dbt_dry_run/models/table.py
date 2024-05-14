@@ -34,6 +34,7 @@ class BigQueryFieldType(str, Enum):
     STRUCT = "STRUCT"
     JSON = "JSON"
     RECORD = "RECORD"
+    RANGE = "RANGE"
 
 
 class TableField(BaseModel):

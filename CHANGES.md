@@ -1,5 +1,11 @@
 ## Changelog
 
+# dbt-dry-run v0.7.x
+
+## Improvements
+
+- Support RANGE datatype
+
 # dbt-dry-run v0.7.7
 
 ## Improvements

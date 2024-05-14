@@ -25,6 +25,7 @@ _EXAMPLE_VALUES: Dict[BigQueryFieldType, Callable[[], str]] = {
     BigQueryFieldType.NUMERIC: lambda: "CAST(1 AS NUMERIC)",
     BigQueryFieldType.BIGNUMERIC: lambda: "CAST(2 AS BIGNUMERIC)",
     BigQueryFieldType.JSON: lambda: "PARSE_JSON('{\"a\": 1}')",
+    BigQueryFieldType.RANGE: lambda: "RANGE(DATE '2022-12-01', DATE '2022-12-31')",
 }
 
 _EXAMPLE_VALUES_TEST: Dict[BigQueryFieldType, Callable[[], str]] = {
@@ -45,6 +46,7 @@ _EXAMPLE_VALUES_TEST: Dict[BigQueryFieldType, Callable[[], str]] = {
     BigQueryFieldType.NUMERIC: lambda: "CAST(1 AS NUMERIC)",
     BigQueryFieldType.BIGNUMERIC: lambda: "CAST(2 AS BIGNUMERIC)",
     BigQueryFieldType.JSON: lambda: "PARSE_JSON('{\"a\": 1}')",
+    BigQueryFieldType.RANGE: lambda: "RANGE(DATE '2022-12-01', DATE '2022-12-31')",
 }
 
 _ACTIVE_EXAMPLE_VALUES = _EXAMPLE_VALUES

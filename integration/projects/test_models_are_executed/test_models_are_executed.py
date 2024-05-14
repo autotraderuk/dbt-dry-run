@@ -87,5 +87,6 @@ def test_model_with_all_column_types_succeeds(dry_run_result: DryRunResult):
         "my_array_of_records",
         "my_array_of_records.col_1",
         "my_array_of_records.col_2",
+        "my_range",
     }
     assert_report_node_has_columns(node, expected_column_names)
