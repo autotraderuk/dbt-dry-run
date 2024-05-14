@@ -27,13 +27,13 @@ typer = "~0"
 black = "^22"
 isort = "^5.10.1"
 pytest = "^7.2.0"
-mypy = "^0.931"
+mypy = "^0.981"
 types-PyYAML = "^6.0.4"
 pytest-cov = "^4.0.0"
 twine = "^3.8.0"
 types-setuptools = "^57.4.9"
 pytest-mock = "^3.7.0"
-dbt-bigquery = "~1.7.0"
+dbt-bigquery = "~1.8.0"
 
 [build-system]
 requires = ["poetry-core>=1.5.0"]

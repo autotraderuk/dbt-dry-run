@@ -4,10 +4,11 @@ from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, Optional
 
 from dbt.adapters.base import BaseAdapter
+from dbt.adapters.contracts.connection import Connection
 from dbt.adapters.factory import get_adapter, register_adapter, reset_adapters
 from dbt.config import RuntimeConfig
-from dbt.contracts.connection import Connection
 from dbt.flags import set_from_args
+from dbt.mp_context import get_mp_context
 
 from dbt_dry_run.adapter.utils import default_profiles_dir
 from dbt_dry_run.models import Manifest
@@ -41,7 +42,7 @@ class ProjectService:
         self._profile = dbt_profile
         self._config = RuntimeConfig.from_parts(dbt_project, dbt_profile, self._args)
         reset_adapters()
-        register_adapter(self._config)
+        register_adapter(self._config, get_mp_context())
         self._adapter = get_adapter(self._config)
 
     def get_connection(self) -> Connection:
