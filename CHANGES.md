@@ -1,10 +1,11 @@
 ## Changelog
 
-# dbt-dry-run v0.7.x
+# dbt-dry-run v0.7.8
 
 ## Improvements
 
 - Support RANGE datatype
+- Official compatibility with dbt v1.8
 
 # dbt-dry-run v0.7.7
 
