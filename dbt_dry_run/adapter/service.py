@@ -1,13 +1,15 @@
 import os
 from argparse import Namespace
 from dataclasses import asdict, dataclass, field
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from dbt.adapters.base import BaseAdapter
+from dbt.adapters.contracts.connection import Connection
 from dbt.adapters.factory import get_adapter, register_adapter, reset_adapters
 from dbt.config import RuntimeConfig
-from dbt.contracts.connection import Connection
 from dbt.flags import set_from_args
+from dbt.mp_context import get_mp_context
+from dbt_common.context import set_invocation_context
 
 from dbt_dry_run.adapter.utils import default_profiles_dir
 from dbt_dry_run.models import Manifest
@@ -23,6 +25,8 @@ class DbtArgs:
     vars: Dict[str, Any] = field(default_factory=dict)
     threads: Optional[int] = None
 
+    dependencies: List[str] = field(default_factory=list)
+
     def to_namespace(self) -> Namespace:
         self_as_dict = asdict(self)
         # self_as_dict["vars"] = json.loads(self_as_dict["vars"])
@@ -36,12 +40,11 @@ def set_dbt_args(args: DbtArgs) -> None:
 class ProjectService:
     def __init__(self, args: DbtArgs):
         self._args = args
-        set_dbt_args(self._args)
-        dbt_project, dbt_profile = RuntimeConfig.collect_parts(self._args)
-        self._profile = dbt_profile
-        self._config = RuntimeConfig.from_parts(dbt_project, dbt_profile, self._args)
+        set_from_args(self._args.to_namespace(), self._args)
+        set_invocation_context({})
+        self._config = RuntimeConfig.from_args(self._args)
         reset_adapters()
-        register_adapter(self._config)
+        register_adapter(self._config, get_mp_context())
         self._adapter = get_adapter(self._config)
 
     def get_connection(self) -> Connection:
@@ -61,7 +64,7 @@ class ProjectService:
 
     @property
     def threads(self) -> int:
-        return self._profile.threads
+        return self._config.threads
 
     @property
     def adapter(self) -> BaseAdapter:
