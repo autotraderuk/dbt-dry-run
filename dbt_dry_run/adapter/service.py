@@ -41,7 +41,7 @@ class ProjectService:
     def __init__(self, args: DbtArgs):
         self._args = args
         set_from_args(self._args.to_namespace(), self._args)
-        set_invocation_context({})
+        set_invocation_context(os.environ)
         self._config = RuntimeConfig.from_args(self._args)
         reset_adapters()
         register_adapter(self._config, get_mp_context())
