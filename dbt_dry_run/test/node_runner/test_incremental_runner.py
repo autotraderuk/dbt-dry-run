@@ -2,6 +2,7 @@ from typing import List, Optional
 from unittest.mock import MagicMock, call
 
 import pytest
+import sqlglot
 
 from dbt_dry_run import flags
 from dbt_dry_run.exception import SchemaChangeException
@@ -17,7 +18,12 @@ from dbt_dry_run.node_runner.incremental_runner import (
 )
 from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
 from dbt_dry_run.scheduler import ManifestScheduler
-from dbt_dry_run.test.utils import SimpleNode, assert_result_has_table, get_executed_sql
+from dbt_dry_run.test.utils import (
+    SimpleNode,
+    assert_ast_equivalent,
+    assert_result_has_table,
+    get_executed_sql,
+)
 
 enable_test_example_values(True)
 
@@ -103,7 +109,7 @@ def test_partitioned_incremental_model_declares_dbt_max_partition_variable() -> 
 
     executed_sql = get_executed_sql(mock_sql_runner)
     assert executed_sql.startswith(dbt_max_partition_declaration)
-    assert node.compiled_code in executed_sql
+    assert_ast_equivalent(node.compiled_code, executed_sql.split(";")[1])
 
 
 def test_incremental_model_that_does_not_exist_returns_dry_run_schema() -> None:
