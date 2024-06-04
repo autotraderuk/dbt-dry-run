@@ -86,7 +86,7 @@ def get_sql_literal_from_table(table: Table) -> str:
     return select_literal
 
 
-def convert_trees_to_sql(trees: List[sqlglot.Expression]) -> str:
+def convert_ast_to_sql(trees: List[sqlglot.Expression]) -> str:
     return ";\n".join(tree.sql(sqlglot.dialects.BigQuery) for tree in trees)
 
 
@@ -124,7 +124,7 @@ def replace_upstream_sql(node_sql: str, upstream_results: List[DryRunResult]) ->
     transformed_trees = [
         parsed.transform(transformer) for parsed in parsed_statements if parsed
     ]
-    return convert_trees_to_sql(transformed_trees)
+    return convert_ast_to_sql(transformed_trees)
 
 
 def insert_dependant_sql_literals(node: Node, results: Results) -> str:

@@ -62,7 +62,7 @@ class DryRunResult:
 
     @classmethod
     def successful(cls, node: Node, table: Table) -> "DryRunResult":
-        return cls(node=node, table=table, status=DryRunStatus.SUCCESS, exception=None)
+        return cls(node=node, table=table, status=DryRunStatus.SUCCESS, exception=None, total_bytes_processed=0)
 
 
 class Results:
