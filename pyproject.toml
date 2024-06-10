@@ -49,7 +49,9 @@ filterwarnings = [
     "ignore:unclosed",
     "ignore:'cgi' is deprecated and slated for removal",
     "ignore:Your application has authenticated using end user credentials",
-    "ignore::UserWarning"
+    "ignore::UserWarning",
+    "ignore:.*custom tp_new.*in Python 3.14.*:DeprecationWarning",
+    "ignore:.*utcnow.*:DeprecationWarning",
 ]
 pythonpath = [
   "."
