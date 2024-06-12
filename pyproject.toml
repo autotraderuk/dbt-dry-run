@@ -22,14 +22,6 @@ tenacity = "^8.2"
 networkx = ">=2.3,<4.0"
 pyyaml = "~6"
 typer = "~0"
-numpy = [
-  {version = ">=1.26", python = ">=3.9"},
-  {version = "<1.25", python = "=3.8"},
-]
-pandas = [
-  {version = ">=2.1.1", python = ">=3.12"},
-  {version = "<2.1", python = "=3.8"},
-]
 
 [tool.poetry.dev-dependencies]
 black = "^22"
@@ -42,6 +34,14 @@ twine = "^3.8.0"
 types-setuptools = "^57.4.9"
 pytest-mock = "^3.7.0"
 dbt-bigquery = "~1.8.0"
+numpy = [
+  {version = ">=1.26", python = ">=3.9"},
+  {version = "<1.25", python = "=3.8"},
+]
+pandas = [
+  {version = ">=2.1.1", python = ">=3.12"},
+  {version = "<2.1", python = "=3.8"},
+]
 
 [build-system]
 requires = ["poetry-core>=1.5.0"]
