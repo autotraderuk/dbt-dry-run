@@ -14,7 +14,7 @@ repository = "https://github.com/autotraderuk/dbt-dry-run"
 dbt-dry-run = "dbt_dry_run.__main__:main"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.12"
+python = ">=3.8,<3.13"
 agate = ">=1.7.0,<1.10"
 google-cloud-bigquery = "^3"
 pydantic = "^1.9.0"
@@ -34,6 +34,14 @@ twine = "^3.8.0"
 types-setuptools = "^57.4.9"
 pytest-mock = "^3.7.0"
 dbt-bigquery = "~1.8.0"
+numpy = [
+  {version = ">=1.26", python = ">=3.9"},
+  {version = "<1.25", python = "=3.8"},
+]
+pandas = [
+  {version = ">=2.1.1", python = ">=3.12"},
+  {version = "<2.1", python = "=3.8"},
+]
 
 [build-system]
 requires = ["poetry-core>=1.5.0"]
@@ -49,7 +57,9 @@ filterwarnings = [
     "ignore:unclosed",
     "ignore:'cgi' is deprecated and slated for removal",
     "ignore:Your application has authenticated using end user credentials",
-    "ignore::UserWarning"
+    "ignore::UserWarning",
+    "ignore:.*custom tp_new.*in Python 3.14.*:DeprecationWarning",
+    "ignore:.*utcnow.*:DeprecationWarning",
 ]
 pythonpath = [
   "."
