@@ -29,6 +29,7 @@ class PartitionBy(BaseModel):
     field: str
     data_type: Literal["timestamp", "date", "datetime", "int64"]
     range: Optional[IntPartitionRange]
+    time_ingestion_partitioning: Optional[bool]
 
     @root_validator(pre=True)
     def lower_data_type(cls, values: Dict[str, Any]) -> Dict[str, Any]:
