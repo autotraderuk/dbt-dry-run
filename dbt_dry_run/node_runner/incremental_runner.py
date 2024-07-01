@@ -4,7 +4,7 @@ from typing import Callable, Dict, Iterable, Optional, Set
 from dbt_dry_run import flags
 from dbt_dry_run.exception import SchemaChangeException, UpstreamFailedException
 from dbt_dry_run.literals import insert_dependant_sql_literals
-from dbt_dry_run.models import Table
+from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
 from dbt_dry_run.models.manifest import Node, OnSchemaChange
 from dbt_dry_run.node_runner import NodeRunner
 from dbt_dry_run.results import DryRunResult, DryRunStatus
@@ -175,6 +175,32 @@ class IncrementalRunner(NodeRunner):
             return node.config.full_refresh
         return flags.FULL_REFRESH
 
+    def _is_time_ingestion_partitioned(self, node: Node) -> bool:
+        if node.config.partition_by:
+            if node.config.partition_by.time_ingestion_partitioning is True:
+                return True
+        return False
+
+    def _replace_partition_with_time_ingestion_column(
+        self, dry_run_result: DryRunResult
+    ) -> DryRunResult:
+        if not dry_run_result.table:
+            return dry_run_result
+
+        if not dry_run_result.node.config.partition_by:
+            return dry_run_result
+
+        new_partition_field = TableField(
+            name="_PARTITIONTIME",
+            type=BigQueryFieldType.TIMESTAMP,
+            mode=BigQueryFieldMode.NULLABLE,
+        )
+
+        final_fields = [field for field in dry_run_result.table.fields]
+        final_fields.append(new_partition_field)
+
+        return dry_run_result.replace_table(Table(fields=final_fields))
+
     def run(self, node: Node) -> DryRunResult:
         try:
             sql_with_literals = insert_dependant_sql_literals(node, self._results)
@@ -201,5 +227,11 @@ class IncrementalRunner(NodeRunner):
                 )
                 if result.status == DryRunStatus.SUCCESS:
                     result = handler(result, target_table)
+
+        if (
+            result.status == DryRunStatus.SUCCESS
+            and self._is_time_ingestion_partitioned(node)
+        ):
+            result = self._replace_partition_with_time_ingestion_column(result)
 
         return result

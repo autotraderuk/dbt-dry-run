@@ -210,3 +210,21 @@ def test_sql_header_and_max_partition(
         assert_report_node_has_columns_in_order(
             report_node, ["snapshot_date", "my_string", "my_func_output"]
         )
+
+
+def test_partition_by_time_ingestion(
+    compiled_project: ProjectContext,
+):
+    node_id = "model.test_incremental.partition_by_time_ingestion"
+    manifest_node = compiled_project.manifest.nodes[node_id]
+    columns = ["executed_at", "col_1 STRING", "col_2 STRING"]
+    with compiled_project.create_state(manifest_node, columns, "_PARTITIONTIME", False):
+        run_result = compiled_project.dry_run()
+        assert_report_produced(run_result)
+        report_node = get_report_node_by_id(
+            run_result.report,
+            node_id,
+        )
+        assert_report_node_has_columns_in_order(
+            report_node, ["executed_at", "col_1", "col_2", "_PARTITIONTIME"]
+        )
