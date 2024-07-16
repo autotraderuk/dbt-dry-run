@@ -1,5 +1,12 @@
 ## Changelog
 
+# dbt-dry-run v0.8.0
+
+## Improvements
+
+- Support for python 3.12
+- Add support incremental models for ingestion time partitioning
+
 # dbt-dry-run v0.7.8
 
 ## Improvements
