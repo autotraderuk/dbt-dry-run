@@ -1,5 +1,12 @@
 ## Changelog
 
+# dbt-dry-run v0.8.1
+
+## Improvements
+
+- Official compatibility with dbt v1.9
+- Drop support for python 3.8
+
 # dbt-dry-run v0.8.0
 
 ## Improvements
