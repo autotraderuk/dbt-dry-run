@@ -14,7 +14,7 @@ repository = "https://github.com/autotraderuk/dbt-dry-run"
 dbt-dry-run = "dbt_dry_run.__main__:main"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.13"
+python = ">=3.9,<3.13"
 agate = ">=1.7.0,<1.10"
 google-cloud-bigquery = "^3"
 pydantic = "^1.9.0"
@@ -33,7 +33,7 @@ pytest-cov = "^4.0.0"
 twine = "^3.8.0"
 types-setuptools = "^57.4.9"
 pytest-mock = "^3.7.0"
-dbt-bigquery = "~1.8.0"
+dbt-bigquery = "~1.9.0"
 numpy = [
   {version = ">=1.26", python = ">=3.9"},
   {version = "<1.25", python = "=3.8"},
