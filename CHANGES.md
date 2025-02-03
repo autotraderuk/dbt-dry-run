@@ -1,5 +1,11 @@
 ## Changelog
 
+# dbt-dry-run vX
+
+## Improvements
+
+- Support seeds with non default delimiters
+
 # dbt-dry-run v0.8.1
 
 ## Improvements
