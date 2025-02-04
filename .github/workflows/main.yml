@@ -11,6 +11,9 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    concurrency:
+      group: Dry Run Release
+      cancel-in-progress: true
 
     strategy:
       fail-fast: false
@@ -52,9 +55,6 @@ jobs:
       # Only do these on push
 
       - name: Run Integration Tests
-        concurrency:
-          group: Dry Run Integration Tests
-          cancel-in-progress: true
         if: github.event_name == 'push' && startsWith(steps.setup-python.outputs.python-version, '3.8')
         env:
           DRY_RUN_SVC_JSON: ${{ secrets.DRY_RUN_SVC_JSON }}
