@@ -11,9 +11,6 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-    concurrency:
-      group: Dry Run Release
-      cancel-in-progress: true
 
     strategy:
       fail-fast: false
@@ -55,7 +52,7 @@ jobs:
       # Only do these on push
 
       - name: Run Integration Tests
-        if: github.event_name == 'push' && startsWith(steps.setup-python.outputs.python-version, '3.8')
+        if: github.event_name == 'push' && startsWith(steps.setup-python.outputs.python-version, '3.12')
         env:
           DRY_RUN_SVC_JSON: ${{ secrets.DRY_RUN_SVC_JSON }}
         run: |
@@ -64,7 +61,7 @@ jobs:
           make integration
 
       - name: Publish package to TestPyPI
-        if: github.event_name == 'push' && startsWith(steps.setup-python.outputs.python-version, '3.8')
+        if: github.event_name == 'push' && startsWith(steps.setup-python.outputs.python-version, '3.12')
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
