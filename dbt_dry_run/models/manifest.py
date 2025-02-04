@@ -71,6 +71,7 @@ class NodeConfig(BaseModel):
     meta: Optional[NodeMeta]
     full_refresh: Optional[bool]
     column_types: Dict[str, str] = Field(default_factory=dict)
+    delimiter: Optional[str]
 
 
 class ManifestColumn(BaseModel):

@@ -11,12 +11,16 @@ from dbt_dry_run.results import DryRunResult, DryRunStatus
 
 
 class SeedRunner(NodeRunner):
+    DEFAULT_DELIMITER = ","
+
     def run(self, node: Node) -> DryRunResult:
         if not node.root_path:
             raise ValueError(f"Node {node.unique_id} does not have `root_path`")
         full_path = os.path.join(node.root_path, node.original_file_path)
         with open(full_path, "r", encoding="utf-8-sig") as f:
-            csv_table = ag.Table.from_csv(f)
+            csv_table = ag.Table.from_csv(
+                f, delimiter=node.config.delimiter or self.DEFAULT_DELIMITER
+            )
 
         fields: List[TableField] = []
         for idx, column in enumerate(csv_table.columns):

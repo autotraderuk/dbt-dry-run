@@ -11,3 +11,7 @@ seeds:
       column_types:
         seed_number: NUMERIC
         seed_string: NUMERIC
+
+  - name: seed_with_delimiter
+    config:
+      delimiter: ;

@@ -50,6 +50,27 @@ def test_seed_runner_loads_file(tmp_path: Path) -> None:
     assert_success_and_columns_equal(node, expected_columns)
 
 
+def test_seed_runner_loads_file_with_custom_delimiter(tmp_path: Path) -> None:
+    delimiter = ";"
+    p = tmp_path / "seed1.csv"
+    csv_content = """a;b;c
+    foo;bar;baz
+    foo2;bar2;baz2
+    """
+    p.write_text(csv_content)
+
+    node = SimpleNode(
+        unique_id="node1",
+        depends_on=[],
+        resource_type=ManifestScheduler.SEED,
+        original_file_path=p.as_posix(),
+    ).to_node()
+    node.config.delimiter = delimiter
+
+    expected_columns = set(csv_content.splitlines()[0].split(delimiter))
+    assert_success_and_columns_equal(node, expected_columns)
+
+
 def test_seed_runner_fails_if_type_returns_none(tmp_path: Path) -> None:
     p = tmp_path / "seed1.csv"
     csv_content = """a,b,c

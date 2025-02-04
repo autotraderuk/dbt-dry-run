@@ -55,6 +55,18 @@ def test_badly_configured_seed_fails(dry_run_result: DryRunResult):
     assert seed_node.status == DryRunStatus.FAILURE
 
 
+def test_seed_with_delimiter_loads_data(dry_run_result: DryRunResult):
+    report = assert_report_produced(dry_run_result)
+    seed_node = get_report_node_by_id(
+        report, "seed.test_models_are_executed.seed_with_delimiter"
+    )
+    columns = expand_table_fields_with_types(seed_node.table)
+    assert columns == {
+        "seed_a": BigQueryFieldType.STRING,
+        "seed_b": BigQueryFieldType.INT64,
+    }
+
+
 def test_model_with_all_column_types_succeeds(dry_run_result: DryRunResult):
     node = get_report_node_by_id(
         dry_run_result.report,
