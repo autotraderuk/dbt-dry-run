@@ -5,7 +5,7 @@ import pytest
 
 from dbt_dry_run import flags
 from dbt_dry_run.exception import SchemaChangeException
-from dbt_dry_run.literals import enable_test_example_values
+from dbt_dry_run.literals import enable_test_example_values, get_sql_literal_from_table
 from dbt_dry_run.models import BigQueryFieldType, Table, TableField
 from dbt_dry_run.models.manifest import NodeConfig, PartitionBy
 from dbt_dry_run.node_runner.incremental_runner import (
@@ -290,12 +290,15 @@ def test_incremental_model_that_exists_and_success_when_schema_not_changed() -> 
     ).to_node()
     node.depends_on.deep_nodes = []
 
+    model_schema = mock_sql_runner.query()[1]
+    select_literal = get_sql_literal_from_table(model_schema)
+
     results = Results()
 
     model_runner = IncrementalRunner(mock_sql_runner, results)
 
     result = model_runner.run(node)
-    merge_sql = get_merge_sql(node, ["a", "b"], node.compiled_code)
+    merge_sql = get_merge_sql(node, ["a", "b"], select_literal)
     mock_sql_runner.query.assert_has_calls([call(node.compiled_code), call(merge_sql)])
     assert result.status == DryRunStatus.SUCCESS
 
