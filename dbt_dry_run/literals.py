@@ -1,5 +1,5 @@
 import re
-from typing import Callable, Dict, Optional, cast
+from typing import Callable, Dict, cast
 from uuid import uuid4
 
 from dbt_dry_run.exception import UpstreamFailedException
