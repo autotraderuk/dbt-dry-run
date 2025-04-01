@@ -135,7 +135,6 @@ class IncrementalRunner(NodeRunner):
     def _verify_merge_type_compatibility(
         self,
         node: Node,
-        sql_statement: str,
         initial_result: DryRunResult,
         target_table: Table,
         model_schema: Table
@@ -224,7 +223,7 @@ class IncrementalRunner(NodeRunner):
                 on_schema_change = node.config.on_schema_change or OnSchemaChange.IGNORE
                 handler = ON_SCHEMA_CHANGE_TABLE_HANDLER[on_schema_change]
                 result = self._verify_merge_type_compatibility(
-                    node, sql_with_literals, result, target_table, model_schema
+                    node, result, target_table, model_schema
                 )
                 if result.status == DryRunStatus.SUCCESS:
                     result = handler(result, target_table)

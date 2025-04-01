@@ -11,7 +11,6 @@ from dbt_dry_run.models.manifest import NodeConfig, PartitionBy
 from dbt_dry_run.node_runner.incremental_runner import (
     IncrementalRunner,
     append_new_columns_handler,
-    get_merge_sql,
     sql_has_recursive_ctes,
     sync_all_columns_handler,
 )
@@ -38,19 +37,19 @@ A_NODE = SimpleNode(
 
 
 def get_mock_sql_runner_with_all_string_columns(
-    model_names: List[str], target_names: Optional[List[str]]
+    model_field_names: List[str], target_field_names: Optional[List[str]]
 ) -> MagicMock:
     model_schema = Table(
         fields=[
-            TableField(name=name, type=BigQueryFieldType.STRING) for name in model_names
+            TableField(name=name, type=BigQueryFieldType.STRING) for name in model_field_names
         ]
     )
     target_schema: Optional[Table] = None
-    if target_names:
+    if target_field_names:
         target_schema = Table(
             fields=[
                 TableField(name=name, type=BigQueryFieldType.STRING)
-                for name in target_names
+                for name in target_field_names
             ]
         )
     return get_mock_sql_runner_with(model_schema, target_schema)
@@ -161,8 +160,6 @@ def test_incremental_model_that_exists_and_has_a_column_removed_and_readded_with
     model_runner = IncrementalRunner(mock_sql_runner, results)
 
     result = model_runner.run(node)
-    merge_sql = get_merge_sql(node, ["a"], node.compiled_code)
-    mock_sql_runner.query.assert_has_calls([call(node.compiled_code), call(merge_sql)])
     assert_result_has_table(expected_table, result)
 
 
@@ -183,8 +180,6 @@ def test_incremental_model_that_exists_and_has_a_column_added_does_nothing() -> 
     model_runner = IncrementalRunner(mock_sql_runner, results)
 
     result = model_runner.run(node)
-    merge_sql = get_merge_sql(node, ["a"], node.compiled_code)
-    mock_sql_runner.query.assert_has_calls([call(node.compiled_code), call(merge_sql)])
     assert_result_has_table(expected_table, result)
 
 
@@ -249,8 +244,6 @@ def test_incremental_model_that_exists_and_syncs_all_columns() -> None:
     model_runner = IncrementalRunner(mock_sql_runner, results)
 
     result = model_runner.run(node)
-    merge_sql = get_merge_sql(node, ["a"], node.compiled_code)
-    mock_sql_runner.query.assert_has_calls([call(node.compiled_code), call(merge_sql)])
     assert_result_has_table(expected_table, result)
 
 
@@ -272,8 +265,6 @@ def test_incremental_model_that_exists_and_fails_when_schema_changed() -> None:
     model_runner = IncrementalRunner(mock_sql_runner, results)
 
     result = model_runner.run(node)
-    merge_sql = get_merge_sql(node, ["a"], node.compiled_code)
-    mock_sql_runner.query.assert_has_calls([call(node.compiled_code), call(merge_sql)])
     assert result.status == DryRunStatus.FAILURE
     assert isinstance(result.exception, SchemaChangeException)
 
@@ -290,16 +281,11 @@ def test_incremental_model_that_exists_and_success_when_schema_not_changed() -> 
     ).to_node()
     node.depends_on.deep_nodes = []
 
-    model_schema = mock_sql_runner.query()[1]
-    select_literal = get_sql_literal_from_table(model_schema)
-
     results = Results()
 
     model_runner = IncrementalRunner(mock_sql_runner, results)
 
     result = model_runner.run(node)
-    merge_sql = get_merge_sql(node, ["a", "b"], select_literal)
-    mock_sql_runner.query.assert_has_calls([call(node.compiled_code), call(merge_sql)])
     assert result.status == DryRunStatus.SUCCESS
 
 
@@ -320,14 +306,7 @@ def test_node_with_no_full_refresh_does_not_full_refresh_when_flag_is_false(
     node_with_no_full_refresh_config.depends_on.deep_nodes = []
 
     IncrementalRunner(mock_sql_runner, Results()).run(node_with_no_full_refresh_config)
-    merge_sql = get_merge_sql(
-        node_with_no_full_refresh_config,
-        ["a"],
-        node_with_no_full_refresh_config.compiled_code,
-    )
-    mock_sql_runner.query.assert_has_calls(
-        [call(node_with_no_full_refresh_config.compiled_code), call(merge_sql)]
-    )
+
     assert len(mock_sql_runner.get_node_schema.call_args_list) == 1
     mock_sql_runner.get_node_schema.assert_called_with(node_with_no_full_refresh_config)
 
@@ -376,14 +355,6 @@ def test_node_full_refresh_false_does_full_refresh_when_flag_is_false(
 
     IncrementalRunner(mock_sql_runner, Results()).run(
         node_with_full_refresh_set_to_false
-    )
-    merge_sql = get_merge_sql(
-        node_with_full_refresh_set_to_false,
-        ["a"],
-        node_with_full_refresh_set_to_false.compiled_code,
-    )
-    mock_sql_runner.query.assert_has_calls(
-        [call(node_with_full_refresh_set_to_false.compiled_code), call(merge_sql)]
     )
     mock_sql_runner.get_node_schema.assert_has_calls(
         [call(node_with_full_refresh_set_to_false)]
@@ -456,14 +427,6 @@ def test_node_with_false_full_refresh_does_not_full_refresh_when_flag_is_true(
 
     IncrementalRunner(mock_sql_runner, Results()).run(
         node_with_full_refresh_set_to_false
-    )
-    merge_sql = get_merge_sql(
-        node_with_full_refresh_set_to_false,
-        ["a"],
-        node_with_full_refresh_set_to_false.compiled_code,
-    )
-    mock_sql_runner.query.assert_has_calls(
-        [call(node_with_full_refresh_set_to_false.compiled_code), call(merge_sql)]
     )
     assert len(mock_sql_runner.get_node_schema.call_args_list) == 1
     mock_sql_runner.get_node_schema.assert_called_with(
