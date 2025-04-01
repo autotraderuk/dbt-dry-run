@@ -13,7 +13,7 @@ from integration.utils import (
 
 def test_ran_correct_number_of_nodes(dry_run_result: DryRunResult):
     report = assert_report_produced(dry_run_result)
-    assert report.node_count == 5
+    assert report.node_count == 6
 
 
 def test_table_of_nodes_is_returned(dry_run_result: DryRunResult):
