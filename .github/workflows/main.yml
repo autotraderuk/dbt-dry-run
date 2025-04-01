@@ -61,7 +61,7 @@ jobs:
           make integration
 
       - name: Publish package to TestPyPI
-        if: github.event_name == 'push' && startsWith(steps.setup-python.outputs.python-version, '3.12')
+        if: github.event_name == 'push' && startsWith(steps.setup-python.outputs.python-version, '3.12') && false  # disabled pending 2FA
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
