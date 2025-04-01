@@ -1,5 +1,5 @@
 import re
-from typing import Callable, Dict, cast
+from typing import Callable, Dict, Optional, cast
 from uuid import uuid4
 
 from dbt_dry_run.exception import UpstreamFailedException
@@ -79,10 +79,13 @@ def get_sql_literal_from_field(field: TableField) -> str:
     return statement
 
 
-def get_sql_literal_from_table(table: Table) -> str:
-    literal_fields = ",".join(map(get_sql_literal_from_field, table.fields))
-    select_literal = f"(SELECT {literal_fields})"
-    return select_literal
+def get_sql_literal_from_table(table: Optional[Table]) -> str:
+    if table is not None:
+        literal_fields = ",".join(map(get_sql_literal_from_field, table.fields))
+        select_literal = f"(SELECT {literal_fields})"
+        return select_literal
+    else:
+        raise KeyError(f"Must specify a table to get a SQL literal")
 
 
 def replace_upstream_sql(node_sql: str, node: Node, table: Table) -> str:

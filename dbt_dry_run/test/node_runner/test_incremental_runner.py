@@ -5,7 +5,7 @@ import pytest
 
 from dbt_dry_run import flags
 from dbt_dry_run.exception import SchemaChangeException
-from dbt_dry_run.literals import enable_test_example_values, get_sql_literal_from_table
+from dbt_dry_run.literals import enable_test_example_values
 from dbt_dry_run.models import BigQueryFieldType, Table, TableField
 from dbt_dry_run.models.manifest import NodeConfig, PartitionBy
 from dbt_dry_run.node_runner.incremental_runner import (
@@ -41,7 +41,8 @@ def get_mock_sql_runner_with_all_string_columns(
 ) -> MagicMock:
     model_schema = Table(
         fields=[
-            TableField(name=name, type=BigQueryFieldType.STRING) for name in model_field_names
+            TableField(name=name, type=BigQueryFieldType.STRING)
+            for name in model_field_names
         ]
     )
     target_schema: Optional[Table] = None

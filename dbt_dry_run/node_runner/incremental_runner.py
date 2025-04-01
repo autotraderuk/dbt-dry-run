@@ -3,7 +3,10 @@ from typing import Callable, Dict, Iterable, Optional, Set
 
 from dbt_dry_run import flags
 from dbt_dry_run.exception import SchemaChangeException, UpstreamFailedException
-from dbt_dry_run.literals import insert_dependant_sql_literals, get_sql_literal_from_table
+from dbt_dry_run.literals import (
+    get_sql_literal_from_table,
+    insert_dependant_sql_literals,
+)
 from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
 from dbt_dry_run.models.manifest import Node, OnSchemaChange
 from dbt_dry_run.node_runner import NodeRunner
@@ -137,7 +140,7 @@ class IncrementalRunner(NodeRunner):
         node: Node,
         initial_result: DryRunResult,
         target_table: Table,
-        model_schema: Table
+        model_schema: Optional[Table],
     ) -> DryRunResult:
         if not initial_result.table or sql_has_recursive_ctes(node.compiled_code):
             return initial_result
