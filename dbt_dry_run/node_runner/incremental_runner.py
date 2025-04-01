@@ -140,14 +140,13 @@ class IncrementalRunner(NodeRunner):
         node: Node,
         initial_result: DryRunResult,
         target_table: Table,
-        model_schema: Optional[Table],
     ) -> DryRunResult:
         if not initial_result.table or sql_has_recursive_ctes(node.compiled_code):
             return initial_result
         common_field_names = get_common_field_names(initial_result.table, target_table)
         if not common_field_names:
             return initial_result
-        select_literal = get_sql_literal_from_table(model_schema)
+        select_literal = get_sql_literal_from_table(initial_result.table)
         sql_statement_with_merge = get_merge_sql(
             node, common_field_names, select_literal
         )
@@ -226,7 +225,7 @@ class IncrementalRunner(NodeRunner):
                 on_schema_change = node.config.on_schema_change or OnSchemaChange.IGNORE
                 handler = ON_SCHEMA_CHANGE_TABLE_HANDLER[on_schema_change]
                 result = self._verify_merge_type_compatibility(
-                    node, result, target_table, model_schema
+                    node, result, target_table
                 )
                 if result.status == DryRunStatus.SUCCESS:
                     result = handler(result, target_table)
