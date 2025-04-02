@@ -1,5 +1,11 @@
 ## Changelog
 
+# dbt-dry-run v0.8.3
+
+## Bugfixes
+
+- Fix dry runner falsely reporting failure when reading BQ columns that are masked via column-level access control
+
 # dbt-dry-run v0.8.2
 
 ## Improvements
