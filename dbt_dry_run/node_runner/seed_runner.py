@@ -52,5 +52,5 @@ class SeedRunner(NodeRunner):
             exception=None,
         )
 
-    def validate_node(self, node: Node) -> Optional[DryRunResult]:
+    def check_node_compiled(self, node: Node) -> Optional[DryRunResult]:
         return None

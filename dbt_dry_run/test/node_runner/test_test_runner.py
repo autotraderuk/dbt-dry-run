@@ -70,7 +70,7 @@ def test_validate_node_fails_if_skip_not_compiled_is_false(
 
     model_runner = NodeTestRunner(mock_sql_runner, results)
 
-    validation_result = model_runner.validate_node(node)
+    validation_result = model_runner.check_node_compiled(node)
     assert validation_result
     assert validation_result.status == DryRunStatus.FAILURE
     assert isinstance(validation_result.exception, NotCompiledException)
@@ -90,7 +90,7 @@ def test_validate_node_skips_if_skip_not_compiled_is_true(
 
     model_runner = NodeTestRunner(mock_sql_runner, results)
 
-    validation_result = model_runner.validate_node(node)
+    validation_result = model_runner.check_node_compiled(node)
     assert validation_result
     assert validation_result.status == DryRunStatus.SKIPPED
     assert validation_result.exception is None

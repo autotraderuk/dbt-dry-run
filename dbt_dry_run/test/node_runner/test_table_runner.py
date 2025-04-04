@@ -108,7 +108,7 @@ def test_model_with_dependency_inserts_sql_literal() -> None:
     upstream_node = upstream_simple_node.to_node()
     upstream_node.depends_on.deep_nodes = []
 
-    compiled_code = f"""SELECT * FROM {upstream_node.to_table_ref_literal()}"""
+    compiled_code = f"""SELECT * FROM {upstream_node.get_table_ref_literal()}"""
 
     node = SimpleNode(
         unique_id="node1",

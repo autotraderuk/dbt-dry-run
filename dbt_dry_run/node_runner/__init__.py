@@ -22,9 +22,8 @@ class NodeRunner(metaclass=ABCMeta):
     def run(self, node: Node) -> DryRunResult:
         ...
 
-    def validate_node(self, node: Node) -> Optional[DryRunResult]:
-        node_compiled = node.compiled
-        if not node_compiled:
+    def check_node_compiled(self, node: Node) -> Optional[DryRunResult]:
+        if not node.compiled:
             if not flags.SKIP_NOT_COMPILED:
                 return DryRunResult(
                     node=node,

@@ -40,7 +40,7 @@ def dispatch_node(node: Node, runners: Dict[RunnerKey, NodeRunner]) -> DryRunRes
         runner = runners[_runner_key]
     except KeyError:
         raise ValueError(f"Unknown node '{_runner_key}'")
-    validation_result = runner.validate_node(node)
+    validation_result = runner.check_node_compiled(node)
     if validation_result:
         return validation_result
     return runner.run(node)

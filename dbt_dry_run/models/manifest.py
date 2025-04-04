@@ -25,6 +25,16 @@ class IntPartitionRange(BaseModel):
     interval: int
 
 
+class TableRef(BaseModel):
+    database: str
+    db_schema: str
+    name: str
+
+    @property
+    def bq_literal(self) -> str:
+        return f"`{self.database}`.`{self.db_schema}`.`{self.name}`"
+
+
 class PartitionBy(BaseModel):
     field: str
     data_type: Literal["timestamp", "date", "datetime", "int64"]
@@ -118,12 +128,20 @@ class Node(BaseModel):
         values["alias"] = values.get("alias") or values["name"]
         return values
 
-    def to_table_ref_literal(self) -> str:
+    @property
+    def table_ref(self) -> TableRef:
         if self.alias:
-            sql = f"`{self.database}`.`{self.db_schema}`.`{self.alias}`"
+            name_param = self.alias
         else:
-            sql = f"`{self.database}`.`{self.db_schema}`.`{self.name}`"
-        return sql
+            name_param = self.name
+        return TableRef(
+            database=self.database,
+            db_schema=self.db_schema,
+            name=name_param,
+        )
+
+    def get_table_ref_literal(self) -> str:
+        return self.table_ref.bq_literal
 
     def get_combined_metadata(self, key: str) -> Optional[Any]:
         node_meta = self.meta.get(key) if self.meta else None

@@ -43,7 +43,7 @@ class ProjectContext:
         partition_by: Optional[str] = None,
         require_partition_by: bool = False,
     ) -> Generator[None, None, None]:
-        node_name = node.to_table_ref_literal()
+        node_name = node.get_table_ref_literal()
         schema_csv = ",\n".join(columns)
         partition_by_clause = f"""
         PARTITION BY {partition_by}

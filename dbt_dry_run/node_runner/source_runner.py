@@ -42,5 +42,5 @@ class SourceRunner(NodeRunner):
             node, predicted_table, status, total_bytes_processed, exception
         )
 
-    def validate_node(self, node: Node) -> Optional[DryRunResult]:
+    def check_node_compiled(self, node: Node) -> Optional[DryRunResult]:
         return None

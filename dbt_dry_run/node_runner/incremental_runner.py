@@ -112,7 +112,7 @@ def get_merge_sql(
 ) -> str:
     values_csv = ",".join(sorted(common_field_names))
     return dedent(
-        f"""MERGE {node.to_table_ref_literal()}
+        f"""MERGE {node.get_table_ref_literal()}
                 USING (
                   {select_statement}
                 )
