@@ -15,16 +15,13 @@ PARTITION_DATA_TYPES_VALUES_MAPPING: Dict[str, str] = {
 
 
 class SQLPreprocessor:
-    def __init__(
-        self, results: Results, transformers: List[Callable[[str, Node, Results], str]]
-    ):
-        self.results = results
+    def __init__(self, transformers: List[Callable[[str, Node, Results], str]]):
         self.transformers = transformers
 
-    def __call__(self, node: Node) -> str:
+    def __call__(self, node: Node, results: Results) -> str:
         sql_statement = node.compiled_code
         for transformer in self.transformers:
-            sql_statement = transformer(sql_statement, node, self.results)
+            sql_statement = transformer(sql_statement, node, results)
         return sql_statement
 
 

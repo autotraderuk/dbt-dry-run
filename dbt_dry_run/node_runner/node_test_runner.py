@@ -6,11 +6,11 @@ from dbt_dry_run.sql.statements import SQLPreprocessor, insert_dependant_sql_lit
 
 
 class NodeTestRunner(NodeRunner):
+    preprocessor = SQLPreprocessor([insert_dependant_sql_literals])
+
     def run(self, node: Node) -> DryRunResult:
         try:
-            run_sql = SQLPreprocessor(self._results, [insert_dependant_sql_literals])(
-                node
-            )
+            run_sql = self.preprocessor(node, self._results)
         except UpstreamFailedException as e:
             return DryRunResult(node, None, DryRunStatus.FAILURE, e)
         (

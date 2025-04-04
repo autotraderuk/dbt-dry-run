@@ -11,12 +11,13 @@ from dbt_dry_run.sql.statements import (
 
 
 class ViewRunner(NodeRunner):
+    preprocessor = SQLPreprocessor(
+        [insert_dependant_sql_literals, create_or_replace_view, add_sql_header]
+    )
+
     def run(self, node: Node) -> DryRunResult:
         try:
-            run_sql = SQLPreprocessor(
-                self._results,
-                [insert_dependant_sql_literals, create_or_replace_view, add_sql_header],
-            )(node)
+            run_sql = self.preprocessor(node, self._results)
         except UpstreamFailedException as e:
             return DryRunResult(node, None, DryRunStatus.FAILURE, e)
         status, model_schema, exception = self._sql_runner.query(run_sql)

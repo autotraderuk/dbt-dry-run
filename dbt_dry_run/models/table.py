@@ -84,3 +84,6 @@ class Table(BaseModel):
             )
             new_fields.append(table_field)
         return new_fields
+
+    def common_field_names(self, other: "Table") -> Set[str]:
+        return self.field_names.intersection(other.field_names)

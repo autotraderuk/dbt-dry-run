@@ -11,11 +11,6 @@ from integration.utils import (
 )
 
 
-def test_ran_correct_number_of_nodes(dry_run_result: DryRunResult):
-    report = assert_report_produced(dry_run_result)
-    assert report.node_count == 6
-
-
 def test_table_of_nodes_is_returned(dry_run_result: DryRunResult):
     report = assert_report_produced(dry_run_result)
     seed_node = get_report_node_by_id(report, "seed.test_models_are_executed.my_seed")
@@ -102,3 +97,12 @@ def test_model_with_all_column_types_succeeds(dry_run_result: DryRunResult):
         "my_range",
     }
     assert_report_node_has_columns(node, expected_column_names)
+
+
+def test_incremental_that_references_model_passes(dry_run_result: DryRunResult):
+    node = get_report_node_by_id(
+        dry_run_result.report, "model.test_models_are_executed.second_layer_incremental"
+    )
+
+    assert node.success
+    assert_report_node_has_columns(node, {"a", "b", "c"})

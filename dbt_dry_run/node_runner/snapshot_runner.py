@@ -39,6 +39,8 @@ DBT_SNAPSHOT_FIELDS = [
 
 
 class SnapshotRunner(NodeRunner):
+    preprocessor = SQLPreprocessor([insert_dependant_sql_literals])
+
     @staticmethod
     def _validate_snapshot_config(node: Node, result: DryRunResult) -> DryRunResult:
         if not result.table:
@@ -86,11 +88,10 @@ class SnapshotRunner(NodeRunner):
 
     def run(self, node: Node) -> DryRunResult:
         try:
-            run_sql = SQLPreprocessor(self._results, [insert_dependant_sql_literals])(
-                node
-            )
+            run_sql = self.preprocessor(node, self._results)
         except UpstreamFailedException as e:
             return DryRunResult(node, None, DryRunStatus.FAILURE, e)
+
         (
             status,
             predicted_table,

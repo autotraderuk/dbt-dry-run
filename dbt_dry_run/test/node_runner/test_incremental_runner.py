@@ -11,12 +11,12 @@ from dbt_dry_run.node_runner.incremental_runner import (
     IncrementalRunner,
     sql_has_recursive_ctes,
 )
-from dbt_dry_run.node_runner.schema_change_handlers import (
+from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
+from dbt_dry_run.scheduler import ManifestScheduler
+from dbt_dry_run.schema_change_handlers import (
     append_new_columns_handler,
     sync_all_columns_handler,
 )
-from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
-from dbt_dry_run.scheduler import ManifestScheduler
 from dbt_dry_run.sql.literals import enable_test_example_values
 from dbt_dry_run.test.utils import SimpleNode, assert_result_has_table, get_executed_sql
 

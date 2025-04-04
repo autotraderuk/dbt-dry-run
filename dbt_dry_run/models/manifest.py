@@ -5,6 +5,8 @@ from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field, root_validator
 
+from dbt_dry_run import flags
+
 
 class NodeDependsOn(BaseModel):
     macros: List[str] = []
@@ -155,6 +157,19 @@ class Node(BaseModel):
     @property
     def is_seed(self) -> bool:
         return self.resource_type == "seed"
+
+    def get_should_full_refresh(self) -> bool:
+        # precedence defined here - https://docs.getdbt.com/reference/resource-configs/full_refresh
+        if self.config.full_refresh is not None:
+            return self.config.full_refresh
+        return flags.FULL_REFRESH
+
+    @property
+    def is_time_ingestion_partitioned(self) -> bool:
+        if self.config.partition_by:
+            if self.config.partition_by.time_ingestion_partitioning is True:
+                return True
+        return False
 
 
 class Macro(BaseModel):
