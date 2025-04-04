@@ -1,11 +1,11 @@
 from typing import Set
 
 from dbt_dry_run.exception import SnapshotConfigException, UpstreamFailedException
-from dbt_dry_run.literals import insert_dependant_sql_literals
 from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
 from dbt_dry_run.models.manifest import Node
 from dbt_dry_run.node_runner import NodeRunner
 from dbt_dry_run.results import DryRunResult, DryRunStatus
+from dbt_dry_run.sql.literals import insert_dependant_sql_literals
 
 
 def _check_cols_missing(node: Node, table: Table) -> Set[str]:

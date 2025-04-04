@@ -5,7 +5,6 @@ import pytest
 
 from dbt_dry_run import flags
 from dbt_dry_run.exception import SchemaChangeException
-from dbt_dry_run.literals import enable_test_example_values
 from dbt_dry_run.models import BigQueryFieldType, Table, TableField
 from dbt_dry_run.models.manifest import NodeConfig, PartitionBy
 from dbt_dry_run.node_runner.incremental_runner import (
@@ -16,6 +15,7 @@ from dbt_dry_run.node_runner.incremental_runner import (
 )
 from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
 from dbt_dry_run.scheduler import ManifestScheduler
+from dbt_dry_run.sql.literals import enable_test_example_values
 from dbt_dry_run.test.utils import SimpleNode, assert_result_has_table, get_executed_sql
 
 enable_test_example_values(True)

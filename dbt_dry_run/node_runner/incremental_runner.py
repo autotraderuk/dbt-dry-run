@@ -3,14 +3,14 @@ from typing import Callable, Dict, Iterable, Optional, Set
 
 from dbt_dry_run import flags
 from dbt_dry_run.exception import SchemaChangeException, UpstreamFailedException
-from dbt_dry_run.literals import (
-    get_sql_literal_from_table,
-    insert_dependant_sql_literals,
-)
 from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
 from dbt_dry_run.models.manifest import Node, OnSchemaChange
 from dbt_dry_run.node_runner import NodeRunner
 from dbt_dry_run.results import DryRunResult, DryRunStatus
+from dbt_dry_run.sql.literals import (
+    get_sql_literal_from_table,
+    insert_dependant_sql_literals,
+)
 
 
 def ignore_handler(dry_run_result: DryRunResult, target_table: Table) -> DryRunResult:

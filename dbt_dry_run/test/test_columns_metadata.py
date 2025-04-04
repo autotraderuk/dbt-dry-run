@@ -8,9 +8,9 @@ from dbt_dry_run.columns_metadata import (
     map_columns_to_table,
 )
 from dbt_dry_run.exception import InvalidColumnSpecification, UnknownDataTypeException
-from dbt_dry_run.literals import enable_test_example_values
 from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
 from dbt_dry_run.models.manifest import ManifestColumn
+from dbt_dry_run.sql.literals import enable_test_example_values
 from dbt_dry_run.test.utils import field_with_name
 
 enable_test_example_values(True)

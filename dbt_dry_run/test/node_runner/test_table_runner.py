@@ -1,11 +1,11 @@
 from unittest.mock import MagicMock
 
 from dbt_dry_run.exception import UpstreamFailedException
-from dbt_dry_run.literals import enable_test_example_values
 from dbt_dry_run.models import BigQueryFieldType, Table, TableField
 from dbt_dry_run.node_runner.table_runner import TableRunner
 from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
 from dbt_dry_run.scheduler import ManifestScheduler
+from dbt_dry_run.sql.literals import enable_test_example_values
 from dbt_dry_run.test.utils import SimpleNode, get_executed_sql
 
 enable_test_example_values(True)

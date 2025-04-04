@@ -1,8 +1,8 @@
 from dbt_dry_run.exception import UpstreamFailedException
-from dbt_dry_run.literals import insert_dependant_sql_literals
 from dbt_dry_run.models.manifest import Node
 from dbt_dry_run.node_runner import NodeRunner
 from dbt_dry_run.results import DryRunResult, DryRunStatus
+from dbt_dry_run.sql.literals import insert_dependant_sql_literals
 
 
 class TableRunner(NodeRunner):

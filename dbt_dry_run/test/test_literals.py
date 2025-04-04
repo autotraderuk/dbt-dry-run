@@ -3,12 +3,12 @@ from typing import List
 
 import pytest
 
-from dbt_dry_run.literals import (
+from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
+from dbt_dry_run.sql.literals import (
     enable_test_example_values,
     get_sql_literal_from_table,
     replace_upstream_sql,
 )
-from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
 from dbt_dry_run.test.utils import SimpleNode
 
 enable_test_example_values(True)
