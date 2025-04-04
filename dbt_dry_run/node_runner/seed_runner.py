@@ -35,7 +35,6 @@ class SeedRunner(NodeRunner):
                     node=node,
                     table=None,
                     status=DryRunStatus.FAILURE,
-                    total_bytes_processed=0,
                     exception=exception,
                 )
             new_field = TableField(
@@ -48,9 +47,8 @@ class SeedRunner(NodeRunner):
             node=node,
             table=schema,
             status=DryRunStatus.SUCCESS,
-            total_bytes_processed=0,
             exception=None,
         )
 
-    def validate_node(self, node: Node) -> Optional[DryRunResult]:
+    def check_node_compiled(self, node: Node) -> Optional[DryRunResult]:
         return None

@@ -2,11 +2,11 @@ from unittest.mock import MagicMock
 
 from dbt_dry_run import flags
 from dbt_dry_run.exception import NotCompiledException
-from dbt_dry_run.literals import enable_test_example_values
 from dbt_dry_run.models import BigQueryFieldType, Table, TableField
 from dbt_dry_run.node_runner.node_test_runner import NodeTestRunner
 from dbt_dry_run.results import DryRunStatus, Results
 from dbt_dry_run.scheduler import ManifestScheduler
+from dbt_dry_run.sql.literals import enable_test_example_values
 from dbt_dry_run.test.utils import SimpleNode
 
 enable_test_example_values(True)
@@ -38,7 +38,7 @@ def test_test_runs_sql() -> None:
             )
         ]
     )
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, 0, None)
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, None)
 
     test_node = SimpleNode(
         unique_id="test1", depends_on=[], resource_type=ManifestScheduler.TEST
@@ -70,7 +70,7 @@ def test_validate_node_fails_if_skip_not_compiled_is_false(
 
     model_runner = NodeTestRunner(mock_sql_runner, results)
 
-    validation_result = model_runner.validate_node(node)
+    validation_result = model_runner.check_node_compiled(node)
     assert validation_result
     assert validation_result.status == DryRunStatus.FAILURE
     assert isinstance(validation_result.exception, NotCompiledException)
@@ -90,7 +90,7 @@ def test_validate_node_skips_if_skip_not_compiled_is_true(
 
     model_runner = NodeTestRunner(mock_sql_runner, results)
 
-    validation_result = model_runner.validate_node(node)
+    validation_result = model_runner.check_node_compiled(node)
     assert validation_result
     assert validation_result.status == DryRunStatus.SKIPPED
     assert validation_result.exception is None

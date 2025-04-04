@@ -3,12 +3,12 @@ from typing import List
 
 import pytest
 
-from dbt_dry_run.literals import (
+from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
+from dbt_dry_run.sql.literals import (
     enable_test_example_values,
     get_sql_literal_from_table,
     replace_upstream_sql,
 )
-from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
 from dbt_dry_run.test.utils import SimpleNode
 
 enable_test_example_values(True)
@@ -100,7 +100,7 @@ def test_replace_upstream_sql_replaces_from() -> None:
     node = SimpleNode(unique_id="A", depends_on=[]).to_node()
     original_sql = f"""
     SELECT foo
-    FROM {node.to_table_ref_literal()}
+    FROM {node.get_table_ref_literal()}
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
     new_sql = replace_upstream_sql(original_sql, node, table)
@@ -119,7 +119,7 @@ def test_replace_upstream_sql_replaces_from_and_aliases_literal_if_none_provided
     node = SimpleNode(unique_id="A", depends_on=[]).to_node()
     original_sql = f"""
     SELECT {node.alias}.foo
-    FROM {node.to_table_ref_literal()}
+    FROM {node.get_table_ref_literal()}
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
     new_sql = replace_upstream_sql(original_sql, node, table)
@@ -137,8 +137,8 @@ def test_replace_upstream_sql_does_not_replace_alias_in_string() -> None:
     node = SimpleNode(unique_id="A", depends_on=[]).to_node()
     original_sql = f"""
     SELECT bar.foo,
-           '{node.to_table_ref_literal()}' as the_table
-    FROM {node.to_table_ref_literal()} as bar
+           '{node.get_table_ref_literal()}' as the_table
+    FROM {node.get_table_ref_literal()} as bar
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
     new_sql = replace_upstream_sql(original_sql, node, table)
@@ -147,7 +147,7 @@ def test_replace_upstream_sql_does_not_replace_alias_in_string() -> None:
         new_sql
         == f"""
     SELECT bar.foo,
-           '{node.to_table_ref_literal()}' as the_table
+           '{node.get_table_ref_literal()}' as the_table
     FROM (SELECT 'foo' as `foo`) as bar
     """
     )
@@ -157,7 +157,7 @@ def test_replace_upstream_sql_replaces_from_with_as_alias() -> None:
     node = SimpleNode(unique_id="A", depends_on=[]).to_node()
     original_sql = f"""
     SELECT bar.foo
-    FROM {node.to_table_ref_literal()} as bar
+    FROM {node.get_table_ref_literal()} as bar
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
     new_sql = replace_upstream_sql(original_sql, node, table)
@@ -176,11 +176,11 @@ def test_replace_upstream_sql_replaces_from_with_cte_and_from() -> None:
     original_sql = f"""
     WITH a_cte AS (
         SELECT cte1.*
-        FROM {node.to_table_ref_literal()} as cte1
+        FROM {node.get_table_ref_literal()} as cte1
     )
     
     SELECT bar.foo
-    FROM {node.to_table_ref_literal()} as bar
+    FROM {node.get_table_ref_literal()} as bar
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
     new_sql = replace_upstream_sql(original_sql, node, table)
@@ -203,7 +203,7 @@ def test_replace_upstream_sql_replaces_from_with_alias() -> None:
     node = SimpleNode(unique_id="A", depends_on=[]).to_node()
     original_sql = f"""
     SELECT bar.foo
-    FROM {node.to_table_ref_literal()} bar
+    FROM {node.get_table_ref_literal()} bar
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
     new_sql = replace_upstream_sql(original_sql, node, table)
@@ -222,7 +222,7 @@ def test_replace_upstream_sql_replaces_join() -> None:
     original_sql = f"""
     SELECT foo
     FROM `a`.`b`.`c`
-    JOIN {node.to_table_ref_literal()}
+    JOIN {node.get_table_ref_literal()}
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
     new_sql = replace_upstream_sql(original_sql, node, table)
@@ -242,7 +242,7 @@ def test_replace_upstream_sql_replaces_from_newline() -> None:
     original_sql = f"""
     SELECT foo
     FROM
-        {node.to_table_ref_literal()}
+        {node.get_table_ref_literal()}
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
     new_sql = replace_upstream_sql(original_sql, node, table)
@@ -261,8 +261,8 @@ def test_ignores_quoted_literals() -> None:
     node = SimpleNode(unique_id="A", depends_on=[]).to_node()
     original_sql = f"""
     SELECT foo,
-           '{node.to_table_ref_literal()}' AS original_table
-    FROM {node.to_table_ref_literal()}
+           '{node.get_table_ref_literal()}' AS original_table
+    FROM {node.get_table_ref_literal()}
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
     new_sql = replace_upstream_sql(original_sql, node, table)
@@ -271,7 +271,7 @@ def test_ignores_quoted_literals() -> None:
         new_sql
         == f"""
     SELECT foo,
-           '{node.to_table_ref_literal()}' AS original_table
+           '{node.get_table_ref_literal()}' AS original_table
     FROM (SELECT 'foo' as `foo`)
     """
     )
@@ -282,7 +282,7 @@ def test_handles_comments() -> None:
     original_sql = f"""
     SELECT foo
     FROM -- test
-        {node.to_table_ref_literal()}
+        {node.get_table_ref_literal()}
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
     new_sql = replace_upstream_sql(original_sql, node, table)
@@ -304,7 +304,7 @@ def test_handles_multiple_comments() -> None:
     SELECT foo
     FROM -- test
          -- test2
-        {node.to_table_ref_literal()}
+        {node.get_table_ref_literal()}
     """
     table = Table(fields=[TableField(name="foo", type=BigQueryFieldType.STRING)])
     new_sql = replace_upstream_sql(original_sql, node, table)

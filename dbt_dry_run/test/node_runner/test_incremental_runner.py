@@ -5,17 +5,19 @@ import pytest
 
 from dbt_dry_run import flags
 from dbt_dry_run.exception import SchemaChangeException
-from dbt_dry_run.literals import enable_test_example_values
 from dbt_dry_run.models import BigQueryFieldType, Table, TableField
 from dbt_dry_run.models.manifest import NodeConfig, PartitionBy
 from dbt_dry_run.node_runner.incremental_runner import (
     IncrementalRunner,
-    append_new_columns_handler,
     sql_has_recursive_ctes,
+)
+from dbt_dry_run.node_runner.schema_change_handlers import (
+    append_new_columns_handler,
     sync_all_columns_handler,
 )
 from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
 from dbt_dry_run.scheduler import ManifestScheduler
+from dbt_dry_run.sql.literals import enable_test_example_values
 from dbt_dry_run.test.utils import SimpleNode, assert_result_has_table, get_executed_sql
 
 enable_test_example_values(True)
@@ -28,8 +30,6 @@ A_SIMPLE_TABLE = Table(
         )
     ]
 )
-
-A_TOTAL_BYTES_PROCESSED = 1000
 
 A_NODE = SimpleNode(
     unique_id="node1", depends_on=[], resource_type=ManifestScheduler.MODEL
@@ -60,7 +60,7 @@ def get_mock_sql_runner_with(
     model_schema: Table, target_schema: Optional[Table]
 ) -> MagicMock:
     mock_sql_runner = MagicMock()
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, model_schema, 0, None)
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, model_schema, None)
     mock_sql_runner.get_node_schema.return_value = target_schema
     return mock_sql_runner
 
@@ -73,7 +73,6 @@ def test_partitioned_incremental_model_declares_dbt_max_partition_variable() -> 
     mock_sql_runner.query.return_value = (
         DryRunStatus.SUCCESS,
         A_SIMPLE_TABLE,
-        A_TOTAL_BYTES_PROCESSED,
         None,
     )
 
@@ -440,7 +439,6 @@ def test_model_with_sql_header_executes_header_first() -> None:
     mock_sql_runner.query.return_value = (
         DryRunStatus.SUCCESS,
         A_SIMPLE_TABLE,
-        A_TOTAL_BYTES_PROCESSED,
         None,
     )
 
@@ -474,7 +472,6 @@ def test_append_handler_preserves_existing_column_order() -> None:
         node=A_NODE,
         status=DryRunStatus.SUCCESS,
         table=model_table,
-        total_bytes_processed=0,
         exception=None,
     )
     target_table = Table(
@@ -508,7 +505,6 @@ def test_sync_handler_preserves_existing_column_order() -> None:
         node=A_NODE,
         status=DryRunStatus.SUCCESS,
         table=model_table,
-        total_bytes_processed=0,
         exception=None,
     )
     target_table = Table(

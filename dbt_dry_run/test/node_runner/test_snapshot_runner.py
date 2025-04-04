@@ -4,12 +4,12 @@ import pytest
 
 from dbt_dry_run import flags
 from dbt_dry_run.exception import NotCompiledException
-from dbt_dry_run.literals import enable_test_example_values
 from dbt_dry_run.models import BigQueryFieldType, Table, TableField
 from dbt_dry_run.models.manifest import NodeConfig
 from dbt_dry_run.node_runner.snapshot_runner import SnapshotRunner
 from dbt_dry_run.results import DryRunStatus, Results
 from dbt_dry_run.scheduler import ManifestScheduler
+from dbt_dry_run.sql.literals import enable_test_example_values
 from dbt_dry_run.test.utils import SimpleNode
 
 enable_test_example_values(True)
@@ -41,7 +41,7 @@ def test_snapshot_with_check_all_strategy_runs_sql_with_id() -> None:
             )
         ]
     )
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, 0, None)
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, None)
 
     node = SimpleNode(
         unique_id="node1",
@@ -76,7 +76,7 @@ def test_snapshot_with_check_all_strategy_fails_without_id() -> None:
             )
         ]
     )
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, 0, None)
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, None)
 
     node = SimpleNode(
         unique_id="node1",
@@ -114,7 +114,7 @@ def test_snapshot_with_check_all_strategy_runs_sql_with_matching_columns() -> No
             ),
         ]
     )
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, 0, None)
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, None)
 
     node = SimpleNode(
         unique_id="node1",
@@ -152,7 +152,7 @@ def test_snapshot_with_check_cols_strategy_fails_with_missing_column() -> None:
             )
         ]
     )
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, 0, None)
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, None)
 
     node = SimpleNode(
         unique_id="node1",
@@ -187,7 +187,7 @@ def test_snapshot_with_timestamp_strategy_with_updated_at_column() -> None:
             TableField(name="last_updated_col", type=BigQueryFieldType.TIMESTAMP),
         ]
     )
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, 0, None)
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, None)
 
     node = SimpleNode(
         unique_id="node1",
@@ -222,7 +222,7 @@ def test_snapshot_with_timestamp_strategy_with_missing_updated_at_column() -> No
             TableField(name="last_updated_col", type=BigQueryFieldType.TIMESTAMP),
         ]
     )
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, 0, None)
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, None)
 
     node = SimpleNode(
         unique_id="node1",
@@ -261,7 +261,7 @@ def test_snapshot_with_list_of_unique_key_columns_raises_error() -> None:
             TableField(name="last_updated_col", type=BigQueryFieldType.TIMESTAMP),
         ]
     )
-    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, 0, None)
+    mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, expected_table, None)
 
     node = SimpleNode(
         unique_id="node1",
@@ -298,7 +298,7 @@ def test_validate_node_fails_if_skip_not_compiled_is_false(
 
     model_runner = SnapshotRunner(mock_sql_runner, results)
 
-    validation_result = model_runner.validate_node(node)
+    validation_result = model_runner.check_node_compiled(node)
     assert validation_result
     assert validation_result.status == DryRunStatus.FAILURE
     assert isinstance(validation_result.exception, NotCompiledException)
@@ -318,7 +318,7 @@ def test_validate_node_skips_if_skip_not_compiled_is_true(
 
     model_runner = SnapshotRunner(mock_sql_runner, results)
 
-    validation_result = model_runner.validate_node(node)
+    validation_result = model_runner.check_node_compiled(node)
     assert validation_result
     assert validation_result.status == DryRunStatus.SKIPPED
     assert validation_result.exception is None

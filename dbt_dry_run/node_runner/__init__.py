@@ -22,15 +22,13 @@ class NodeRunner(metaclass=ABCMeta):
     def run(self, node: Node) -> DryRunResult:
         ...
 
-    def validate_node(self, node: Node) -> Optional[DryRunResult]:
-        node_compiled = node.compiled
-        if not node_compiled:
+    def check_node_compiled(self, node: Node) -> Optional[DryRunResult]:
+        if not node.compiled:
             if not flags.SKIP_NOT_COMPILED:
                 return DryRunResult(
                     node=node,
                     table=None,
                     status=DryRunStatus.FAILURE,
-                    total_bytes_processed=0,
                     exception=NotCompiledException(
                         f"Node {node.unique_id} was not compiled"
                     ),
@@ -40,7 +38,6 @@ class NodeRunner(metaclass=ABCMeta):
                     node,
                     table=None,
                     status=DryRunStatus.SKIPPED,
-                    total_bytes_processed=0,
                     exception=None,
                 )
         else:

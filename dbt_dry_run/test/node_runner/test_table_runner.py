@@ -1,11 +1,11 @@
 from unittest.mock import MagicMock
 
 from dbt_dry_run.exception import UpstreamFailedException
-from dbt_dry_run.literals import enable_test_example_values
 from dbt_dry_run.models import BigQueryFieldType, Table, TableField
 from dbt_dry_run.node_runner.table_runner import TableRunner
 from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
 from dbt_dry_run.scheduler import ManifestScheduler
+from dbt_dry_run.sql.literals import enable_test_example_values
 from dbt_dry_run.test.utils import SimpleNode, get_executed_sql
 
 enable_test_example_values(True)
@@ -18,8 +18,6 @@ A_SIMPLE_TABLE = Table(
         )
     ]
 )
-
-A_TOTAL_BYTES_PROCESSED = 1000
 
 
 def test_model_with_no_dependencies_runs_sql() -> None:
@@ -35,7 +33,6 @@ def test_model_with_no_dependencies_runs_sql() -> None:
     mock_sql_runner.query.return_value = (
         DryRunStatus.SUCCESS,
         expected_table,
-        A_TOTAL_BYTES_PROCESSED,
         None,
     )
 
@@ -53,7 +50,6 @@ def test_model_with_no_dependencies_runs_sql() -> None:
     assert result.status == DryRunStatus.SUCCESS
     assert result.table
     assert result.table.fields[0].name == expected_table.fields[0].name
-    assert result.total_bytes_processed == A_TOTAL_BYTES_PROCESSED
 
 
 def test_model_with_failed_dependency_raises_upstream_failed_exception() -> None:
@@ -61,7 +57,6 @@ def test_model_with_failed_dependency_raises_upstream_failed_exception() -> None
     mock_sql_runner.query.return_value = (
         DryRunStatus.SUCCESS,
         A_SIMPLE_TABLE,
-        A_TOTAL_BYTES_PROCESSED,
         None,
     )
 
@@ -83,7 +78,6 @@ def test_model_with_failed_dependency_raises_upstream_failed_exception() -> None
             node=upstream_node,
             status=DryRunStatus.FAILURE,
             table=None,
-            total_bytes_processed=0,
             exception=Exception("BOOM"),
         ),
     )
@@ -91,7 +85,6 @@ def test_model_with_failed_dependency_raises_upstream_failed_exception() -> None
     model_runner = TableRunner(mock_sql_runner, results)
     result = model_runner.run(node)
     assert result.status == DryRunStatus.FAILURE
-    assert result.total_bytes_processed == 0
     assert isinstance(result.exception, UpstreamFailedException)
 
 
@@ -100,7 +93,6 @@ def test_model_with_dependency_inserts_sql_literal() -> None:
     mock_sql_runner.query.return_value = (
         DryRunStatus.SUCCESS,
         A_SIMPLE_TABLE,
-        A_TOTAL_BYTES_PROCESSED,
         None,
     )
 
@@ -108,7 +100,7 @@ def test_model_with_dependency_inserts_sql_literal() -> None:
     upstream_node = upstream_simple_node.to_node()
     upstream_node.depends_on.deep_nodes = []
 
-    compiled_code = f"""SELECT * FROM {upstream_node.to_table_ref_literal()}"""
+    compiled_code = f"""SELECT * FROM {upstream_node.get_table_ref_literal()}"""
 
     node = SimpleNode(
         unique_id="node1",
@@ -125,7 +117,6 @@ def test_model_with_dependency_inserts_sql_literal() -> None:
             node=upstream_node,
             status=DryRunStatus.SUCCESS,
             table=A_SIMPLE_TABLE,
-            total_bytes_processed=A_TOTAL_BYTES_PROCESSED,
             exception=Exception("BOOM"),
         ),
     )
@@ -143,7 +134,6 @@ def test_model_with_sql_header_executes_header_first() -> None:
     mock_sql_runner.query.return_value = (
         DryRunStatus.SUCCESS,
         A_SIMPLE_TABLE,
-        A_TOTAL_BYTES_PROCESSED,
         None,
     )
 

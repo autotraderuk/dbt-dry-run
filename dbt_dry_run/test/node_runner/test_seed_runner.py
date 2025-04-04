@@ -124,5 +124,5 @@ def test_validate_node_returns_none_if_node_is_not_compiled() -> None:
 
     model_runner = SeedRunner(mock_sql_runner, results)
 
-    validation_result = model_runner.validate_node(node)
+    validation_result = model_runner.check_node_compiled(node)
     assert validation_result is None
