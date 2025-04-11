@@ -1,5 +1,12 @@
 ## Changelog
 
+# dbt-dry-run v0.8.x
+
+## Bugfixes
+
+- Basic support for materialized views. This materialisation will be treated as a normal view. This means the dry run
+  may erroneously succeed if it contains SQL that is not supported for materialised views.
+
 # dbt-dry-run v0.8.3
 
 ## Bugfixes

@@ -23,6 +23,7 @@ RUNNERS: Dict[RunnerKey, Type[NodeRunner]] = {
     RunnerKey("model", "incremental"): IncrementalRunner,
     RunnerKey("model", "table"): TableRunner,
     RunnerKey("model", "view"): ViewRunner,
+    RunnerKey("model", "materialized_view"): ViewRunner,
     RunnerKey("test", "test"): NodeTestRunner,
     RunnerKey("snapshot", "snapshot"): SnapshotRunner,
     RunnerKey("seed", "seed"): SeedRunner,
