@@ -13,7 +13,7 @@ from google.cloud.bigquery import Client
 
 
 @dataclass
-class DryRunResult:
+class CompletedDryRun:
     process: subprocess.CompletedProcess
     report: Optional[Report]
 
@@ -75,7 +75,7 @@ class ProjectContext:
 
     def dry_run(
         self, skip_not_compiled: bool = False, full_refresh: bool = False
-    ) -> DryRunResult:
+    ) -> CompletedDryRun:
         report_path = os.path.join(self.target_path, "dry_run_output.json")
         if os.path.exists(report_path):
             os.remove(report_path)
@@ -106,7 +106,7 @@ class ProjectContext:
         else:
             dry_run_report = None
 
-        return DryRunResult(run_dry_run, dry_run_report)
+        return CompletedDryRun(run_dry_run, dry_run_report)
 
 
 def running_in_github() -> bool:
@@ -115,22 +115,22 @@ def running_in_github() -> bool:
 
 def _dry_run_result(
     project: ProjectContext, skip_not_compiled: bool = False, full_refresh: bool = False
-) -> DryRunResult:
+) -> CompletedDryRun:
     return project.dry_run(skip_not_compiled, full_refresh)
 
 
 @pytest.fixture(scope="module")
-def dry_run_result_skip_not_compiled(compiled_project: ProjectContext) -> DryRunResult:
+def dry_run_result_skip_not_compiled(compiled_project: ProjectContext) -> CompletedDryRun:
     yield _dry_run_result(compiled_project, skip_not_compiled=True)
 
 
 @pytest.fixture(scope="module")
-def dry_run_result_full_refresh(compiled_project: ProjectContext) -> DryRunResult:
+def dry_run_result_full_refresh(compiled_project: ProjectContext) -> CompletedDryRun:
     yield _dry_run_result(compiled_project, full_refresh=True)
 
 
 @pytest.fixture(scope="module")
-def dry_run_result(compiled_project: ProjectContext) -> DryRunResult:
+def dry_run_result(compiled_project: ProjectContext) -> CompletedDryRun:
     yield _dry_run_result(compiled_project)
 
 

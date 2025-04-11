@@ -2,17 +2,17 @@ from typing import Set, List
 
 from dbt_dry_run.models import Report, ReportNode
 from dbt_dry_run.columns_metadata import expand_table_fields
-from integration.conftest import DryRunResult
+from integration.conftest import CompletedDryRun
 
 
-def assert_report_produced(result: DryRunResult) -> Report:
+def assert_report_produced(result: CompletedDryRun) -> Report:
     assert (
         result.report
     ), f"Report is missing: {result.process.stdout.decode('utf-8')}\n{result.process.stderr.decode('utf-8')}"
     return result.report
 
 
-def assert_report_success(result: DryRunResult) -> Report:
+def assert_report_success(result: CompletedDryRun) -> Report:
     assert (
         result.report
     ), f"Report is missing: {result.process.stdout.decode('utf-8')}\n{result.process.stderr.decode('utf-8')}"
@@ -20,7 +20,7 @@ def assert_report_success(result: DryRunResult) -> Report:
     return result.report
 
 
-def assert_report_failure(result: DryRunResult) -> Report:
+def assert_report_failure(result: CompletedDryRun) -> Report:
     assert (
         result.report
     ), f"Report is missing: {result.process.stdout.decode('utf-8')}\n{result.process.stderr.decode('utf-8')}"
