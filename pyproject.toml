@@ -46,6 +46,9 @@ pandas = [
   {version = "<2.1", python = "=3.8"},
 ]
 
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.11.5"
+
 [build-system]
 requires = ["poetry-core>=1.5.0"]
 build-backend = "poetry.core.masonry.api"

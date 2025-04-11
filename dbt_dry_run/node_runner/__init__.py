@@ -1,6 +1,5 @@
-import itertools
 from abc import ABCMeta, abstractmethod
-from typing import Dict, List, Optional, Tuple, Type
+from typing import Optional
 
 from dbt_dry_run import flags
 from dbt_dry_run.exception import NotCompiledException

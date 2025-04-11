@@ -1,5 +1,4 @@
-from contextlib import contextmanager
-from typing import Generator, cast
+from typing import cast
 from unittest.mock import MagicMock
 
 import pytest

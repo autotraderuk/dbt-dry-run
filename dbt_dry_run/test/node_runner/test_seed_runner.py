@@ -2,10 +2,7 @@ from pathlib import Path
 from typing import Optional, Set
 from unittest.mock import MagicMock
 
-from dbt_dry_run import flags
-from dbt_dry_run.exception import NotCompiledException, UnknownSchemaException
-from dbt_dry_run.flags import Flags
-from dbt_dry_run.models import BigQueryFieldType
+from dbt_dry_run.exception import UnknownSchemaException
 from dbt_dry_run.models.dry_run_result import DryRunResult
 from dbt_dry_run.models.manifest import Node
 from dbt_dry_run.models.report import DryRunStatus
@@ -88,7 +85,7 @@ def test_seed_runner_fails_if_type_returns_none(tmp_path: Path) -> None:
     ).to_node()
     result = get_result(node, None)
     assert result.status == DryRunStatus.FAILURE
-    assert type(result.exception) == UnknownSchemaException
+    assert type(result.exception) is UnknownSchemaException
 
 
 def test_seed_runner_uses_column_overrides(tmp_path: Path) -> None:

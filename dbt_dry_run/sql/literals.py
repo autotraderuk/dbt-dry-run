@@ -27,8 +27,8 @@ _EXAMPLE_VALUES: Dict[BigQueryFieldType, Callable[[], str]] = {
 }
 
 _EXAMPLE_VALUES_TEST: Dict[BigQueryFieldType, Callable[[], str]] = {
-    BigQueryFieldType.STRING: lambda: f"'foo'",
-    BigQueryFieldType.BYTES: lambda: f"b'foo'",
+    BigQueryFieldType.STRING: lambda: "'foo'",
+    BigQueryFieldType.BYTES: lambda: "b'foo'",
     BigQueryFieldType.INTEGER: lambda: "1",
     BigQueryFieldType.INT64: lambda: "1",
     BigQueryFieldType.FLOAT: lambda: "1.0",

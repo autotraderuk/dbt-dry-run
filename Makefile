@@ -15,6 +15,10 @@ integration:
 mypy:
 	mypy dbt_dry_run
 
+.PHONY: lint
+lint:
+	ruff check
+
 .PHONY: format
 format:
 	black dbt_dry_run
@@ -22,7 +26,7 @@ format:
 	isort dbt_dry_run
 
 .PHONY: verify
-verify: format mypy testcov
+verify: format mypy lint testcov
 
 .PHONY: build
 build: verify

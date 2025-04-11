@@ -22,7 +22,7 @@ class SimpleNode(BaseModel):
     database: str = "my_db"
     db_schema: str = Field("my_schema", alias="schema")
     compiled_code: str = A_SQL_QUERY
-    original_file_path: str = f"test123.sql"
+    original_file_path: str = "test123.sql"
     root_path: str = "/home/"
     meta: Optional[NodeMeta]
     language = "python"

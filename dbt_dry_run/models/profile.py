@@ -30,9 +30,9 @@ class Output(BaseModel):
     @root_validator(pre=True)
     def validate_dataset_or_schema(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         if values.get("schema") and values.get("dataset"):
-            raise ValueError(f"Must specify one of dataset or schema")
+            raise ValueError("Must specify one of dataset or schema")
         elif not values.get("schema") and not values.get("dataset"):
-            raise ValueError(f"Must specify dataset or schema")
+            raise ValueError("Must specify dataset or schema")
         values["dataset"] = values.get("dataset", values.get("schema"))
         return values
 
