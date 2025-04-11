@@ -106,3 +106,13 @@ def test_incremental_that_references_model_passes(dry_run_result: DryRunResult):
 
     assert node.success
     assert_report_node_has_columns(node, {"a", "b", "c"})
+
+
+def test_materialized_view_schema_is_predicted(dry_run_result: DryRunResult):
+    node = get_report_node_by_id(
+        dry_run_result.report,
+        "model.test_models_are_executed.second_layer_materialized_view",
+    )
+
+    assert node.success
+    assert_report_node_has_columns(node, {"a", "b", "c"})
