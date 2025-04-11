@@ -120,7 +120,9 @@ def _dry_run_result(
 
 
 @pytest.fixture(scope="module")
-def dry_run_result_skip_not_compiled(compiled_project: ProjectContext) -> CompletedDryRun:
+def dry_run_result_skip_not_compiled(
+    compiled_project: ProjectContext,
+) -> CompletedDryRun:
     yield _dry_run_result(compiled_project, skip_not_compiled=True)
 
 
