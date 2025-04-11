@@ -1,6 +1,6 @@
 import pytest
 
-from dbt_dry_run.models.manifest import Node, NodeConfig, NodeMeta, PartitionBy
+from dbt_dry_run.models.manifest import NodeConfig, NodeMeta, PartitionBy
 from dbt_dry_run.test.utils import SimpleNode
 
 

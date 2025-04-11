@@ -1,4 +1,4 @@
-from dbt_dry_run.results import LintingStatus
+from dbt_dry_run.models.report import LintingStatus
 from integration.conftest import DryRunResult
 from integration.utils import get_report_node_by_id
 

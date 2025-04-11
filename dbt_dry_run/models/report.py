@@ -3,7 +3,7 @@ from typing import List, Optional
 from pydantic import Field
 from pydantic.main import BaseModel
 
-from ..results import DryRunStatus, LintingStatus
+from .dry_run_result import DryRunStatus, LintingStatus
 from .table import Table
 
 

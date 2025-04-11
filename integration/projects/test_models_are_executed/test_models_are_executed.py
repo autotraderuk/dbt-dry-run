@@ -2,7 +2,7 @@ import pytest
 
 from dbt_dry_run.columns_metadata import expand_table_fields_with_types
 from dbt_dry_run.models import BigQueryFieldType
-from dbt_dry_run.results import DryRunStatus
+from dbt_dry_run.models.report import DryRunStatus
 from integration.conftest import DryRunResult
 from integration.utils import (
     get_report_node_by_id,

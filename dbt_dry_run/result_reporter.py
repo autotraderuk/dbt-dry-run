@@ -2,14 +2,9 @@ import re
 from typing import List, Set, Tuple
 
 from dbt_dry_run.models import Report, ReportNode
-from dbt_dry_run.models.report import ReportLintingError
-from dbt_dry_run.results import (
-    DryRunResult,
-    DryRunStatus,
-    LintingError,
-    LintingStatus,
-    Results,
-)
+from dbt_dry_run.models.dry_run_result import DryRunResult, LintingError
+from dbt_dry_run.models.report import DryRunStatus, LintingStatus, ReportLintingError
+from dbt_dry_run.results import Results
 
 QUERY_JOB_SQL_FOLLOWS = "-----Query Job SQL Follows-----"
 QUERY_JOB_HEADER = re.compile(r"|    .    ", re.MULTILINE)

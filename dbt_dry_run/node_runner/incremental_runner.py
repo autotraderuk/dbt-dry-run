@@ -1,8 +1,9 @@
 from dbt_dry_run.exception import UpstreamFailedException
 from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
+from dbt_dry_run.models.dry_run_result import DryRunResult
 from dbt_dry_run.models.manifest import Node, OnSchemaChange
+from dbt_dry_run.models.report import DryRunStatus
 from dbt_dry_run.node_runner import NodeRunner
-from dbt_dry_run.results import DryRunResult, DryRunStatus
 from dbt_dry_run.schema_change_handlers import ON_SCHEMA_CHANGE_TABLE_HANDLER
 from dbt_dry_run.sql.literals import get_sql_literal_from_table
 from dbt_dry_run.sql.parsing import get_merge_sql, sql_has_recursive_ctes

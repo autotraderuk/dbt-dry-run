@@ -1,8 +1,9 @@
 from unittest.mock import MagicMock
 
 from dbt_dry_run.models.manifest import ExternalConfig, ManifestColumn, Node, NodeConfig
+from dbt_dry_run.models.report import DryRunStatus
 from dbt_dry_run.node_runner.source_runner import SourceRunner
-from dbt_dry_run.results import DryRunStatus, Results
+from dbt_dry_run.results import Results
 
 
 def test_external_source_with_columns_but_no_dry_run_columns() -> None:

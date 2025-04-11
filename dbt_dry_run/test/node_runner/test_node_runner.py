@@ -3,8 +3,8 @@ from unittest.mock import MagicMock
 from dbt_dry_run import flags
 from dbt_dry_run.exception import NotCompiledException
 from dbt_dry_run.flags import Flags
+from dbt_dry_run.models.report import DryRunStatus
 from dbt_dry_run.node_runner.incremental_runner import IncrementalRunner
-from dbt_dry_run.results import DryRunStatus
 from dbt_dry_run.scheduler import ManifestScheduler
 from dbt_dry_run.test.utils import SimpleNode
 

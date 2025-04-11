@@ -2,8 +2,8 @@ from typing import Callable, Dict, List
 
 from dbt_dry_run.columns_metadata import expand_table_fields
 from dbt_dry_run.models import Table
+from dbt_dry_run.models.dry_run_result import DryRunResult, LintingError
 from dbt_dry_run.models.manifest import ManifestColumn, Node
-from dbt_dry_run.results import DryRunResult, LintingError
 
 
 def get_extra_documented_columns(

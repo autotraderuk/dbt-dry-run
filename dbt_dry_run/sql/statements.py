@@ -3,7 +3,8 @@ from typing import Callable, Dict, List, cast
 from dbt_dry_run.exception import UpstreamFailedException
 from dbt_dry_run.models import Table
 from dbt_dry_run.models.manifest import Node
-from dbt_dry_run.results import DryRunStatus, Results
+from dbt_dry_run.models.report import DryRunStatus
+from dbt_dry_run.results import Results
 from dbt_dry_run.sql.literals import replace_upstream_sql
 
 PARTITION_DATA_TYPES_VALUES_MAPPING: Dict[str, str] = {
@@ -13,9 +14,11 @@ PARTITION_DATA_TYPES_VALUES_MAPPING: Dict[str, str] = {
     "int64": "100",
 }
 
+SQLPreprocessorStep = Callable[[str, Node, Results], str]
+
 
 class SQLPreprocessor:
-    def __init__(self, transformers: List[Callable[[str, Node, Results], str]]):
+    def __init__(self, transformers: List[SQLPreprocessorStep]):
         self.transformers = transformers
 
     def __call__(self, node: Node, results: Results) -> str:

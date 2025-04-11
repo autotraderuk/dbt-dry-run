@@ -6,7 +6,7 @@ import agate
 from dbt_dry_run.adapter.service import ProjectService
 from dbt_dry_run.models import Table
 from dbt_dry_run.models.manifest import Node
-from dbt_dry_run.results import DryRunStatus
+from dbt_dry_run.models.report import DryRunStatus
 
 
 class SQLRunner(metaclass=ABCMeta):

@@ -1,7 +1,8 @@
 from dbt_dry_run.exception import UpstreamFailedException
+from dbt_dry_run.models.dry_run_result import DryRunResult
 from dbt_dry_run.models.manifest import Node
+from dbt_dry_run.models.report import DryRunStatus
 from dbt_dry_run.node_runner import NodeRunner
-from dbt_dry_run.results import DryRunResult, DryRunStatus
 from dbt_dry_run.sql.statements import (
     SQLPreprocessor,
     add_sql_header,

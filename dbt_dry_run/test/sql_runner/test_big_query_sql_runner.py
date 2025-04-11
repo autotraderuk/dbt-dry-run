@@ -10,7 +10,7 @@ from tenacity import RetryError, wait_none
 
 from dbt_dry_run.adapter.service import ProjectService
 from dbt_dry_run.exception import UnknownSchemaException
-from dbt_dry_run.results import DryRunStatus
+from dbt_dry_run.models.report import DryRunStatus
 from dbt_dry_run.sql_runner.big_query_sql_runner import (
     MAX_ATTEMPT_NUMBER,
     QUERY_TIMED_OUT,

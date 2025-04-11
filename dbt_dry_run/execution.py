@@ -53,7 +53,7 @@ def dry_run_node(
 def create_context(
     project: ProjectService,
 ) -> Generator[Tuple[SQLRunner, ThreadPoolExecutor], None, None]:
-    sql_runner: Optional[SQLRunner] = None
+    sql_runner: Optional[SQLRunner]
     executor: Optional[ThreadPoolExecutor] = None
     try:
         sql_runner = BigQuerySQLRunner(project)

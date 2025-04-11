@@ -4,8 +4,9 @@ from unittest.mock import MagicMock
 from pydantic import BaseModel, Field
 
 from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
+from dbt_dry_run.models.dry_run_result import DryRunResult
 from dbt_dry_run.models.manifest import Node, NodeConfig, NodeDependsOn, NodeMeta
-from dbt_dry_run.results import DryRunResult, DryRunStatus
+from dbt_dry_run.models.report import DryRunStatus
 from dbt_dry_run.scheduler import ManifestScheduler
 
 A_SQL_QUERY = "SELECT * FROM `foo`"
@@ -24,6 +25,7 @@ class SimpleNode(BaseModel):
     original_file_path: str = f"test123.sql"
     root_path: str = "/home/"
     meta: Optional[NodeMeta]
+    language = "python"
 
     def to_node(self) -> Node:
         depends_on = NodeDependsOn(
@@ -45,6 +47,7 @@ class SimpleNode(BaseModel):
             root_path=self.root_path,
             columns=dict(),
             meta=self.meta,
+            language=self.language,
         )
 
 

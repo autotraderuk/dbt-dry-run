@@ -1,4 +1,4 @@
-from dbt_dry_run.results import DryRunStatus
+from dbt_dry_run.models.report import DryRunStatus
 from integration.conftest import DryRunResult
 from integration.utils import (
     assert_report_success,

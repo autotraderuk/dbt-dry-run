@@ -4,8 +4,10 @@ from typing import Dict, List, Optional, Tuple, Type
 
 from dbt_dry_run import flags
 from dbt_dry_run.exception import NotCompiledException
+from dbt_dry_run.models.dry_run_result import DryRunResult
 from dbt_dry_run.models.manifest import Node
-from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
+from dbt_dry_run.models.report import DryRunStatus
+from dbt_dry_run.results import Results
 from dbt_dry_run.sql_runner import SQLRunner
 
 

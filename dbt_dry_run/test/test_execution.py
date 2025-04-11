@@ -4,9 +4,11 @@ from unittest.mock import MagicMock
 import pytest
 
 from dbt_dry_run import flags
-from dbt_dry_run.execution import should_check_columns
+from dbt_dry_run.exception import ManifestValidationError
+from dbt_dry_run.execution import should_check_columns, validate_manifest_compatibility
 from dbt_dry_run.flags import Flags
-from dbt_dry_run.models.manifest import NodeMeta
+from dbt_dry_run.models.manifest import Manifest, NodeMeta
+from dbt_dry_run.test.utils import SimpleNode
 
 SOME_KEY = "SOME_KEY"
 
@@ -71,3 +73,16 @@ def test_should_check_columns_casts_non_bools(
     node = MagicMock()
     node.get_combined_metadata.return_value = meta_value
     assert should_check_columns(node) is expected_value
+
+
+def test_validate_manifest_compatibility_succeeds_if_no_python_models() -> None:
+    node = SimpleNode(unique_id="a", depends_on=[], language="sql").to_node()
+    manifest = Manifest(nodes={"a": node}, sources={}, macros={})
+    validate_manifest_compatibility(manifest)
+
+
+def test_validate_manifest_compatibility_raises_if_contains_python_models() -> None:
+    node = SimpleNode(unique_id="a", depends_on=[], language="python").to_node()
+    manifest = Manifest(nodes={"a": node}, sources={}, macros={})
+    with pytest.raises(ManifestValidationError):
+        validate_manifest_compatibility(manifest)

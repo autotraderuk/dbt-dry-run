@@ -2,7 +2,8 @@ from typing import Callable, Dict, Optional
 
 from dbt_dry_run.exception import SchemaChangeException
 from dbt_dry_run.models import OnSchemaChange, Table
-from dbt_dry_run.results import DryRunResult, DryRunStatus
+from dbt_dry_run.models.dry_run_result import DryRunResult
+from dbt_dry_run.models.report import DryRunStatus
 
 
 def ignore_handler(dry_run_result: DryRunResult, target_table: Table) -> DryRunResult:

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Type
 
+from dbt_dry_run.models.dry_run_result import DryRunResult
 from dbt_dry_run.models.manifest import Node
 from dbt_dry_run.node_runner import NodeRunner
 from dbt_dry_run.node_runner.incremental_runner import IncrementalRunner
@@ -10,7 +11,6 @@ from dbt_dry_run.node_runner.snapshot_runner import SnapshotRunner
 from dbt_dry_run.node_runner.source_runner import SourceRunner
 from dbt_dry_run.node_runner.table_runner import TableRunner
 from dbt_dry_run.node_runner.view_runner import ViewRunner
-from dbt_dry_run.results import DryRunResult
 
 
 @dataclass(frozen=True, eq=True)

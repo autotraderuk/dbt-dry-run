@@ -1,22 +1,14 @@
 from typing import List, Optional
 from unittest.mock import MagicMock, call
 
-import pytest
-
 from dbt_dry_run import flags
 from dbt_dry_run.exception import SchemaChangeException
 from dbt_dry_run.models import BigQueryFieldType, Table, TableField
 from dbt_dry_run.models.manifest import NodeConfig, PartitionBy
-from dbt_dry_run.node_runner.incremental_runner import (
-    IncrementalRunner,
-    sql_has_recursive_ctes,
-)
-from dbt_dry_run.results import DryRunResult, DryRunStatus, Results
+from dbt_dry_run.models.report import DryRunStatus
+from dbt_dry_run.node_runner.incremental_runner import IncrementalRunner
+from dbt_dry_run.results import Results
 from dbt_dry_run.scheduler import ManifestScheduler
-from dbt_dry_run.schema_change_handlers import (
-    append_new_columns_handler,
-    sync_all_columns_handler,
-)
 from dbt_dry_run.sql.literals import enable_test_example_values
 from dbt_dry_run.test.utils import SimpleNode, assert_result_has_table, get_executed_sql
 
@@ -30,10 +22,6 @@ A_SIMPLE_TABLE = Table(
         )
     ]
 )
-
-A_NODE = SimpleNode(
-    unique_id="node1", depends_on=[], resource_type=ManifestScheduler.MODEL
-).to_node()
 
 
 def get_mock_sql_runner_with_all_string_columns(
@@ -458,102 +446,3 @@ def test_model_with_sql_header_executes_header_first() -> None:
     executed_sql = get_executed_sql(mock_sql_runner)
     assert executed_sql.startswith(pre_header_value)
     assert node.compiled_code in executed_sql
-
-
-def test_append_handler_preserves_existing_column_order() -> None:
-    model_table = Table(
-        fields=[
-            TableField(name="col_1", type=BigQueryFieldType.STRING),
-            TableField(name="col_2", type=BigQueryFieldType.STRING),
-            TableField(name="col_3", type=BigQueryFieldType.STRING),
-        ]
-    )
-    dry_run_result = DryRunResult(
-        node=A_NODE,
-        status=DryRunStatus.SUCCESS,
-        table=model_table,
-        exception=None,
-    )
-    target_table = Table(
-        fields=[
-            TableField(name="col_2", type=BigQueryFieldType.STRING),
-            TableField(name="col_1", type=BigQueryFieldType.STRING),
-        ]
-    )
-    actual_result = append_new_columns_handler(dry_run_result, target_table)
-
-    expected_table = Table(
-        fields=[
-            TableField(name="col_2", type=BigQueryFieldType.STRING),
-            TableField(name="col_1", type=BigQueryFieldType.STRING),
-            TableField(name="col_3", type=BigQueryFieldType.STRING),
-        ]
-    )
-
-    assert actual_result.table == expected_table
-
-
-def test_sync_handler_preserves_existing_column_order() -> None:
-    model_table = Table(
-        fields=[
-            TableField(name="col_3", type=BigQueryFieldType.STRING),
-            TableField(name="col_2", type=BigQueryFieldType.STRING),
-            TableField(name="col_4", type=BigQueryFieldType.STRING),
-        ]
-    )
-    dry_run_result = DryRunResult(
-        node=A_NODE,
-        status=DryRunStatus.SUCCESS,
-        table=model_table,
-        exception=None,
-    )
-    target_table = Table(
-        fields=[
-            TableField(name="col_1", type=BigQueryFieldType.STRING),
-            TableField(name="col_2", type=BigQueryFieldType.STRING),
-            TableField(name="col_3", type=BigQueryFieldType.STRING),
-        ]
-    )
-    actual_result = sync_all_columns_handler(dry_run_result, target_table)
-
-    expected_table = Table(
-        fields=[
-            TableField(name="col_2", type=BigQueryFieldType.STRING),
-            TableField(name="col_3", type=BigQueryFieldType.STRING),
-            TableField(name="col_4", type=BigQueryFieldType.STRING),
-        ]
-    )
-
-    assert actual_result.table == expected_table
-
-
-@pytest.mark.parametrize(
-    "code, has_ctes",
-    [
-        (
-            """WITH RECURSIVE my_foo as (SELECT * FROM foo)""",
-            True,
-        ),
-        (
-            """with recursive my_foo as (SELECT * FROM foo)""",
-            True,
-        ),
-        (
-            """  with   recursive    my_foo as (SELECT * FROM foo)""",
-            True,
-        ),
-        (
-            """  with
-                  RECURSIVE 
-                     my_foo as (SELECT * FROM foo)""",
-            True,
-        ),
-        (
-            """  with
-                     my_foo as (SELECT recursive FROM foo)""",
-            False,
-        ),
-    ],
-)
-def test_sql_has_recursive_ctes(code: str, has_ctes: bool) -> None:
-    assert sql_has_recursive_ctes(code) == has_ctes
