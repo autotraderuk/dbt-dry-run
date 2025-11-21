@@ -2,6 +2,10 @@
 
 # dbt-dry-run v0.8.x
 
+## Improvements
+
+- Include is_deleted column for snapshots where hard_deletes='new_record'
+
 ## Bugfixes
 
 - Basic support for materialized views. This materialisation will be treated as a normal view. This means the dry run
