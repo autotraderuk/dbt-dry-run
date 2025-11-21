@@ -281,13 +281,6 @@ There are certain cases where a syntactically valid query can fail due to the da
 2. `NULL` values in `ARRAY_AGG` (See [IGNORE_NULLS bullet point][bq-ignore-nulls])
 3. Bad query performance that makes it too complex/expensive to run
 
-### Things still to do...
-
-The implementation of seeds is incomplete as we don't use them very much in our own dbt projects. The dry runner
-will just use the datatypes that `agate` infers from the CSV files. It will ignore any type overrides you add in the YAML.
-
-If you see anything else that you think it should catch don't hesitate to raise an issue!
-
 [dbt-home]: https://www.getdbt.com/
 
 [bq-dry-run]: https://cloud.google.com/bigquery/docs/dry-run-queries
