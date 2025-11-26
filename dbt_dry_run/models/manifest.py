@@ -84,6 +84,7 @@ class NodeConfig(BaseModel):
     full_refresh: Optional[bool]
     column_types: Dict[str, str] = Field(default_factory=dict)
     delimiter: Optional[str]
+    hard_deletes: Optional[Literal["ignore", "invalidate", "new_record"]]
 
 
 class ManifestColumn(BaseModel):

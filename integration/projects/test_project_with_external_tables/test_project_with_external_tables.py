@@ -1,12 +1,9 @@
-from dbt_dry_run.node_runner.snapshot_runner import DBT_SNAPSHOT_FIELDS
 from integration.conftest import CompletedDryRun
 from integration.utils import (
     get_report_node_by_id,
     assert_report_node_has_columns,
     assert_node_failed_with_error,
 )
-
-DBT_SNAPSHOT_COLUMN_NAMES = set([field.name for field in DBT_SNAPSHOT_FIELDS])
 
 
 def test_model_selecting_from_external_table_has_correct_schema(
