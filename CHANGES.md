@@ -1,10 +1,15 @@
 ## Changelog
 
-# dbt-dry-run v0.8.x
+# dbt-dry-run v0.8.5
 
 ## Improvements
 
 - Officially support dbt-core 1.10
+- Support python 3.13
+
+## Bugfixes
+
+- Fix incorrect snapshot meta column name `is_deleted` -> `dbt_is_deleted`
 
 # dbt-dry-run v0.8.4
 
