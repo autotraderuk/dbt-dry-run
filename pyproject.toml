@@ -17,7 +17,7 @@ repository = "https://github.com/autotraderuk/dbt-dry-run"
 dbt-dry-run = "dbt_dry_run.__main__:main"
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.13"
+python = ">=3.10,<3.14"
 agate = ">=1.7.0,<1.10"
 google-cloud-bigquery = "^3"
 pydantic = "^1.9.0"
@@ -60,6 +60,7 @@ filterwarnings = [
     "ignore:.*custom tp_new.*in Python 3.14.*:DeprecationWarning",
     "ignore:.*utcnow.*:DeprecationWarning",
     "ignore:.*is deprecated and will be removed in Click 9.0.*"
+    "ignore:.*Please upgrade to the latest Python version.*"
 ]
 pythonpath = [
   "."
