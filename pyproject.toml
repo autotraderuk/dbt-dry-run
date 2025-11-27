@@ -59,7 +59,7 @@ filterwarnings = [
     "ignore::UserWarning",
     "ignore:.*custom tp_new.*in Python 3.14.*:DeprecationWarning",
     "ignore:.*utcnow.*:DeprecationWarning",
-    "ignore:.*is deprecated and will be removed in Click 9.0.*"
+    "ignore:.*is deprecated and will be removed in Click 9.0.*",
     "ignore:.*Please upgrade to the latest Python version.*"
 ]
 pythonpath = [
