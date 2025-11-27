@@ -24,9 +24,9 @@ def assert_columns_result_in_table(
     columns: List[ManifestColumn], expected: Table
 ) -> None:
     actual = map_columns_to_table(get_column_map(columns))
-    assert (
-        actual == expected
-    ), f"SQL Literal:\n {actual} does not equal expected:\n {expected}"
+    assert actual == expected, (
+        f"SQL Literal:\n {actual} does not equal expected:\n {expected}"
+    )
 
 
 def field_type_as_repeated(field_type: BigQueryFieldType) -> str:

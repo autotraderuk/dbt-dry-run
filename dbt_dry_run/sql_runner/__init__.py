@@ -18,18 +18,15 @@ class SQLRunner(metaclass=ABCMeta):
         self._project = project
 
     @abstractmethod
-    def node_exists(self, node: Node) -> bool:
-        ...
+    def node_exists(self, node: Node) -> bool: ...
 
     @abstractmethod
-    def get_node_schema(self, node: Node) -> Optional[Table]:
-        ...
+    def get_node_schema(self, node: Node) -> Optional[Table]: ...
 
     @abstractmethod
     def query(
         self, sql: str
-    ) -> Tuple[DryRunStatus, Optional[Table], Optional[Exception]]:
-        ...
+    ) -> Tuple[DryRunStatus, Optional[Table], Optional[Exception]]: ...
 
     def convert_agate_type(
         self, agate_table: agate.Table, col_idx: int

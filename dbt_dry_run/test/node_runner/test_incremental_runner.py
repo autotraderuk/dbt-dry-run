@@ -121,7 +121,9 @@ def test_incremental_model_that_does_not_exist_returns_dry_run_schema() -> None:
     assert_result_has_table(expected_table, result)
 
 
-def test_incremental_model_that_exists_and_has_a_column_removed_and_readded_with_new_name() -> None:
+def test_incremental_model_that_exists_and_has_a_column_removed_and_readded_with_new_name() -> (
+    None
+):
     mock_sql_runner = get_mock_sql_runner_with_all_string_columns(
         ["a", "b"], ["a", "c"]
     )
@@ -320,9 +322,9 @@ def test_node_full_refresh_true_does_full_refresh_when_flag_is_false(
     mock_sql_runner.query.assert_has_calls(
         [call(node_with_full_refresh_set_to_true.compiled_code)]
     )
-    assert (
-        not mock_sql_runner.get_node_schema.called
-    ), "If full refresh we do not look at the target node schema"
+    assert not mock_sql_runner.get_node_schema.called, (
+        "If full refresh we do not look at the target node schema"
+    )
 
 
 def test_node_full_refresh_false_does_full_refresh_when_flag_is_false(

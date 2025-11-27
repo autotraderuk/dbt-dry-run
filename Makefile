@@ -21,9 +21,8 @@ lint:
 
 .PHONY: format
 format:
-	black dbt_dry_run
-	black integration
-	isort dbt_dry_run
+	ruff format dbt_dry_run
+	ruff format integration
 
 .PHONY: verify
 verify: format mypy lint testcov

@@ -73,18 +73,18 @@ class NodeMeta(BaseModel):
 class NodeConfig(BaseModel):
     enabled: bool = True
     materialized: Optional[str]
-    on_schema_change: Optional[OnSchemaChange]
-    sql_header: Optional[str]
-    unique_key: Optional[Union[str, List[str]]]
-    updated_at: Optional[str]
-    strategy: Union[None, Literal["timestamp", "check"]]
-    check_cols: Optional[Union[Literal["all"], List[str]]]
-    partition_by: Optional[PartitionBy]
-    meta: Optional[NodeMeta]
-    full_refresh: Optional[bool]
+    on_schema_change: Optional[OnSchemaChange] = None
+    sql_header: Optional[str] = None
+    unique_key: Optional[Union[str, List[str]]] = None
+    updated_at: Optional[str] = None
+    strategy: Union[None, Literal["timestamp", "check"]] = None
+    check_cols: Optional[Union[Literal["all"], List[str]]] = None
+    partition_by: Optional[PartitionBy] = None
+    meta: Optional[NodeMeta] = None
+    full_refresh: Optional[bool] = None
     column_types: Dict[str, str] = Field(default_factory=dict)
-    delimiter: Optional[str]
-    hard_deletes: Optional[Literal["ignore", "invalidate", "new_record"]]
+    delimiter: Optional[str] = None
+    hard_deletes: Optional[Literal["ignore", "invalidate", "new_record"]] = None
 
 
 class ManifestColumn(BaseModel):

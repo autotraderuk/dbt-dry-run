@@ -20,8 +20,7 @@ class NodeRunner(metaclass=ABCMeta):
         self._results = results
 
     @abstractmethod
-    def run(self, node: Node) -> DryRunResult:
-        ...
+    def run(self, node: Node) -> DryRunResult: ...
 
     def check_node_compiled(self, node: Node) -> Optional[DryRunResult]:
         if not node.compiled:

@@ -42,7 +42,7 @@ class TableField(BaseModel):
     type_: BigQueryFieldType = Field(..., alias="type")
     mode: Optional[BigQueryFieldMode]
     fields: Optional[List["TableField"]] = None
-    description: Optional[str]
+    description: Optional[str] = None
 
     @pydantic.validator("type_", pre=True)
     def validate_type_field(cls, field: str) -> BigQueryFieldType:
@@ -66,18 +66,16 @@ class Table(BaseModel):
         return set(field.name for field in self.fields)
 
     @classmethod
-    def map_fields(
-        cls, schema: Optional[List[SchemaField]]
-    ) -> Optional[List[TableField]]:
+    def map_fields(cls, schema: Optional[List[SchemaField]]) -> List[TableField]:
         new_fields = []
 
         if schema is None:
-            return None
+            return []
 
         for field in schema:
             table_field = TableField(
                 name=field.name,
-                type=field.field_type,
+                type=BigQueryFieldType(field.field_type),
                 mode=field.mode,
                 fields=cls.map_fields(field.fields),
                 description=field.description,

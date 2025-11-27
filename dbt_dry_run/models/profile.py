@@ -52,7 +52,7 @@ class Profile(BaseModel):
         return values
 
 
-def profiles_get_env_var(key: str, default: str = None) -> Optional[str]:
+def profiles_get_env_var(key: str, default: Optional[str] = None) -> Optional[str]:
     return os.environ.get(key, default)
 
 

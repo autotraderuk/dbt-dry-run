@@ -24,7 +24,7 @@ class SimpleNode(BaseModel):
     compiled_code: str = A_SQL_QUERY
     original_file_path: str = "test123.sql"
     root_path: str = "/home/"
-    meta: Optional[NodeMeta]
+    meta: Optional[NodeMeta] = None
     language = "python"
 
     def to_node(self) -> Node:
@@ -77,6 +77,6 @@ def assert_result_has_table(expected: Table, actual: DryRunResult) -> None:
     actual_field_names = set([field.name for field in actual.table.fields])
     expected_field_names = set([field.name for field in expected.fields])
 
-    assert (
-        actual_field_names == expected_field_names
-    ), f"Actual field names: {actual_field_names} did not equal expected: {expected_field_names}"
+    assert actual_field_names == expected_field_names, (
+        f"Actual field names: {actual_field_names} did not equal expected: {expected_field_names}"
+    )

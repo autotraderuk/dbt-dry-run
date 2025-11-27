@@ -44,9 +44,9 @@ def test_snapshot_with_check_all_strategy_runs_sql_with_id() -> None:
 
     result = model_runner.run(node)
     mock_sql_runner.query.assert_called_with(node.compiled_code)
-    assert (
-        result.status == DryRunStatus.SUCCESS
-    ), f"Failed with error: {result.exception}"
+    assert result.status == DryRunStatus.SUCCESS, (
+        f"Failed with error: {result.exception}"
+    )
     assert result.table
     assert result.table.fields[0].name == expected_table.fields[0].name
 
@@ -83,9 +83,9 @@ def test_snapshot_with_hard_deletes_new_record_returns_all_meta_columns() -> Non
 
     result = model_runner.run(node)
     mock_sql_runner.query.assert_called_with(node.compiled_code)
-    assert (
-        result.status == DryRunStatus.SUCCESS
-    ), f"Failed with error: {result.exception}"
+    assert result.status == DryRunStatus.SUCCESS, (
+        f"Failed with error: {result.exception}"
+    )
     assert result.table
     assert result.table.field_names == {
         "a",
@@ -166,9 +166,9 @@ def test_snapshot_with_check_all_strategy_runs_sql_with_matching_columns() -> No
 
     result = model_runner.run(node)
     mock_sql_runner.query.assert_called_with(node.compiled_code)
-    assert (
-        result.status == DryRunStatus.SUCCESS
-    ), f"Failed with error: {result.exception}"
+    assert result.status == DryRunStatus.SUCCESS, (
+        f"Failed with error: {result.exception}"
+    )
     assert result.table
     assert result.table.fields[0].name == expected_table.fields[0].name
 

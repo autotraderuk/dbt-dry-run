@@ -16,9 +16,9 @@ enable_test_example_values(True)
 
 def assert_fields_result_in_literal(fields: List[TableField], expected: str) -> None:
     actual = get_sql_literal_from_table(Table(fields=fields))
-    assert (
-        actual == expected
-    ), f"SQL Literal:\n {actual} does not equal expected:\n {expected}"
+    assert actual == expected, (
+        f"SQL Literal:\n {actual} does not equal expected:\n {expected}"
+    )
 
 
 def assert_fields_result_in_literal_regex(
@@ -27,9 +27,9 @@ def assert_fields_result_in_literal_regex(
     actual = get_sql_literal_from_table(Table(fields=fields))
 
     expected = re.compile(pattern)
-    assert expected.match(
-        actual
-    ), f"SQL Literal:\n {actual} does not match pattern:\n {pattern}"
+    assert expected.match(actual), (
+        f"SQL Literal:\n {actual} does not match pattern:\n {pattern}"
+    )
 
 
 def test_single_field_simple_field() -> None:
@@ -115,7 +115,9 @@ def test_replace_upstream_sql_replaces_from() -> None:
 
 
 @pytest.mark.xfail(reason="Need to implement implicit alias. See Issue #11")
-def test_replace_upstream_sql_replaces_from_and_aliases_literal_if_none_provided() -> None:
+def test_replace_upstream_sql_replaces_from_and_aliases_literal_if_none_provided() -> (
+    None
+):
     node = SimpleNode(unique_id="A", depends_on=[]).to_node()
     original_sql = f"""
     SELECT {node.alias}.foo
