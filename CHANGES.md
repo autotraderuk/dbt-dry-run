@@ -1,5 +1,11 @@
 ## Changelog
 
+# dbt-dry-run v0.8.x
+
+## Improvements
+
+- Officially support dbt-core 1.10
+
 # dbt-dry-run v0.8.4
 
 ## Improvements
