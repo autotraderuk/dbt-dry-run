@@ -1,11 +1,12 @@
+from dbt_dry_run.models.manifest import SnapshotMetaColumnName
 from integration.conftest import CompletedDryRun
 from integration.utils import get_report_node_by_id, assert_report_node_has_columns
 
 DBT_ALWAYS_ON_SNAPSHOT_COLUMN_NAMES = {
-    "dbt_scd_id",
-    "dbt_updated_at",
-    "dbt_valid_from",
-    "dbt_valid_to",
+    SnapshotMetaColumnName.DBT_SCD_ID,
+    SnapshotMetaColumnName.DBT_UPDATED_AT,
+    SnapshotMetaColumnName.DBT_VALID_FROM,
+    SnapshotMetaColumnName.DBT_VALID_TO,
 }
 
 
@@ -72,5 +73,12 @@ def test_hard_deletes_creates_is_deleted_column(dry_run_result: CompletedDryRun)
         "snapshot.test_project_with_snapshots.case_check_hard_deletes",
     )
     assert_report_node_has_columns(
-        node, {"a", "b", "c", *DBT_ALWAYS_ON_SNAPSHOT_COLUMN_NAMES, "is_deleted"}
+        node,
+        {
+            "a",
+            "b",
+            "c",
+            *DBT_ALWAYS_ON_SNAPSHOT_COLUMN_NAMES,
+            SnapshotMetaColumnName.DBT_IS_DELETED,
+        },
     )

@@ -5,7 +5,7 @@ import pytest
 from dbt_dry_run import flags
 from dbt_dry_run.exception import NotCompiledException
 from dbt_dry_run.models import BigQueryFieldType, Table, TableField
-from dbt_dry_run.models.manifest import NodeConfig
+from dbt_dry_run.models.manifest import NodeConfig, SnapshotMetaColumnName
 from dbt_dry_run.models.report import DryRunStatus
 from dbt_dry_run.node_runner.snapshot_runner import SnapshotRunner
 from dbt_dry_run.results import Results
@@ -89,11 +89,11 @@ def test_snapshot_with_hard_deletes_new_record_returns_all_meta_columns() -> Non
     assert result.table
     assert result.table.field_names == {
         "a",
-        "dbt_scd_id",
-        "dbt_updated_at",
-        "dbt_valid_from",
-        "dbt_valid_to",
-        "is_deleted",
+        SnapshotMetaColumnName.DBT_SCD_ID,
+        SnapshotMetaColumnName.DBT_UPDATED_AT,
+        SnapshotMetaColumnName.DBT_VALID_FROM,
+        SnapshotMetaColumnName.DBT_VALID_TO,
+        SnapshotMetaColumnName.DBT_IS_DELETED,
     }
 
 

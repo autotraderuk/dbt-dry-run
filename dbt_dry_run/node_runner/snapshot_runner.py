@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from dbt_dry_run.exception import SnapshotConfigException, UpstreamFailedException
 from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
 from dbt_dry_run.models.dry_run_result import DryRunResult
-from dbt_dry_run.models.manifest import Node, NodeConfig
+from dbt_dry_run.models.manifest import Node, NodeConfig, SnapshotMetaColumnName
 from dbt_dry_run.models.report import DryRunStatus
 from dbt_dry_run.node_runner import NodeRunner
 from dbt_dry_run.sql.statements import SQLPreprocessor, insert_dependant_sql_literals
@@ -25,35 +25,35 @@ class SnapshotField(BaseModel):
 DBT_SNAPSHOT_FIELDS = [
     SnapshotField(
         table_field=TableField(
-            name="dbt_scd_id",
+            name=SnapshotMetaColumnName.DBT_SCD_ID,
             type=BigQueryFieldType.STRING,
             mode=BigQueryFieldMode.NULLABLE,
         )
     ),
     SnapshotField(
         table_field=TableField(
-            name="dbt_updated_at",
+            name=SnapshotMetaColumnName.DBT_UPDATED_AT,
             type=BigQueryFieldType.TIMESTAMP,
             mode=BigQueryFieldMode.NULLABLE,
         )
     ),
     SnapshotField(
         table_field=TableField(
-            name="dbt_valid_from",
+            name=SnapshotMetaColumnName.DBT_VALID_FROM,
             type=BigQueryFieldType.TIMESTAMP,
             mode=BigQueryFieldMode.NULLABLE,
         )
     ),
     SnapshotField(
         table_field=TableField(
-            name="dbt_valid_to",
+            name=SnapshotMetaColumnName.DBT_VALID_TO,
             type=BigQueryFieldType.TIMESTAMP,
             mode=BigQueryFieldMode.NULLABLE,
         )
     ),
     SnapshotField(
         table_field=TableField(
-            name="is_deleted",
+            name=SnapshotMetaColumnName.DBT_IS_DELETED,
             type=BigQueryFieldType.STRING,
             mode=BigQueryFieldMode.NULLABLE,
         ),

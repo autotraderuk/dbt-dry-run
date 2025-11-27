@@ -8,6 +8,14 @@ from pydantic import BaseModel, Field, root_validator
 from dbt_dry_run import flags
 
 
+class SnapshotMetaColumnName(str, Enum):
+    DBT_VALID_FROM = "dbt_valid_from"
+    DBT_VALID_TO = "dbt_valid_to"
+    DBT_SCD_ID = "dbt_scd_id"
+    DBT_UPDATED_AT = "dbt_updated_at"
+    DBT_IS_DELETED = "dbt_is_deleted"
+
+
 class NodeDependsOn(BaseModel):
     macros: List[str] = []
     nodes: List[str] = []
