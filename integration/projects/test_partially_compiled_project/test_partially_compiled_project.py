@@ -1,4 +1,4 @@
-from dbt_dry_run.model.report import DryRunStatus
+from dbt_dry_run.models.report import DryRunStatus
 from integration.conftest import CompletedDryRun
 from integration.utils import (
     get_report_node_by_id,
