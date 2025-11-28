@@ -60,6 +60,7 @@ def assert_node_failed(report: Report, unique_id: str) -> None:
 
 
 def assert_report_node_has_columns(node: ReportNode, columns: Set[str]) -> None:
+    assert node.table is not None, f"Report node {node.unique_id} has no table"
     column_names = set(expand_table_fields(node.table))
     assert column_names == columns, (
         f"Report node {node.unique_id} columns: {column_names} does not have expected columns: {columns}"
@@ -69,6 +70,7 @@ def assert_report_node_has_columns(node: ReportNode, columns: Set[str]) -> None:
 def assert_report_node_has_columns_in_order(
     node: ReportNode, columns: List[str]
 ) -> None:
+    assert node.table is not None, f"Report node {node.unique_id} has no table"
     column_names = expand_table_fields(node.table)
     assert column_names == columns, (
         f"Report node {node.unique_id} columns: {column_names} does not have expected columns in order: {columns}"

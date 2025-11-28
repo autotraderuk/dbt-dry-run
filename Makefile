@@ -13,7 +13,7 @@ integration:
 
 .PHONY: mypy
 mypy:
-	mypy dbt_dry_run
+	mypy dbt_dry_run integration
 
 .PHONY: lint
 lint:

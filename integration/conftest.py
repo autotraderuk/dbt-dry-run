@@ -2,7 +2,7 @@ import os
 import subprocess
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Optional, Iterable, Generator
+from typing import Optional, Iterable, Generator, cast
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -14,8 +14,13 @@ from google.cloud.bigquery import Client
 
 @dataclass
 class CompletedDryRun:
-    process: subprocess.CompletedProcess
+    process: subprocess.CompletedProcess[bytes]
     report: Optional[Report]
+
+    def get_report(self) -> Report:
+        if not self.report:
+            raise ValueError("Dry run report is not available")
+        return self.report
 
 
 class ProjectContext:
@@ -58,7 +63,7 @@ class ProjectContext:
             )
             {partition_by_clause};
         """
-        client: Client = self._project.get_connection().handle
+        client: Client = cast(Client, self._project.get_connection().handle)
         client.query(create_ddl)
         yield
         drop_ddl = f"""
@@ -122,17 +127,21 @@ def _dry_run_result(
 @pytest.fixture(scope="module")
 def dry_run_result_skip_not_compiled(
     compiled_project: ProjectContext,
-) -> CompletedDryRun:
+) -> Generator[CompletedDryRun, None, None]:
     yield _dry_run_result(compiled_project, skip_not_compiled=True)
 
 
 @pytest.fixture(scope="module")
-def dry_run_result_full_refresh(compiled_project: ProjectContext) -> CompletedDryRun:
+def dry_run_result_full_refresh(
+    compiled_project: ProjectContext,
+) -> Generator[CompletedDryRun, None, None]:
     yield _dry_run_result(compiled_project, full_refresh=True)
 
 
 @pytest.fixture(scope="module")
-def dry_run_result(compiled_project: ProjectContext) -> CompletedDryRun:
+def dry_run_result(
+    compiled_project: ProjectContext,
+) -> Generator[CompletedDryRun, None, None]:
     yield _dry_run_result(compiled_project)
 
 
@@ -149,8 +158,8 @@ def compiled_project_full_refresh(request: FixtureRequest) -> ProjectContext:
 def _compiled_project(
     request: FixtureRequest, full_refresh: bool = False
 ) -> ProjectContext:
-    folder = request.fspath.dirname
-    profiles_dir = os.path.join(request.config.rootdir, "integration/profiles")
+    folder = request.path.parent.as_posix()
+    profiles_dir = os.path.join(request.config.rootpath, "integration/profiles")
     target_path = os.path.join(folder, "target")
     if full_refresh:
         target_path = os.path.join(folder, "target-full-refresh")
@@ -176,7 +185,7 @@ def _compiled_project(
         dbt_args,
         capture_output=True,
     )
-    test_display_name = f"{request.keywords.node.name}/{request.node.name}"
+    test_display_name = f"{request.node.name}/{request.node.name}"
 
     dbt_stdout = run_dbt.stdout.decode("utf-8")
     if run_dbt.returncode != 0:

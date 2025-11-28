@@ -11,9 +11,10 @@ from integration.utils import (
 )
 
 
-def test_table_of_nodes_is_returned(dry_run_result: CompletedDryRun):
+def test_table_of_nodes_is_returned(dry_run_result: CompletedDryRun) -> None:
     report = assert_report_produced(dry_run_result)
     seed_node = get_report_node_by_id(report, "seed.test_models_are_executed.my_seed")
+    assert seed_node.table, "Seed node should have table"
     columns = expand_table_fields_with_types(seed_node.table)
     assert columns == {
         "a": BigQueryFieldType.STRING,
@@ -32,7 +33,7 @@ def test_table_of_nodes_is_returned(dry_run_result: CompletedDryRun):
     assert_report_node_has_columns(second_layer, {"a", "b", "c", "seed_b", "seed_c"})
 
 
-def test_disabled_model_not_run(dry_run_result: CompletedDryRun):
+def test_disabled_model_not_run(dry_run_result: CompletedDryRun) -> None:
     report = assert_report_produced(dry_run_result)
     assert "model.test_models_are_executed.disabled_model" not in set(
         n.unique_id for n in report.nodes
@@ -42,7 +43,7 @@ def test_disabled_model_not_run(dry_run_result: CompletedDryRun):
 @pytest.mark.xfail(
     reason="Seed type compatibility not checked. (Trying to convert string to number)"
 )
-def test_badly_configured_seed_fails(dry_run_result: CompletedDryRun):
+def test_badly_configured_seed_fails(dry_run_result: CompletedDryRun) -> None:
     report = assert_report_produced(dry_run_result)
     seed_node = get_report_node_by_id(
         report, "seed.test_models_are_executed.badly_configured_seed"
@@ -50,11 +51,12 @@ def test_badly_configured_seed_fails(dry_run_result: CompletedDryRun):
     assert seed_node.status == DryRunStatus.FAILURE
 
 
-def test_seed_with_delimiter_loads_data(dry_run_result: CompletedDryRun):
+def test_seed_with_delimiter_loads_data(dry_run_result: CompletedDryRun) -> None:
     report = assert_report_produced(dry_run_result)
     seed_node = get_report_node_by_id(
         report, "seed.test_models_are_executed.seed_with_delimiter"
     )
+    assert seed_node.table, "Seed node should have table"
     columns = expand_table_fields_with_types(seed_node.table)
     assert columns == {
         "seed_a": BigQueryFieldType.STRING,
@@ -62,9 +64,9 @@ def test_seed_with_delimiter_loads_data(dry_run_result: CompletedDryRun):
     }
 
 
-def test_model_with_all_column_types_succeeds(dry_run_result: CompletedDryRun):
+def test_model_with_all_column_types_succeeds(dry_run_result: CompletedDryRun) -> None:
     node = get_report_node_by_id(
-        dry_run_result.report,
+        dry_run_result.get_report(),
         "model.test_models_are_executed.model_with_all_column_types",
     )
     expected_column_names = {
@@ -99,18 +101,21 @@ def test_model_with_all_column_types_succeeds(dry_run_result: CompletedDryRun):
     assert_report_node_has_columns(node, expected_column_names)
 
 
-def test_incremental_that_references_model_passes(dry_run_result: CompletedDryRun):
+def test_incremental_that_references_model_passes(
+    dry_run_result: CompletedDryRun,
+) -> None:
     node = get_report_node_by_id(
-        dry_run_result.report, "model.test_models_are_executed.second_layer_incremental"
+        dry_run_result.get_report(),
+        "model.test_models_are_executed.second_layer_incremental",
     )
 
     assert node.success
     assert_report_node_has_columns(node, {"a", "b", "c"})
 
 
-def test_materialized_view_schema_is_predicted(dry_run_result: CompletedDryRun):
+def test_materialized_view_schema_is_predicted(dry_run_result: CompletedDryRun) -> None:
     node = get_report_node_by_id(
-        dry_run_result.report,
+        dry_run_result.get_report(),
         "model.test_models_are_executed.second_layer_materialized_view",
     )
 
