@@ -1,3 +1,8 @@
+.PHONY: install
+install:
+	poetry env use 3.13
+	poetry install
+
 .PHONY: test
 test:
 	pytest --cov=dbt_dry_run

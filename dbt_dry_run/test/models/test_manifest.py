@@ -16,7 +16,7 @@ def test_node_get_combined_metadata_inherits_from_node_meta() -> None:
         unique_id="a",
         depends_on=[],
         table_config=config,
-        meta=NodeMeta.parse_obj({NodeMeta.DEFAULT_CHECK_COLUMNS_KEY: True}),
+        meta=NodeMeta.model_validate({NodeMeta.DEFAULT_CHECK_COLUMNS_KEY: True}),
     ).to_node()
 
     assert node.get_combined_metadata(NodeMeta.DEFAULT_CHECK_COLUMNS_KEY) is True
@@ -28,23 +28,25 @@ def test_node_get_combined_metadata_is_overridden_by_config(
 ) -> None:
     config = NodeConfig(
         materialized="table",
-        meta=NodeMeta.parse_obj({NodeMeta.DEFAULT_CHECK_COLUMNS_KEY: config_meta}),
+        meta=NodeMeta.model_validate({NodeMeta.DEFAULT_CHECK_COLUMNS_KEY: config_meta}),
     )
     node = SimpleNode(
         unique_id="a",
         depends_on=[],
         table_config=config,
-        meta=NodeMeta.parse_obj({NodeMeta.DEFAULT_CHECK_COLUMNS_KEY: not config_meta}),
+        meta=NodeMeta.model_validate(
+            {NodeMeta.DEFAULT_CHECK_COLUMNS_KEY: not config_meta}
+        ),
     ).to_node()
 
     assert node.get_combined_metadata(NodeMeta.DEFAULT_CHECK_COLUMNS_KEY) is config_meta
 
 
 def test_metadata_parses_check_columns() -> None:
-    metadata = NodeMeta.parse_obj({NodeMeta.DEFAULT_CHECK_COLUMNS_KEY: False})
+    metadata = NodeMeta.model_validate({NodeMeta.DEFAULT_CHECK_COLUMNS_KEY: False})
     assert metadata[NodeMeta.DEFAULT_CHECK_COLUMNS_KEY] is False
 
 
 def test_metadata_contains_key() -> None:
-    metadata = NodeMeta.parse_obj({"my_key": False})
+    metadata = NodeMeta.model_validate({"my_key": False})
     assert ("my_key" in metadata) is True

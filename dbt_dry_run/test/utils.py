@@ -25,7 +25,7 @@ class SimpleNode(BaseModel):
     original_file_path: str = "test123.sql"
     root_path: str = "/home/"
     meta: Optional[NodeMeta] = None
-    language = "python"
+    language: str = "python"
 
     def to_node(self) -> Node:
         depends_on = NodeDependsOn(
@@ -51,7 +51,7 @@ class SimpleNode(BaseModel):
         )
 
 
-SimpleNode.update_forward_refs()
+SimpleNode.model_rebuild()
 
 
 def field_with_name(

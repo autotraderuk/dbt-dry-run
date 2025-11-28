@@ -40,16 +40,16 @@ class BigQueryFieldType(str, Enum):
 class TableField(BaseModel):
     name: str
     type_: BigQueryFieldType = Field(..., alias="type")
-    mode: Optional[BigQueryFieldMode]
+    mode: Optional[BigQueryFieldMode] = None
     fields: Optional[List["TableField"]] = None
     description: Optional[str] = None
 
-    @pydantic.validator("type_", pre=True)
+    @pydantic.field_validator("type_", mode="before")
     def validate_type_field(cls, field: str) -> BigQueryFieldType:
         return BigQueryFieldType(field)
 
 
-TableField.update_forward_refs()
+TableField.model_rebuild()
 
 
 class Table(BaseModel):

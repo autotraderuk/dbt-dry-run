@@ -107,7 +107,8 @@ class ProjectContext:
         run_dry_run = subprocess.run(dry_run_args, capture_output=True)
 
         if os.path.exists(report_path):
-            dry_run_report = Report.parse_file(report_path)
+            with open(report_path, "r") as f:
+                dry_run_report = Report.model_validate_json(f.read())
         else:
             dry_run_report = None
 

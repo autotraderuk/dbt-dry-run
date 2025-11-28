@@ -109,7 +109,7 @@ def test_get_node_schema_returns_table_schema() -> None:
 def test_get_schema_from_schema_fields_raises_error_if_unknown_field_type() -> None:
     invalid_field_type = "INVALID_FIELD_TYPE"
     invalid_field_name = "a"
-    expected_error_message = f"BigQuery dry run field '{invalid_field_name}' returned unknown column types: '{invalid_field_type}' is not a valid BigQueryFieldType"
+    expected_error_message = f"BigQuery dry run field '{invalid_field_name}' returned unknown column types: '{invalid_field_type}'. If you think this column type is valid then raise an issue on GitHub"
     with pytest.raises(UnknownSchemaException, match=expected_error_message):
         BigQuerySQLRunner.get_schema_from_schema_fields(
             [SchemaField(name=invalid_field_name, field_type=invalid_field_type)]

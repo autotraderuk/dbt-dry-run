@@ -3,7 +3,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
 
-from pydantic import BaseModel, Field, root_validator
+from pydantic import BaseModel, ConfigDict, Field, RootModel, model_validator
 
 from dbt_dry_run import flags
 
@@ -48,39 +48,36 @@ class TableRef(BaseModel):
 class PartitionBy(BaseModel):
     field: str
     data_type: Literal["timestamp", "date", "datetime", "int64"]
-    range: Optional[IntPartitionRange]
-    time_ingestion_partitioning: Optional[bool]
+    range: Optional[IntPartitionRange] = None
+    time_ingestion_partitioning: Optional[bool] = None
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
     def lower_data_type(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         values["data_type"] = values["data_type"].lower()
         return values
 
 
-class NodeMeta(BaseModel):
+class NodeMeta(RootModel[Dict[str, Any]]):
     DEFAULT_CHECK_COLUMNS_KEY: ClassVar[str] = "dry_run.check_columns"
 
-    __root__: Dict[str, Any]
-
     def get(self, key: str) -> Optional[Any]:
-        return self.__root__.get(key)
+        return self.root.get(key)
 
     def __getitem__(self, key: str) -> Any:
         try:
-            return self.__root__[key]
+            return self.root[key]
         except KeyError:
             raise KeyError(f"Node does not have metadata '{key}'")
 
     def __contains__(self, key: str) -> bool:
-        return key in self.__root__
+        return key in self.root
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class NodeConfig(BaseModel):
     enabled: bool = True
-    materialized: Optional[str]
+    materialized: Optional[str] = None
     on_schema_change: Optional[OnSchemaChange] = None
     sql_header: Optional[str] = None
     unique_key: Optional[Union[str, List[str]]] = None
@@ -97,8 +94,8 @@ class NodeConfig(BaseModel):
 
 class ManifestColumn(BaseModel):
     name: str
-    description: Optional[str]
-    data_type: Optional[str]
+    description: Optional[str] = None
+    data_type: Optional[str] = None
 
 
 class ExternalConfig(BaseModel):
@@ -118,23 +115,17 @@ class Node(BaseModel):
     compiled: bool = False
     compiled_code: str = ""
     database: str
-    db_schema: str = Field(..., alias="schema")
+    db_schema: str = Field(..., alias="schema", serialization_alias="schema")
     alias: str
     language: Optional[str] = None
     resource_type: str
     original_file_path: str
     root_path: Optional[str] = None
-    columns: Dict[str, ManifestColumn]
-    meta: Optional[NodeMeta]
-    external: Optional[ExternalConfig]
+    columns: Dict[str, ManifestColumn] = Field(default_factory=dict)
+    meta: Optional[NodeMeta] = None
+    external: Optional[ExternalConfig] = None
 
-    def __init__(self, **data: Any):
-        super().__init__(
-            compiled_code=data.pop("compiled_code", "") or data.pop("compiled_sql", ""),
-            **data,
-        )
-
-    @root_validator(pre=True)
+    @model_validator(mode="before")
     def default_alias(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         values["alias"] = values.get("alias") or values["name"]
         return values

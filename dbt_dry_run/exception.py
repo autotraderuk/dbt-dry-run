@@ -49,7 +49,7 @@ class UnknownSchemaException(Exception):
         column_type_exception = list(filter(lambda err: "type" in err["loc"], errors))
         if column_type_exception:
             return cls(
-                f"BigQuery dry run field '{schema_field.name}' returned unknown column types: {column_type_exception[0]['msg']}."
+                f"BigQuery dry run field '{schema_field.name}' returned unknown column types: '{column_type_exception[0]['input']}'. "
                 f"If you think this column type is valid then raise an issue on GitHub"
             )
         else:
