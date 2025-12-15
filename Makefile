@@ -5,29 +5,28 @@ install:
 
 .PHONY: test
 test:
-	pytest --cov=dbt_dry_run
+	poetry run pytest --cov=dbt_dry_run
 
 .PHONY: testcov
 testcov: test
-	@echo "building coverage html"
-	@coverage html
+	poetry run coverage html
 
 .PHONY: integration
 integration:
-	pytest ./integration
+	poetry run pytest ./integration
 
 .PHONY: mypy
 mypy:
-	mypy dbt_dry_run integration
+	poetry run mypy dbt_dry_run integration
 
 .PHONY: lint
 lint:
-	ruff check
+	poetry run ruff check
 
 .PHONY: format
 format:
-	ruff format dbt_dry_run
-	ruff format integration
+	poetry run ruff format dbt_dry_run
+	poetry run ruff format integration
 
 .PHONY: verify
 verify: format mypy lint testcov
@@ -41,5 +40,5 @@ build: verify
 .PHONY: release
 release:
 	git diff HEAD main --quiet || (echo 'Must release in main' && false)
-	twine upload ./dist/*.whl
-	twine upload ./dist/*.tar.gz
+	poetry run twine upload ./dist/*.whl
+	poetry run twine upload ./dist/*.tar.gz
