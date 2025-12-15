@@ -1,5 +1,11 @@
 ## Changelog
 
+# dbt-dry-run v0.8.6
+
+## Under The Hood
+
+- Support Pydantic V2
+
 # dbt-dry-run v0.8.5
 
 ## Improvements
