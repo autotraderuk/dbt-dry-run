@@ -289,7 +289,7 @@ There are certain cases where a syntactically valid query can fail due to the da
 
 [bq-ignore-nulls]: https://cloud.google.com/bigquery/docs/reference/standard-sql/aggregate_functions#array_agg
 
-[blog-post]: https://engineering.autotrader.co.uk/2022/04/06/dry-running-our-data-warehouse-using-bigquery-and-dbt.html
+[blog-post]: https://medium.com/autotrader-engineering/dry-running-our-data-warehouse-using-bigquery-and-dbt-12ccae0209f1
 
 [get-poetry]: https://python-poetry.org/
 
