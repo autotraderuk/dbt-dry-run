@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dbt-dry-run"
-version = "0.8.6"
+version = "0.8.7"
 description = "Dry run dbt projects"
 authors = ["Connor Charles <connor.charles@autotrader.co.uk>",
            "Phil hope <philip.hope@autotrader.co.uk>",
@@ -33,7 +33,7 @@ types-pyyaml = "^6.0.12.20250915"
 pytest-cov = "^4.0.0"
 twine = "^3.8.0"
 pytest-mock = "^3.7.0"
-dbt-bigquery = "~1.10.0"
+dbt-bigquery = "~1.11.0"
 numpy = [
   {version = ">=1.26", python = ">=3.9"},
 ]

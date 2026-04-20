@@ -1,5 +1,11 @@
 ## Changelog
 
+# dbt-dry-run v0.8.7
+
+## Improvements
+
+- Official compatibility with dbt v1.11
+
 # dbt-dry-run v0.8.6
 
 ## Under The Hood
