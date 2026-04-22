@@ -1,6 +1,6 @@
 from dbt_dry_run.models import TableField, BigQueryFieldType
 from dbt_dry_run.models.table import FieldLineage, Table
-from dbt_dry_run.utils import collect_field_lineages, find_missing_fields, build_predicted_table
+from dbt_dry_run.utils import collect_field_lineages, find_missing_fields, build_predicted_table, add_missing_fields
 
 
 def test_collect_field_dicts_should_collect_all_fields_with_lineages() -> None:
@@ -105,6 +105,62 @@ def test_find_missing_fields_should_find_all_nested_fields_missing_from_target_f
     assert actual_missing_fields == expected_target_fields
 
 
+def test_add_missing_fields_should_add_missing_fields_to_correct_parent() -> None:
+    target_field = TableField(
+        name="struct_field",
+        type=BigQueryFieldType.STRUCT,
+        fields=[
+            TableField(name="lv2", type=BigQueryFieldType.STRING),
+        ],
+    )
+
+    missing_fields = [FieldLineage(
+            lineage="struct_field.lv2.lv3",
+            field=TableField(name="lv3", type=BigQueryFieldType.NUMERIC),
+        )
+    ]
+
+    expected_field = TableField(
+        name="struct_field",
+        type=BigQueryFieldType.STRUCT,
+        fields=[
+            TableField(name="lv2", type=BigQueryFieldType.STRING, fields=[TableField(name="lv3", type=BigQueryFieldType.NUMERIC)]),
+        ],
+    )
+
+    actual_field = add_missing_fields(target_field, missing_fields)
+
+    assert actual_field == expected_field
+
+
+def test_add_missing_fields_should_not_update_field_if_child_field_does_not_belong() -> None:
+    target_field = TableField(
+        name="struct_field",
+        type=BigQueryFieldType.STRUCT,
+        fields=[
+            TableField(name="lv1", type=BigQueryFieldType.STRING),
+        ],
+    )
+
+    missing_fields = [FieldLineage(
+            lineage="struct_field.lv2.lv3",
+            field=TableField(name="lv3", type=BigQueryFieldType.NUMERIC),
+        )
+    ]
+
+    expected_field = TableField(
+        name="struct_field",
+        type=BigQueryFieldType.STRUCT,
+        fields=[
+            TableField(name="lv1", type=BigQueryFieldType.STRING),
+        ],
+    )
+
+    actual_field = add_missing_fields(target_field, missing_fields)
+
+    assert actual_field == expected_field
+
+
 def test_build_predicted_table_correctly_reconstructs_table() -> None:
     target_table = Table(
         fields=[
@@ -138,7 +194,6 @@ def test_build_predicted_table_correctly_reconstructs_table() -> None:
         ]
     )
 
-    field_name = expected_predicted_table.fields[1].child_field_names
     actual_predicted_table = build_predicted_table(target_table, missing_fields)
 
     assert actual_predicted_table == expected_predicted_table

@@ -39,11 +39,11 @@ def add_missing_fields(target_field: TableField, missing_fields: list[FieldLinea
 
     # If the field has children, recursively add missing fields to them
     if field_copy.fields:
-        updated_children = []
-        for child in field_copy.fields:
-            updated_child = add_missing_fields(child, missing_fields, path)
-            updated_children.append(updated_child)
-        field_copy.fields = updated_children
+        child_fields = []
+        for field in field_copy.fields:
+            updated_child = add_missing_fields(field, missing_fields, path)
+            child_fields.append(updated_child)
+        field_copy.fields = child_fields
     else:
         field_copy.fields = None
 
@@ -63,6 +63,7 @@ def build_predicted_table(target_table: Table, missing_fields: list[FieldLineage
     for target_field in target_table.fields:
         updated_field = add_missing_fields(target_field, missing_fields)
         predicted_fields.append(updated_field)
+
     # Add any missing top-level fields (whose lineage has no dot)
     top_level_missing = [mf for mf in missing_fields if "." not in mf.lineage]
     for mf in top_level_missing:
