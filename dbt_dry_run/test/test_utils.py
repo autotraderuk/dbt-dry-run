@@ -75,7 +75,7 @@ def test_find_missing_fields_should_find_all_nested_fields_missing_from_target_f
                 ),
                 TableField(name="lv2_1", type=BigQueryFieldType.NUMERIC),
             ],
-        ),
+        )
     ]
 
     target_fields = [
@@ -122,7 +122,8 @@ def test_build_predicted_table_correctly_reconstructs_table() -> None:
     missing_fields = [FieldLineage(
             lineage="struct_field.lv2.lv3",
             field=TableField(name="lv3", type=BigQueryFieldType.NUMERIC),
-        )]
+        )
+    ]
 
     expected_predicted_table = Table(
         fields=[
@@ -131,12 +132,13 @@ def test_build_predicted_table_correctly_reconstructs_table() -> None:
                 name="struct_field",
                 type=BigQueryFieldType.STRUCT,
                 fields=[
-                    TableField(name="lv2", type=BigQueryFieldType.STRING, fields=[TableField(name="lv3", type=BigQueryFieldType.NUMERIC)])
+                    TableField(name="lv2", type=BigQueryFieldType.STRING, fields=[TableField(name="lv3", type=BigQueryFieldType.NUMERIC)]),
                 ]
             )
         ]
     )
 
+    field_name = expected_predicted_table.fields[1].child_field_names
     actual_predicted_table = build_predicted_table(target_table, missing_fields)
 
     assert actual_predicted_table == expected_predicted_table

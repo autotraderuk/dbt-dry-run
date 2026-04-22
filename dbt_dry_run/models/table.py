@@ -48,6 +48,9 @@ class TableField(BaseModel):
     def validate_type_field(cls, field: str) -> BigQueryFieldType:
         return BigQueryFieldType(field)
 
+    @property
+    def child_field_names(self) -> Set[str]:
+        return set(field.name for field in self.fields)
 
 TableField.model_rebuild()
 
