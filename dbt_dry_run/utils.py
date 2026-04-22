@@ -22,3 +22,7 @@ def find_missing_fields(dry_run_fields: list[TableField], target_fields: list[Ta
             if field_path not in target_field_paths:
                 missing_fields.append(dry_run_dict)
     return missing_fields
+
+## TODO 1 - Append missing fields to target table fields
+## TODO 2 - Rebuild nested fields from path into schema
+## TODO 3 - Update each schema change handler to use the new utils and test with nested fields
