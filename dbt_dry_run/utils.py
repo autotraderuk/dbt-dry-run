@@ -1,5 +1,5 @@
 from dbt_dry_run.models import TableField
-from dbt_dry_run.models.table import FieldLineage
+from dbt_dry_run.models.table import FieldLineage, Table
 
 
 def collect_field_lineages(
@@ -33,18 +33,8 @@ def find_missing_fields(
     return missing_fields
 
 
-# def rebuild_nested_fields(new_target_map: list[dict[str, TableField]]) -> Table:
-#     final_fields = []
-#     for field in new_target_map:
-#         for key in field.keys():
-#             levels = key.split(".")
-#             if len(levels) == 1:
-#                 final_fields.append(field.get(key))
-#             if levels[0] not in final_fields:
-#                 final_fields.append(levels[0])
-#     return Table(fields=final_fields)
-# for level in levels[1:]:
+def build_predicted_table(target_table: Table, missing_fields: list[FieldLineage]) -> Table:
+## TODO: insert missing fields into target table fields based on lineage path, ensuring it is inserted at the correct level of nesting
+    return target_table
 
-
-## TODO 1 - Rebuild nested fields from path into schema
 ## TODO 2 - Update each schema change handler to use the new utils and test with nested fields
