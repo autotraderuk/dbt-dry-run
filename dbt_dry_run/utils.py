@@ -2,6 +2,7 @@ from dbt_dry_run.models import TableField
 from dbt_dry_run.models.table import FieldLineage, Table
 from copy import deepcopy
 
+
 def collect_field_lineages(
     fields: list[TableField], prefix: str = ""
 ) -> list[FieldLineage]:
@@ -33,7 +34,9 @@ def find_missing_fields(
     return missing_fields
 
 
-def add_missing_fields(target_field: TableField, missing_fields: list[FieldLineage], current_path: str = "") -> TableField:
+def add_missing_fields(
+    target_field: TableField, missing_fields: list[FieldLineage], current_path: str = ""
+) -> TableField:
     path = f"{current_path}.{target_field.name}" if current_path else target_field.name
     field_copy = deepcopy(target_field)
 
@@ -58,7 +61,9 @@ def add_missing_fields(target_field: TableField, missing_fields: list[FieldLinea
     return field_copy
 
 
-def build_predicted_table(target_table: Table, missing_fields: list[FieldLineage]) -> Table:
+def build_predicted_table(
+    target_table: Table, missing_fields: list[FieldLineage]
+) -> Table:
     predicted_fields = []
     for target_field in target_table.fields:
         updated_field = add_missing_fields(target_field, missing_fields)
@@ -70,5 +75,6 @@ def build_predicted_table(target_table: Table, missing_fields: list[FieldLineage
         if not any(f.name == mf.field.name for f in predicted_fields):
             predicted_fields.append(mf.field)
     return Table(fields=predicted_fields)
+
 
 ## TODO 2 - Update each schema change handler to use the new utils and test with nested fields

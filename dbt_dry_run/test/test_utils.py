@@ -1,6 +1,11 @@
 from dbt_dry_run.models import TableField, BigQueryFieldType
 from dbt_dry_run.models.table import FieldLineage, Table
-from dbt_dry_run.utils import collect_field_lineages, find_missing_fields, build_predicted_table, add_missing_fields
+from dbt_dry_run.utils import (
+    collect_field_lineages,
+    find_missing_fields,
+    build_predicted_table,
+    add_missing_fields,
+)
 
 
 def test_collect_field_dicts_should_collect_all_fields_with_lineages() -> None:
@@ -33,9 +38,7 @@ def test_collect_field_dicts_should_collect_all_fields_with_lineages() -> None:
                     TableField(
                         name="lv2",
                         type=BigQueryFieldType.STRING,
-                        fields=[
-                            TableField(name="lv3", type=BigQueryFieldType.NUMERIC)
-                        ],
+                        fields=[TableField(name="lv3", type=BigQueryFieldType.NUMERIC)],
                     )
                 ],
             ),
@@ -75,7 +78,7 @@ def test_find_missing_fields_should_find_all_nested_fields_missing_from_target_f
                 ),
                 TableField(name="lv2_1", type=BigQueryFieldType.NUMERIC),
             ],
-        )
+        ),
     ]
 
     target_fields = [
@@ -114,7 +117,8 @@ def test_add_missing_fields_should_add_missing_fields_to_correct_parent() -> Non
         ],
     )
 
-    missing_fields = [FieldLineage(
+    missing_fields = [
+        FieldLineage(
             lineage="struct_field.lv2.lv3",
             field=TableField(name="lv3", type=BigQueryFieldType.NUMERIC),
         )
@@ -124,7 +128,11 @@ def test_add_missing_fields_should_add_missing_fields_to_correct_parent() -> Non
         name="struct_field",
         type=BigQueryFieldType.STRUCT,
         fields=[
-            TableField(name="lv2", type=BigQueryFieldType.STRING, fields=[TableField(name="lv3", type=BigQueryFieldType.NUMERIC)]),
+            TableField(
+                name="lv2",
+                type=BigQueryFieldType.STRING,
+                fields=[TableField(name="lv3", type=BigQueryFieldType.NUMERIC)],
+            ),
         ],
     )
 
@@ -133,7 +141,9 @@ def test_add_missing_fields_should_add_missing_fields_to_correct_parent() -> Non
     assert actual_field == expected_field
 
 
-def test_add_missing_fields_should_not_update_field_if_child_field_does_not_belong() -> None:
+def test_add_missing_fields_should_not_update_field_if_child_field_does_not_belong() -> (
+    None
+):
     target_field = TableField(
         name="struct_field",
         type=BigQueryFieldType.STRUCT,
@@ -142,7 +152,8 @@ def test_add_missing_fields_should_not_update_field_if_child_field_does_not_belo
         ],
     )
 
-    missing_fields = [FieldLineage(
+    missing_fields = [
+        FieldLineage(
             lineage="struct_field.lv2.lv3",
             field=TableField(name="lv3", type=BigQueryFieldType.NUMERIC),
         )
@@ -175,7 +186,8 @@ def test_build_predicted_table_correctly_reconstructs_table() -> None:
         ]
     )
 
-    missing_fields = [FieldLineage(
+    missing_fields = [
+        FieldLineage(
             lineage="struct_field.lv2.lv3",
             field=TableField(name="lv3", type=BigQueryFieldType.NUMERIC),
         )
@@ -188,9 +200,13 @@ def test_build_predicted_table_correctly_reconstructs_table() -> None:
                 name="struct_field",
                 type=BigQueryFieldType.STRUCT,
                 fields=[
-                    TableField(name="lv2", type=BigQueryFieldType.STRING, fields=[TableField(name="lv3", type=BigQueryFieldType.NUMERIC)]),
-                ]
-            )
+                    TableField(
+                        name="lv2",
+                        type=BigQueryFieldType.STRING,
+                        fields=[TableField(name="lv3", type=BigQueryFieldType.NUMERIC)],
+                    ),
+                ],
+            ),
         ]
     )
 

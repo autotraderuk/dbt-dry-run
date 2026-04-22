@@ -16,7 +16,9 @@ def append_new_columns_handler(
 ) -> DryRunResult:
     if dry_run_result.table is None:
         return dry_run_result
-    missing_fields = find_missing_fields(dry_run_result.table.fields, target_table.fields)
+    missing_fields = find_missing_fields(
+        dry_run_result.table.fields, target_table.fields
+    )
     replacement_table = build_predicted_table(target_table, missing_fields)
     return dry_run_result.replace_table(replacement_table)
 

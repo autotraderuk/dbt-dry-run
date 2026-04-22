@@ -52,6 +52,7 @@ class TableField(BaseModel):
     def child_field_names(self) -> Set[str]:
         return set(field.name for field in self.fields)
 
+
 TableField.model_rebuild()
 
 
