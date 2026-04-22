@@ -1,5 +1,5 @@
 from typing import Dict
-from dbt_dry_run.models import TableField
+from dbt_dry_run.models import TableField, Table
 
 
 def collect_field_dicts(
@@ -18,7 +18,7 @@ def collect_field_dicts(
 
 def append_new_fields(
     dry_run_fields: list[TableField], target_fields: list[TableField]
-):
+) -> list[dict[str, TableField]]:
     dry_run_map = collect_field_dicts(dry_run_fields)
     target_map = collect_field_dicts(target_fields)
 
@@ -32,6 +32,23 @@ def append_new_fields(
             if field_path not in target_field_paths:
                 target_map.append(dry_run_dict)
     return target_map
+
+
+def rebuild_nested_fields(new_target_map: list[dict[str, TableField]]) -> Table:
+    final_fields = []
+    for field in new_target_map:
+        for key in field.keys():
+            levels = key.split(".")
+            if len(levels) == 1:
+                final_fields.append(field.get(key))
+            if levels[0] not in final_fields:
+                final_fields.append(levels[0])
+    return Table(fields=final_fields)
+                # for level in levels[1:]:
+
+
+
+
 
 
 ## TODO 1 - Rebuild nested fields from path into schema
