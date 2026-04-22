@@ -52,6 +52,11 @@ class TableField(BaseModel):
 TableField.model_rebuild()
 
 
+class FieldLineage(BaseModel):
+    lineage: str
+    field: TableField
+
+
 class Table(BaseModel):
     fields: List[TableField]
 
