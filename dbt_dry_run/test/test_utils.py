@@ -3,7 +3,7 @@ from dbt_dry_run.models.table import FieldLineage, Table
 from dbt_dry_run.utils import (
     collect_field_lineages,
     find_missing_fields,
-    build_predicted_table,
+    build_predicted_fields,
     add_missing_fields,
 )
 
@@ -193,23 +193,21 @@ def test_build_predicted_table_correctly_reconstructs_table() -> None:
         )
     ]
 
-    expected_predicted_table = Table(
-        fields=[
-            TableField(name="string_field", type=BigQueryFieldType.STRING),
-            TableField(
-                name="struct_field",
-                type=BigQueryFieldType.STRUCT,
-                fields=[
-                    TableField(
-                        name="lv2",
-                        type=BigQueryFieldType.STRING,
-                        fields=[TableField(name="lv3", type=BigQueryFieldType.NUMERIC)],
-                    ),
-                ],
-            ),
-        ]
-    )
+    expected_predicted_fields = [
+        TableField(name="string_field", type=BigQueryFieldType.STRING),
+        TableField(
+            name="struct_field",
+            type=BigQueryFieldType.STRUCT,
+            fields=[
+                TableField(
+                    name="lv2",
+                    type=BigQueryFieldType.STRING,
+                    fields=[TableField(name="lv3", type=BigQueryFieldType.NUMERIC)],
+                ),
+            ],
+        ),
+    ]
 
-    actual_predicted_table = build_predicted_table(target_table, missing_fields)
+    actual_predicted_fields = build_predicted_fields(target_table, missing_fields)
 
-    assert actual_predicted_table == expected_predicted_table
+    assert actual_predicted_fields == expected_predicted_fields

@@ -61,9 +61,9 @@ def add_missing_fields(
     return field_copy
 
 
-def build_predicted_table(
+def build_predicted_fields(
     target_table: Table, missing_fields: list[FieldLineage]
-) -> Table:
+) -> list[TableField]:
     predicted_fields = []
     for target_field in target_table.fields:
         updated_field = add_missing_fields(target_field, missing_fields)
@@ -74,4 +74,4 @@ def build_predicted_table(
     for missing_field in top_level_missing:
         if not any(f.name == missing_field.field.name for f in predicted_fields):
             predicted_fields.append(missing_field.field)
-    return Table(fields=predicted_fields)
+    return predicted_fields
