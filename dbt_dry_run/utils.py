@@ -40,7 +40,7 @@ def add_missing_fields(
     path = f"{current_path}.{target_field.name}" if current_path else target_field.name
     field_copy = deepcopy(target_field)
 
-    # If the field has children, recursively add missing fields to them
+    # Recursively update child fields if they exist
     if field_copy.fields:
         child_fields = []
         for field in field_copy.fields:
@@ -56,7 +56,7 @@ def add_missing_fields(
         if parent_lineage == path:
             if field_copy.fields is None:
                 field_copy.fields = []
-            if not any(f.name == missing.field.name for f in field_copy.fields):
+            if not any(field.name == missing.field.name for field in field_copy.fields):
                 field_copy.fields.append(missing.field)
     return field_copy
 
@@ -69,12 +69,9 @@ def build_predicted_table(
         updated_field = add_missing_fields(target_field, missing_fields)
         predicted_fields.append(updated_field)
 
-    # Add any missing top-level fields (whose lineage has no dot)
-    top_level_missing = [mf for mf in missing_fields if "." not in mf.lineage]
-    for mf in top_level_missing:
-        if not any(f.name == mf.field.name for f in predicted_fields):
-            predicted_fields.append(mf.field)
+    # Add any missing top-level fields
+    top_level_missing = [field for field in missing_fields if "." not in field.lineage]
+    for missing_field in top_level_missing:
+        if not any(f.name == missing_field.field.name for f in predicted_fields):
+            predicted_fields.append(missing_field.field)
     return Table(fields=predicted_fields)
-
-
-## TODO 2 - Update each schema change handler to use the new utils and test with nested fields
