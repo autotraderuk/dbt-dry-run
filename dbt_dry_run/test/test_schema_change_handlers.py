@@ -160,8 +160,11 @@ def test_append_handler_preserves_existing_nested_column_order() -> None:
 
     assert actual_result.table == expected_table
 
+
 def test_append_handler_should_return_original_result_when_table_is_none() -> None:
-    target_table = Table(fields=[TableField(name="col_1", type=BigQueryFieldType.STRING)])
+    target_table = Table(
+        fields=[TableField(name="col_1", type=BigQueryFieldType.STRING)]
+    )
     dry_run_result = DryRunResult(
         node=A_NODE,
         status=DryRunStatus.SUCCESS,
@@ -172,6 +175,7 @@ def test_append_handler_should_return_original_result_when_table_is_none() -> No
     actual_result = append_new_columns_handler(dry_run_result, target_table)
 
     assert actual_result == dry_run_result
+
 
 def test_sync_handler_preserves_existing_column_order() -> None:
     model_table = Table(
@@ -242,7 +246,9 @@ def test_sync_handler_should_not_remove_nested_fields_from_existing_structs() ->
 
 
 def test_sync_handler_should_return_original_result_when_table_is_none() -> None:
-    target_table = Table(fields=[TableField(name="col_1", type=BigQueryFieldType.STRING)])
+    target_table = Table(
+        fields=[TableField(name="col_1", type=BigQueryFieldType.STRING)]
+    )
     dry_run_result = DryRunResult(
         node=A_NODE,
         status=DryRunStatus.SUCCESS,
@@ -254,8 +260,11 @@ def test_sync_handler_should_return_original_result_when_table_is_none() -> None
 
     assert actual_result == dry_run_result
 
+
 def test_ignore_handler_should_return_target_table() -> None:
-    model_table = Table(fields=[TableField(name="new_col", type=BigQueryFieldType.STRING)])
+    model_table = Table(
+        fields=[TableField(name="new_col", type=BigQueryFieldType.STRING)]
+    )
     target_table = Table(
         fields=[TableField(name="existing_col", type=BigQueryFieldType.STRING)]
     )
@@ -272,7 +281,9 @@ def test_ignore_handler_should_return_target_table() -> None:
 
 
 def test_fail_handler_should_fail_when_schema_changes() -> None:
-    model_table = Table(fields=[TableField(name="new_col", type=BigQueryFieldType.STRING)])
+    model_table = Table(
+        fields=[TableField(name="new_col", type=BigQueryFieldType.STRING)]
+    )
     target_table = Table(
         fields=[TableField(name="existing_col", type=BigQueryFieldType.STRING)]
     )
@@ -293,8 +304,12 @@ def test_fail_handler_should_fail_when_schema_changes() -> None:
 
 
 def test_fail_handler_should_not_fail_when_schema_is_unchanged() -> None:
-    model_table = Table(fields=[TableField(name="col_1", type=BigQueryFieldType.STRING)])
-    target_table = Table(fields=[TableField(name="col_1", type=BigQueryFieldType.STRING)])
+    model_table = Table(
+        fields=[TableField(name="col_1", type=BigQueryFieldType.STRING)]
+    )
+    target_table = Table(
+        fields=[TableField(name="col_1", type=BigQueryFieldType.STRING)]
+    )
     dry_run_result = DryRunResult(
         node=A_NODE,
         status=DryRunStatus.SUCCESS,
@@ -310,7 +325,9 @@ def test_fail_handler_should_not_fail_when_schema_is_unchanged() -> None:
 
 
 def test_fail_handler_should_return_original_result_when_table_is_none() -> None:
-    target_table = Table(fields=[TableField(name="col_1", type=BigQueryFieldType.STRING)])
+    target_table = Table(
+        fields=[TableField(name="col_1", type=BigQueryFieldType.STRING)]
+    )
     dry_run_result = DryRunResult(
         node=A_NODE,
         status=DryRunStatus.SUCCESS,

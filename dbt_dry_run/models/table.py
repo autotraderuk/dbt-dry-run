@@ -49,7 +49,6 @@ class TableField(BaseModel):
         return BigQueryFieldType(field)
 
 
-
 TableField.model_rebuild()
 
 

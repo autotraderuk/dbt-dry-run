@@ -56,7 +56,10 @@ def add_missing_fields(
         if parent_lineage == path:
             if field_copy.fields is None:
                 field_copy.fields = []
-            if not any(existing_field.name == missing.field.name for existing_field in field_copy.fields):
+            if not any(
+                existing_field.name == missing.field.name
+                for existing_field in field_copy.fields
+            ):
                 field_copy.fields.append(missing.field)
     return field_copy
 
