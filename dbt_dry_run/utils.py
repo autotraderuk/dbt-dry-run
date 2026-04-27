@@ -2,6 +2,7 @@ from dbt_dry_run.models import TableField
 from dbt_dry_run.models.table import FieldLineage, Table
 from copy import deepcopy
 
+# BQ limitation
 MAX_SUPPORTED_NESTED_FIELD_DEPTH = 15
 
 
