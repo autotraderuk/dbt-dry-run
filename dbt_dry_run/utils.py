@@ -62,15 +62,30 @@ def add_missing_fields(
 
 
 def build_predicted_fields(
-    target_table: Table, missing_fields: list[FieldLineage]
+    target_table: Table,
+    missing_fields: list[FieldLineage],
+    included_top_level_field_names: set[str] | None = None,
 ) -> list[TableField]:
     predicted_fields = []
     for target_field in target_table.fields:
+        if (
+            included_top_level_field_names is not None
+            and target_field.name not in included_top_level_field_names
+        ):
+            continue
         updated_field = add_missing_fields(target_field, missing_fields)
         predicted_fields.append(updated_field)
 
     # Add any missing top-level fields
-    top_level_missing = [field for field in missing_fields if "." not in field.lineage]
+    top_level_missing = [
+        field
+        for field in missing_fields
+        if "." not in field.lineage
+        and (
+            included_top_level_field_names is None
+            or field.field.name in included_top_level_field_names
+        )
+    ]
     for missing_field in top_level_missing:
         if not any(f.name == missing_field.field.name for f in predicted_fields):
             predicted_fields.append(missing_field.field)

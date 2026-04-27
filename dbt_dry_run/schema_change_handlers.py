@@ -40,7 +40,13 @@ def sync_all_columns_handler(
         for existing_field in target_table.fields
         if existing_field.name in predicted_column_names
     ]
-    final_fields = existing_columns + new_columns
+    final_field_names = set(field.name for field in existing_columns + new_columns)
+    missing_fields = find_missing_fields(dry_run_result.table.fields, existing_columns)
+    final_fields = build_predicted_fields(
+        target_table=target_table,
+        missing_fields=missing_fields,
+        included_top_level_field_names=final_field_names,
+    )
     return dry_run_result.replace_table(Table(fields=final_fields))
 
 

@@ -211,3 +211,49 @@ def test_build_predicted_table_correctly_reconstructs_table() -> None:
     actual_predicted_fields = build_predicted_fields(target_table, missing_fields)
 
     assert actual_predicted_fields == expected_predicted_fields
+
+
+def test_build_predicted_fields_should_filter_top_level_fields_and_preserve_nested_fields() -> (
+    None
+):
+    target_table = Table(
+        fields=[
+            TableField(name="col_1", type=BigQueryFieldType.STRING),
+            TableField(
+                name="struct_field",
+                type=BigQueryFieldType.STRUCT,
+                fields=[TableField(name="nested_col_1", type=BigQueryFieldType.STRING)],
+            ),
+        ]
+    )
+
+    missing_fields = [
+        FieldLineage(
+            lineage="struct_field.nested_col_2",
+            field=TableField(name="nested_col_2", type=BigQueryFieldType.NUMERIC),
+        ),
+        FieldLineage(
+            lineage="new_col",
+            field=TableField(name="new_col", type=BigQueryFieldType.STRING),
+        ),
+    ]
+
+    expected_predicted_fields = [
+        TableField(
+            name="struct_field",
+            type=BigQueryFieldType.STRUCT,
+            fields=[
+                TableField(name="nested_col_1", type=BigQueryFieldType.STRING),
+                TableField(name="nested_col_2", type=BigQueryFieldType.NUMERIC),
+            ],
+        ),
+        TableField(name="new_col", type=BigQueryFieldType.STRING),
+    ]
+
+    actual_predicted_fields = build_predicted_fields(
+        target_table,
+        missing_fields,
+        included_top_level_field_names={"struct_field", "new_col"},
+    )
+
+    assert actual_predicted_fields == expected_predicted_fields
