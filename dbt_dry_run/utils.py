@@ -6,15 +6,17 @@ MAX_SUPPORTED_NESTED_FIELD_DEPTH = 15
 
 
 def collect_field_lineages(
-    fields: list[TableField], prefix: str = ""
+    fields: list[TableField], prefix: str = "", current_depth: int = 1
 ) -> list[FieldLineage]:
     collected: list[FieldLineage] = []
     for field in fields:
         name = field.name
         path = f"{prefix}.{name}" if prefix else name
         collected.append(FieldLineage(lineage=path, field=field))
-        if field.fields:
-            collected.extend(collect_field_lineages(field.fields, path))
+        if field.fields and current_depth < MAX_SUPPORTED_NESTED_FIELD_DEPTH:
+            collected.extend(
+                collect_field_lineages(field.fields, path, current_depth + 1)
+            )
     return collected
 
 
