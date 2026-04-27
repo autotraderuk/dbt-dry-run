@@ -3,6 +3,8 @@ from dbt_dry_run.models.dry_run_result import DryRunResult, DryRunStatus
 from dbt_dry_run.scheduler import ManifestScheduler
 from dbt_dry_run.schema_change_handlers import (
     append_new_columns_handler,
+    fail_handler,
+    ignore_handler,
     sync_all_columns_handler,
 )
 from dbt_dry_run.test.utils import SimpleNode
@@ -158,6 +160,18 @@ def test_append_handler_preserves_existing_nested_column_order() -> None:
 
     assert actual_result.table == expected_table
 
+def test_append_handler_should_return_original_result_when_table_is_none() -> None:
+    target_table = Table(fields=[TableField(name="col_1", type=BigQueryFieldType.STRING)])
+    dry_run_result = DryRunResult(
+        node=A_NODE,
+        status=DryRunStatus.SUCCESS,
+        table=None,
+        exception=None,
+    )
+
+    actual_result = append_new_columns_handler(dry_run_result, target_table)
+
+    assert actual_result == dry_run_result
 
 def test_sync_handler_preserves_existing_column_order() -> None:
     model_table = Table(
@@ -225,3 +239,85 @@ def test_sync_handler_should_not_remove_nested_fields_from_existing_structs() ->
     actual_result = sync_all_columns_handler(dry_run_result, target_table)
 
     assert actual_result.table == target_table
+
+
+def test_sync_handler_should_return_original_result_when_table_is_none() -> None:
+    target_table = Table(fields=[TableField(name="col_1", type=BigQueryFieldType.STRING)])
+    dry_run_result = DryRunResult(
+        node=A_NODE,
+        status=DryRunStatus.SUCCESS,
+        table=None,
+        exception=None,
+    )
+
+    actual_result = sync_all_columns_handler(dry_run_result, target_table)
+
+    assert actual_result == dry_run_result
+
+def test_ignore_handler_should_return_target_table() -> None:
+    model_table = Table(fields=[TableField(name="new_col", type=BigQueryFieldType.STRING)])
+    target_table = Table(
+        fields=[TableField(name="existing_col", type=BigQueryFieldType.STRING)]
+    )
+    dry_run_result = DryRunResult(
+        node=A_NODE,
+        status=DryRunStatus.SUCCESS,
+        table=model_table,
+        exception=None,
+    )
+
+    actual_result = ignore_handler(dry_run_result, target_table)
+
+    assert actual_result.table == target_table
+
+
+def test_fail_handler_should_fail_when_schema_changes() -> None:
+    model_table = Table(fields=[TableField(name="new_col", type=BigQueryFieldType.STRING)])
+    target_table = Table(
+        fields=[TableField(name="existing_col", type=BigQueryFieldType.STRING)]
+    )
+    dry_run_result = DryRunResult(
+        node=A_NODE,
+        status=DryRunStatus.SUCCESS,
+        table=model_table,
+        exception=None,
+    )
+
+    actual_result = fail_handler(dry_run_result, target_table)
+
+    assert actual_result.status == DryRunStatus.FAILURE
+    assert actual_result.table is None
+    assert actual_result.exception is not None
+    assert "Fields added" in str(actual_result.exception)
+    assert "Fields removed" in str(actual_result.exception)
+
+
+def test_fail_handler_should_not_fail_when_schema_is_unchanged() -> None:
+    model_table = Table(fields=[TableField(name="col_1", type=BigQueryFieldType.STRING)])
+    target_table = Table(fields=[TableField(name="col_1", type=BigQueryFieldType.STRING)])
+    dry_run_result = DryRunResult(
+        node=A_NODE,
+        status=DryRunStatus.SUCCESS,
+        table=model_table,
+        exception=None,
+    )
+
+    actual_result = fail_handler(dry_run_result, target_table)
+
+    assert actual_result.status == DryRunStatus.SUCCESS
+    assert actual_result.table == target_table
+    assert actual_result.exception is None
+
+
+def test_fail_handler_should_return_original_result_when_table_is_none() -> None:
+    target_table = Table(fields=[TableField(name="col_1", type=BigQueryFieldType.STRING)])
+    dry_run_result = DryRunResult(
+        node=A_NODE,
+        status=DryRunStatus.SUCCESS,
+        table=None,
+        exception=None,
+    )
+
+    actual_result = fail_handler(dry_run_result, target_table)
+
+    assert actual_result == dry_run_result

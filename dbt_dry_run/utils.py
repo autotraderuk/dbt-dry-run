@@ -56,7 +56,7 @@ def add_missing_fields(
         if parent_lineage == path:
             if field_copy.fields is None:
                 field_copy.fields = []
-            if not any(field.name == missing.field.name for field in field_copy.fields):
+            if not any(existing_field.name == missing.field.name for existing_field in field_copy.fields):
                 field_copy.fields.append(missing.field)
     return field_copy
 
@@ -76,14 +76,14 @@ def build_predicted_fields(
         updated_field = add_missing_fields(target_field, missing_fields)
         predicted_fields.append(updated_field)
 
-    # Add any missing top-level fields
+    # Add any missing top-level fields for sync_all_columns_handler
     top_level_missing = [
-        field
-        for field in missing_fields
-        if "." not in field.lineage
+        missing_field
+        for missing_field in missing_fields
+        if "." not in missing_field.lineage
         and (
             included_top_level_field_names is None
-            or field.field.name in included_top_level_field_names
+            or missing_field.field.name in included_top_level_field_names
         )
     ]
     for missing_field in top_level_missing:
