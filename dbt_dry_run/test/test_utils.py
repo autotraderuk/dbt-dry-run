@@ -5,6 +5,7 @@ from dbt_dry_run.utils import (
     find_missing_fields,
     build_predicted_fields,
     add_missing_fields,
+    MAX_SUPPORTED_NESTED_FIELD_DEPTH,
 )
 
 

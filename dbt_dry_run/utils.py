@@ -2,6 +2,8 @@ from dbt_dry_run.models import TableField
 from dbt_dry_run.models.table import FieldLineage, Table
 from copy import deepcopy
 
+MAX_SUPPORTED_NESTED_FIELD_DEPTH = 15
+
 
 def collect_field_lineages(
     fields: list[TableField], prefix: str = ""
@@ -35,25 +37,34 @@ def find_missing_fields(
 
 
 def add_missing_fields(
-    target_field: TableField, missing_fields: list[FieldLineage], current_path: str = ""
+    target_field: TableField,
+    missing_fields: list[FieldLineage],
+    current_path: str = "",
+    current_depth: int = 1,
 ) -> TableField:
     path = f"{current_path}.{target_field.name}" if current_path else target_field.name
     field_copy = deepcopy(target_field)
 
-    # Recursively update child fields if they exist
-    if field_copy.fields:
+    # Recursively update child fields if they exist and we are below the nesting limit.
+    if field_copy.fields and current_depth < MAX_SUPPORTED_NESTED_FIELD_DEPTH:
         child_fields = []
         for field in field_copy.fields:
-            updated_child = add_missing_fields(field, missing_fields, path)
+            updated_child = add_missing_fields(
+                field, missing_fields, path, current_depth + 1
+            )
             child_fields.append(updated_child)
         field_copy.fields = child_fields
     else:
-        field_copy.fields = None
+        field_copy.fields = field_copy.fields or None
 
-    # Add missing fields whose parent lineage matches this field's path
+    # Add missing fields whose parent lineage matches this field's path.
     for missing in missing_fields:
         parent_lineage = ".".join(missing.lineage.split(".")[:-1])
-        if parent_lineage == path:
+        if (
+            parent_lineage == path
+            and current_depth < MAX_SUPPORTED_NESTED_FIELD_DEPTH
+            and len(missing.lineage.split(".")) <= MAX_SUPPORTED_NESTED_FIELD_DEPTH
+        ):
             if field_copy.fields is None:
                 field_copy.fields = []
             if not any(
