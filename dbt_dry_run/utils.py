@@ -1,5 +1,5 @@
 from dbt_dry_run.models import TableField
-from dbt_dry_run.models.table import FieldLineage, Table
+from dbt_dry_run.models.table import FieldPath, Table
 from copy import deepcopy
 
 # BQ limitation
@@ -7,13 +7,13 @@ MAX_SUPPORTED_NESTED_FIELD_DEPTH = 15
 
 
 def collect_field_lineages(
-    fields: list[TableField], prefix: str = "", current_depth: int = 1
-) -> list[FieldLineage]:
-    collected: list[FieldLineage] = []
+    fields: list[TableField], prefix: tuple[str, ...] = (), current_depth: int = 1
+) -> list[FieldPath]:
+    collected: list[FieldPath] = []
     for field in fields:
         name = field.name
-        path = f"{prefix}.{name}" if prefix else name
-        collected.append(FieldLineage(lineage=path, field=field))
+        path = prefix + (name,)
+        collected.append(FieldPath(path=path, field=field))
         if field.fields and current_depth < MAX_SUPPORTED_NESTED_FIELD_DEPTH:
             collected.extend(
                 collect_field_lineages(field.fields, path, current_depth + 1)
@@ -23,29 +23,29 @@ def collect_field_lineages(
 
 def find_missing_fields(
     dry_run_fields: list[TableField], target_fields: list[TableField]
-) -> list[FieldLineage]:
+) -> list[FieldPath]:
     dry_run_fields_with_lineage = collect_field_lineages(dry_run_fields)
     target_fields_with_lineage = collect_field_lineages(target_fields)
 
     target_field_lineages = set(
-        target_field.lineage for target_field in target_fields_with_lineage
+        target_field.path for target_field in target_fields_with_lineage
     )
     missing_fields = []
     for dry_run_field in dry_run_fields_with_lineage:
-        if dry_run_field.lineage not in target_field_lineages:
+        if dry_run_field.path not in target_field_lineages:
             missing_fields.append(
-                FieldLineage(lineage=dry_run_field.lineage, field=dry_run_field.field)
+                FieldPath(path=dry_run_field.path, field=dry_run_field.field)
             )
     return missing_fields
 
 
 def add_missing_fields(
     target_field: TableField,
-    missing_fields: list[FieldLineage],
-    current_path: str = "",
+    missing_fields: list[FieldPath],
+    current_path: tuple[str, ...] = (),
     current_depth: int = 1,
 ) -> TableField:
-    path = f"{current_path}.{target_field.name}" if current_path else target_field.name
+    path = current_path + (target_field.name,)
     field_copy = deepcopy(target_field)
 
     # Recursively update child fields if they exist and we are below the nesting limit.
@@ -62,11 +62,11 @@ def add_missing_fields(
 
     # Add missing fields whose parent lineage matches this field's path.
     for missing in missing_fields:
-        parent_lineage = ".".join(missing.lineage.split(".")[:-1])
+        parent_lineage = missing.path[:-1]
         if (
             parent_lineage == path
             and current_depth < MAX_SUPPORTED_NESTED_FIELD_DEPTH
-            and len(missing.lineage.split(".")) <= MAX_SUPPORTED_NESTED_FIELD_DEPTH
+            and len(missing.path) <= MAX_SUPPORTED_NESTED_FIELD_DEPTH
         ):
             if field_copy.fields is None:
                 field_copy.fields = []
@@ -80,7 +80,7 @@ def add_missing_fields(
 
 def build_predicted_fields(
     target_table: Table,
-    missing_fields: list[FieldLineage],
+    missing_fields: list[FieldPath],
     included_top_level_field_names: set[str] | None = None,
 ) -> list[TableField]:
     predicted_fields = []
@@ -97,7 +97,7 @@ def build_predicted_fields(
     top_level_missing = [
         missing_field
         for missing_field in missing_fields
-        if "." not in missing_field.lineage
+        if len(missing_field.path) == 1
         and (
             included_top_level_field_names is None
             or missing_field.field.name in included_top_level_field_names
