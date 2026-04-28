@@ -40,6 +40,24 @@ def test_single_column_append_new_columns_has_both_columns(
         assert_report_node_has_columns(report_node, {"my_string", "my_string2"})
 
 
+def test_struct_column_append_new_field_has_all_fields(
+    compiled_project: ProjectContext,
+) -> None:
+    node_id = "model.test_incremental.struct_column_append_new_field"
+    manifest_node = compiled_project.manifest.nodes[node_id]
+    columns = ["my_struct STRUCT<my_string_2 STRING>"]
+    with compiled_project.create_state(manifest_node, columns):
+        run_result = compiled_project.dry_run()
+        assert_report_produced(run_result)
+        report_node = get_report_node_by_id(
+            run_result.get_report(),
+            node_id,
+        )
+        assert_report_node_has_columns(
+            report_node, {"my_struct", "my_struct.my_string", "my_struct.my_string_2"}
+        )
+
+
 def test_single_column_ignore_raises_error_if_column_type_changes(
     compiled_project: ProjectContext,
 ) -> None:
