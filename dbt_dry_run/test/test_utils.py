@@ -1,10 +1,10 @@
 from dbt_dry_run.models import TableField, BigQueryFieldType
 from dbt_dry_run.models.table import FieldPath, Table
-from dbt_dry_run.utils import (
+from dbt_dry_run.nested_schema_change import (
     collect_field_lineages,
     find_missing_fields,
-    build_predicted_fields,
-    add_missing_fields,
+    get_updated_schema,
+    add_missing_nested_fields,
 )
 
 
@@ -136,7 +136,7 @@ def test_add_missing_fields_should_add_missing_fields_to_correct_parent() -> Non
         ],
     )
 
-    actual_field = add_missing_fields(target_field, missing_fields)
+    actual_field = add_missing_nested_fields(target_field, missing_fields)
 
     assert actual_field == expected_field
 
@@ -167,7 +167,7 @@ def test_add_missing_fields_should_not_update_field_if_child_field_does_not_belo
         ],
     )
 
-    actual_field = add_missing_fields(target_field, missing_fields)
+    actual_field = add_missing_nested_fields(target_field, missing_fields)
 
     assert actual_field == expected_field
 
@@ -208,7 +208,7 @@ def test_build_predicted_table_correctly_reconstructs_table() -> None:
         ),
     ]
 
-    actual_predicted_fields = build_predicted_fields(target_table, missing_fields)
+    actual_predicted_fields = get_updated_schema(target_table, missing_fields)
 
     assert actual_predicted_fields == expected_predicted_fields
 
@@ -250,7 +250,7 @@ def test_build_predicted_fields_should_filter_top_level_fields_and_preserve_nest
         TableField(name="new_col", type=BigQueryFieldType.STRING),
     ]
 
-    actual_predicted_fields = build_predicted_fields(
+    actual_predicted_fields = get_updated_schema(
         target_table,
         missing_fields,
         included_top_level_field_names={"struct_field", "new_col"},

@@ -4,7 +4,7 @@ from dbt_dry_run.exception import SchemaChangeException
 from dbt_dry_run.models import OnSchemaChange, Table
 from dbt_dry_run.models.dry_run_result import DryRunResult
 from dbt_dry_run.models.report import DryRunStatus
-from dbt_dry_run.utils import find_missing_fields, build_predicted_fields
+from dbt_dry_run.nested_schema_change import find_missing_fields, get_updated_schema
 
 
 def ignore_handler(dry_run_result: DryRunResult, target_table: Table) -> DryRunResult:
@@ -19,7 +19,7 @@ def append_new_columns_handler(
     missing_fields = find_missing_fields(
         dry_run_result.table.fields, target_table.fields
     )
-    predicted_fields = build_predicted_fields(target_table, missing_fields)
+    predicted_fields = get_updated_schema(target_table, missing_fields)
     return dry_run_result.replace_table(Table(fields=predicted_fields))
 
 
@@ -42,7 +42,7 @@ def sync_all_columns_handler(
     ]
     final_field_names = set(field.name for field in existing_columns + new_columns)
     missing_fields = find_missing_fields(dry_run_result.table.fields, existing_columns)
-    final_fields = build_predicted_fields(
+    final_fields = get_updated_schema(
         target_table=target_table,
         missing_fields=missing_fields,
         included_top_level_field_names=final_field_names,

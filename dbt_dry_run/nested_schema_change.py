@@ -39,7 +39,7 @@ def find_missing_fields(
     return missing_fields
 
 
-def add_missing_fields(
+def add_missing_nested_fields(
     target_field: TableField,
     missing_fields: list[FieldPath],
     current_path: tuple[str, ...] = (),
@@ -52,7 +52,7 @@ def add_missing_fields(
     if field_copy.fields and current_depth < MAX_SUPPORTED_NESTED_FIELD_DEPTH:
         child_fields = []
         for field in field_copy.fields:
-            updated_child = add_missing_fields(
+            updated_child = add_missing_nested_fields(
                 field, missing_fields, path, current_depth + 1
             )
             child_fields.append(updated_child)
@@ -78,20 +78,20 @@ def add_missing_fields(
     return field_copy
 
 
-def build_predicted_fields(
+def get_updated_schema(
     target_table: Table,
     missing_fields: list[FieldPath],
     included_top_level_field_names: set[str] | None = None,
 ) -> list[TableField]:
-    predicted_fields = []
+    updated_schema = []
     for target_field in target_table.fields:
         if (
             included_top_level_field_names is not None
             and target_field.name not in included_top_level_field_names
         ):
             continue
-        updated_field = add_missing_fields(target_field, missing_fields)
-        predicted_fields.append(updated_field)
+        updated_field = add_missing_nested_fields(target_field, missing_fields)
+        updated_schema.append(updated_field)
 
     # Add any missing top-level fields for sync_all_columns_handler
     top_level_missing = [
@@ -104,6 +104,6 @@ def build_predicted_fields(
         )
     ]
     for missing_field in top_level_missing:
-        if not any(f.name == missing_field.field.name for f in predicted_fields):
-            predicted_fields.append(missing_field.field)
-    return predicted_fields
+        if not any(f.name == missing_field.field.name for f in updated_schema):
+            updated_schema.append(missing_field.field)
+    return updated_schema
