@@ -38,9 +38,19 @@ class IncrementalRunner(NodeRunner):
             return initial_result
         select_literal = get_sql_literal_from_table(initial_result.table)
 
-        status, partition_table, exception = self._sql_runner.query(get_partition_columns_sql(node.table_ref))
+        (
+            partition_status,
+            partition_rows,
+            partition_exception,
+        ) = self._sql_runner.query_rows(get_partition_columns_sql(node.table_ref))
+        if partition_status != DryRunStatus.SUCCESS:
+            return DryRunResult(node, None, partition_status, partition_exception)
 
-        partition_column_name = partition_table.fields[0].name
+        partition_column_name = (
+            str(partition_rows[0]["column_name"])
+            if partition_rows and partition_rows[0].get("column_name")
+            else ""
+        )
 
         sql_statement_with_union = get_union_sql(
             node.table_ref, common_field_names, select_literal, partition_column_name

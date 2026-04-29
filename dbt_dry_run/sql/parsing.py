@@ -38,7 +38,7 @@ def get_union_sql(
     )
 
     if partition_column_name:
-        partition_column_filter = f"WHERE {partition_column_name} IN (SELECT {partition_column_name} FROM ({select_statement_with_common_field_names}))"
+        partition_column_filter = f"WHERE {partition_column_name} = (SELECT {partition_column_name} FROM ({select_statement_with_common_field_names}))"
     else:
         partition_column_filter = ""
 

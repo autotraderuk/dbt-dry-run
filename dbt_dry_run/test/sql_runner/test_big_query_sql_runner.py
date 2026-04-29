@@ -63,6 +63,39 @@ def test_error_query_does_not_retry() -> None:
     mock_project.assert_query_called_with_sql(expected_sql)
 
 
+def test_query_rows_returns_results() -> None:
+    mock_project = MockProject()
+    mock_query_job = MagicMock()
+    mock_row = MagicMock()
+    mock_row.items.return_value = [("column_name", "created_at")]
+    mock_query_job.result.return_value = [mock_row]
+    mock_project.mock_client.query.return_value = mock_query_job
+    sql_runner = BigQuerySQLRunner(cast(ProjectService, mock_project))
+
+    expected_sql = "SELECT column_name FROM foo"
+    status, rows, exc = sql_runner.query_rows(expected_sql)
+
+    assert status == DryRunStatus.SUCCESS
+    assert rows == [{"column_name": "created_at"}]
+    assert exc is None
+    assert mock_project.mock_client.query.call_args_list[0].args[0] == expected_sql
+
+
+def test_query_rows_handles_error() -> None:
+    mock_project = MockProject()
+    raised_exception = BadRequest(message="FOO")
+    mock_project.mock_client.query.side_effect = raised_exception
+    sql_runner = BigQuerySQLRunner(cast(ProjectService, mock_project))
+
+    expected_sql = "SELECT column_name FROM foo"
+    status, rows, exc = sql_runner.query_rows(expected_sql)
+
+    assert status == DryRunStatus.FAILURE
+    assert rows is None
+    assert exc is raised_exception
+    mock_project.assert_query_called_with_sql(expected_sql)
+
+
 def test_get_node_schema_returns_none_if_not_found() -> None:
     mock_project = MockProject()
     raised_exception = NotFound("not_found")

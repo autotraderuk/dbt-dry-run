@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from google.cloud.bigquery import (
     Client,
@@ -72,6 +72,21 @@ class BigQuerySQLRunner(SQLRunner):
                 raise
             exception = e
         return status, table, exception
+
+    def query_rows(
+        self, sql: str
+    ) -> Tuple[DryRunStatus, Optional[List[Dict[str, Any]]], Optional[Exception]]:
+        exception = None
+        rows = None
+        client = self.get_client()
+        try:
+            query_job = client.query(sql)
+            rows = [dict(row.items()) for row in query_job.result()]
+            status = DryRunStatus.SUCCESS
+        except (Forbidden, BadRequest, NotFound) as e:
+            status = DryRunStatus.FAILURE
+            exception = e
+        return status, rows, exception
 
     @staticmethod
     def get_schema_from_schema_fields(schema_fields: List[SchemaField]) -> Table:

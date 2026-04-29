@@ -49,6 +49,11 @@ def get_mock_sql_runner_with(
 ) -> MagicMock:
     mock_sql_runner = MagicMock()
     mock_sql_runner.query.return_value = (DryRunStatus.SUCCESS, model_schema, None)
+    mock_sql_runner.query_rows.return_value = (
+        DryRunStatus.SUCCESS,
+        [{"column_name": "partition_col"}],
+        None,
+    )
     mock_sql_runner.get_node_schema.return_value = target_schema
     return mock_sql_runner
 

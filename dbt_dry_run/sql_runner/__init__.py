@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import agate
 
@@ -27,6 +27,11 @@ class SQLRunner(metaclass=ABCMeta):
     def query(
         self, sql: str
     ) -> Tuple[DryRunStatus, Optional[Table], Optional[Exception]]: ...
+
+    @abstractmethod
+    def query_rows(
+        self, sql: str
+    ) -> Tuple[DryRunStatus, Optional[List[Dict[str, Any]]], Optional[Exception]]: ...
 
     def convert_agate_type(
         self, agate_table: agate.Table, col_idx: int
