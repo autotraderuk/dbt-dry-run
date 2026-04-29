@@ -12,18 +12,22 @@ def sql_has_recursive_ctes(code: str) -> bool:
     return False
 
 
-def get_merge_sql(
+def get_union_sql(
     table_ref: TableRef, common_field_names: Iterable[str], select_statement: str
 ) -> str:
     values_csv = ",".join(sorted(common_field_names))
+    select_statement_with_common_field_names = (
+    f"""
+    SELECT {values_csv} FROM ({select_statement})
+    """
+    )
     return dedent(
-        f"""MERGE {table_ref.bq_literal}
-                USING (
-                  {select_statement}
-                )
-                ON False
-                WHEN NOT MATCHED THEN 
-                INSERT ({values_csv}) 
-                VALUES ({values_csv})
-            """
+        f"""
+        SELECT
+            *
+        FROM {table_ref.bq_literal}
+        UNION ALL (
+          {select_statement_with_common_field_names}
+        )
+        """
     )

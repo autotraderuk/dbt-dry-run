@@ -6,7 +6,7 @@ from dbt_dry_run.models.report import DryRunStatus
 from dbt_dry_run.node_runner import NodeRunner
 from dbt_dry_run.schema_change_handlers import ON_SCHEMA_CHANGE_TABLE_HANDLER
 from dbt_dry_run.sql.literals import get_sql_literal_from_table
-from dbt_dry_run.sql.parsing import get_merge_sql, sql_has_recursive_ctes
+from dbt_dry_run.sql.parsing import get_union_sql, sql_has_recursive_ctes
 from dbt_dry_run.sql.statements import (
     SQLPreprocessor,
     add_dbt_max_partition_declaration,
@@ -37,7 +37,7 @@ class IncrementalRunner(NodeRunner):
         if not common_field_names:
             return initial_result
         select_literal = get_sql_literal_from_table(initial_result.table)
-        sql_statement_with_merge = get_merge_sql(
+        sql_statement_with_merge = get_union_sql(
             node.table_ref, common_field_names, select_literal
         )
         status, model_schema, exception = self._sql_runner.query(
