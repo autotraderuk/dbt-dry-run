@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional, Set
+from typing import List, Optional, Set, Tuple
 
 import pydantic
 from google.cloud.bigquery import SchemaField
@@ -50,6 +50,11 @@ class TableField(BaseModel):
 
 
 TableField.model_rebuild()
+
+
+class FieldPath(BaseModel):
+    path: Tuple[str, ...]
+    field: TableField
 
 
 class Table(BaseModel):
