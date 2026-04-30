@@ -5,13 +5,4 @@
     )
 }}
 
-WITH RECURSIVE my_cte AS (
-    SELECT "foo" AS join_key
-)
-
-SELECT
-   my_struct
-FROM (
-    SELECT STRUCT("foo" AS my_string) AS my_struct, "foo" AS join_key
-)
-LEFT JOIN my_cte USING(join_key)
+SELECT STRUCT("foo" AS my_string_1, 'bar' AS my_string_2) AS my_struct

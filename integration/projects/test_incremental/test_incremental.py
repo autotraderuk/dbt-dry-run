@@ -45,7 +45,7 @@ def test_struct_column_append_new_field_has_all_fields(
 ) -> None:
     node_id = "model.test_incremental.struct_column_append_new_field"
     manifest_node = compiled_project.manifest.nodes[node_id]
-    columns = ["my_struct STRUCT<my_string_2 STRING>"]
+    columns = ["my_struct STRUCT<my_string_1 STRING>"]
     with compiled_project.create_state(manifest_node, columns):
         run_result = compiled_project.dry_run()
         assert_report_produced(run_result)
@@ -54,7 +54,7 @@ def test_struct_column_append_new_field_has_all_fields(
             node_id,
         )
         assert_report_node_has_columns(
-            report_node, {"my_struct", "my_struct.my_string", "my_struct.my_string_2"}
+            report_node, {"my_struct", "my_struct.my_string_1", "my_struct.my_string_2"}
         )
 
 
