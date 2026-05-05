@@ -21,21 +21,23 @@ def get_partition_columns_sql(table_ref: TableRef) -> str:
             column_name
         FROM
             {project}.{dataset}.INFORMATION_SCHEMA.COLUMNS
-        WHERE table_name = "{table_name.replace("`","")}"
+        WHERE table_name = "{table_name.replace("`", "")}"
         AND is_partitioning_column = "YES"
         """
     )
 
+
 def get_union_sql(
-    table_ref: TableRef, common_field_names: Iterable[str], select_statement: str, partition_column_name: str
+    table_ref: TableRef,
+    common_field_names: Iterable[str],
+    select_statement: str,
+    partition_column_name: str,
 ) -> str:
     values_csv = ",".join(sorted(common_field_names))
 
-    select_statement_with_common_field_names = (
-    f"""
+    select_statement_with_common_field_names = f"""
     SELECT {values_csv} FROM ({select_statement})
     """
-    )
 
     if partition_column_name:
         partition_column_filter = f"WHERE {partition_column_name} = (SELECT {partition_column_name} FROM ({select_statement_with_common_field_names}))"

@@ -1,4 +1,5 @@
 from dbt_dry_run.exception import UpstreamFailedException
+from dbt_dry_run.MergeTypeCompatibilityBlacklist import MergeTypeCompatibilityBlacklist
 from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
 from dbt_dry_run.models.dry_run_result import DryRunResult
 from dbt_dry_run.models.manifest import Node, OnSchemaChange
@@ -6,7 +7,11 @@ from dbt_dry_run.models.report import DryRunStatus
 from dbt_dry_run.node_runner import NodeRunner
 from dbt_dry_run.schema_change_handlers import ON_SCHEMA_CHANGE_TABLE_HANDLER
 from dbt_dry_run.sql.literals import get_sql_literal_from_table
-from dbt_dry_run.sql.parsing import get_union_sql, sql_has_recursive_ctes, get_partition_columns_sql
+from dbt_dry_run.sql.parsing import (
+    get_union_sql,
+    sql_has_recursive_ctes,
+    get_partition_columns_sql,
+)
 from dbt_dry_run.sql.statements import (
     SQLPreprocessor,
     add_dbt_max_partition_declaration,
@@ -36,6 +41,22 @@ class IncrementalRunner(NodeRunner):
         common_field_names = initial_result.table.common_field_names(target_table)
         if not common_field_names:
             return initial_result
+        model_field_types_by_name = {
+            field.name: field.type_ for field in initial_result.table.fields
+        }
+        target_field_types_by_name = {
+            field.name: field.type_ for field in target_table.fields
+        }
+        merge_comparable_field_names = {
+            field_name
+            for field_name in common_field_names
+            if not MergeTypeCompatibilityBlacklist.is_incompatible(
+                target_field_types_by_name[field_name],
+                model_field_types_by_name[field_name],
+            )
+        }
+        if not merge_comparable_field_names:
+            return initial_result
         select_literal = get_sql_literal_from_table(initial_result.table)
 
         (
@@ -43,6 +64,7 @@ class IncrementalRunner(NodeRunner):
             partition_rows,
             partition_exception,
         ) = self._sql_runner.query_rows(get_partition_columns_sql(node.table_ref))
+
         if partition_status != DryRunStatus.SUCCESS:
             return DryRunResult(node, None, partition_status, partition_exception)
 
@@ -53,7 +75,10 @@ class IncrementalRunner(NodeRunner):
         )
 
         sql_statement_with_union = get_union_sql(
-            node.table_ref, common_field_names, select_literal, partition_column_name
+            node.table_ref,
+            merge_comparable_field_names,
+            select_literal,
+            partition_column_name,
         )
         status, model_schema, exception = self._sql_runner.query(
             sql_statement_with_union

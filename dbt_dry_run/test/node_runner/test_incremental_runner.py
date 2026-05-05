@@ -453,3 +453,57 @@ def test_model_with_sql_header_executes_header_first() -> None:
     executed_sql = get_executed_sql(mock_sql_runner)
     assert executed_sql.startswith(pre_header_value)
     assert node.compiled_code in executed_sql
+
+
+def test_merge_compatibility_skips_union_check_when_only_incompatible_types() -> None:
+    model_schema = Table(
+        fields=[TableField(name="event_date", type=BigQueryFieldType.DATETIME)]
+    )
+    target_schema = Table(
+        fields=[TableField(name="event_date", type=BigQueryFieldType.DATE)]
+    )
+    mock_sql_runner = get_mock_sql_runner_with(model_schema, target_schema)
+
+    node = SimpleNode(
+        unique_id="node1",
+        depends_on=[],
+        resource_type=ManifestScheduler.SEED,
+        table_config=NodeConfig(materialized="incremental", on_schema_change="ignore"),
+    ).to_node()
+    node.depends_on.deep_nodes = []
+
+    IncrementalRunner(mock_sql_runner, Results()).run(node)
+
+    mock_sql_runner.query.assert_called_once_with(node.compiled_code)
+
+
+def test_merge_compatibility_uses_only_merge_compatible_columns_in_union_check() -> (
+    None
+):
+    model_schema = Table(
+        fields=[
+            TableField(name="event_date", type=BigQueryFieldType.DATETIME),
+            TableField(name="description", type=BigQueryFieldType.STRING),
+        ]
+    )
+    target_schema = Table(
+        fields=[
+            TableField(name="event_date", type=BigQueryFieldType.DATE),
+            TableField(name="description", type=BigQueryFieldType.STRING),
+        ]
+    )
+    mock_sql_runner = get_mock_sql_runner_with(model_schema, target_schema)
+
+    node = SimpleNode(
+        unique_id="node1",
+        depends_on=[],
+        resource_type=ManifestScheduler.SEED,
+        table_config=NodeConfig(materialized="incremental", on_schema_change="ignore"),
+    ).to_node()
+    node.depends_on.deep_nodes = []
+
+    IncrementalRunner(mock_sql_runner, Results()).run(node)
+
+    union_sql = mock_sql_runner.query.call_args_list[1].args[0]
+    assert "SELECT description FROM (" in union_sql
+    assert "SELECT event_date FROM (" not in union_sql
