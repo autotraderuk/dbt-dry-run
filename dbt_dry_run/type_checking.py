@@ -11,12 +11,14 @@ def target_type_can_be_coerced_to_model_type(target_type: BigQueryFieldType, mod
             BigQueryFieldType.NUMERIC,
             BigQueryFieldType.BIGNUMERIC,
             BigQueryFieldType.FLOAT64,
+            BigQueryFieldType.STRING
         },
         BigQueryFieldType.FLOAT64: {
             BigQueryFieldType.INT64,
             BigQueryFieldType.NUMERIC,
             BigQueryFieldType.BIGNUMERIC,
             BigQueryFieldType.FLOAT64,
+            BigQueryFieldType.STRING
         },
     }
 
