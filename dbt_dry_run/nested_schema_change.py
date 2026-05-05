@@ -1,12 +1,13 @@
 from dbt_dry_run.models import TableField
 from dbt_dry_run.models.table import FieldPath, Table
 from copy import deepcopy
+from dbt_dry_run.exception import SchemaChangeException
 
 # BQ limitation
 MAX_SUPPORTED_NESTED_FIELD_DEPTH = 15
 
 
-def collect_field_lineages(
+def collect_field_paths(
     fields: list[TableField], prefix: tuple[str, ...] = (), current_depth: int = 1
 ) -> list[FieldPath]:
     collected: list[FieldPath] = []
@@ -16,7 +17,7 @@ def collect_field_lineages(
         collected.append(FieldPath(path=path, field=field))
         if field.fields and current_depth < MAX_SUPPORTED_NESTED_FIELD_DEPTH:
             collected.extend(
-                collect_field_lineages(field.fields, path, current_depth + 1)
+                collect_field_paths(field.fields, path, current_depth + 1)
             )
     return collected
 
@@ -24,15 +25,25 @@ def collect_field_lineages(
 def find_missing_fields(
     dry_run_fields: list[TableField], target_fields: list[TableField]
 ) -> list[FieldPath]:
-    dry_run_fields_with_lineage = collect_field_lineages(dry_run_fields)
-    target_fields_with_lineage = collect_field_lineages(target_fields)
+    dry_run_fields_with_paths = collect_field_paths(dry_run_fields)
+    target_fields_with_paths = collect_field_paths(target_fields)
 
-    target_field_lineages = set(
-        target_field.path for target_field in target_fields_with_lineage
+    target_field_paths = set(
+        target_field.path for target_field in target_fields_with_paths
     )
+
+    dry_run_field_paths = set(
+        dry_run_field.path for dry_run_field in dry_run_fields_with_paths
+    )
+
     missing_fields = []
-    for dry_run_field in dry_run_fields_with_lineage:
-        if dry_run_field.path not in target_field_lineages:
+
+    for target_field in target_field_paths:
+        if target_field not in dry_run_field_paths and len(target_field) > 1:
+            raise SchemaChangeException(f"Field '{'.'.join(target_field)}' has been removed from a RECORD field. This is not supported by BigQuery.")
+
+    for dry_run_field in dry_run_fields_with_paths:
+        if dry_run_field.path not in target_field_paths:
             missing_fields.append(
                 FieldPath(path=dry_run_field.path, field=dry_run_field.field)
             )

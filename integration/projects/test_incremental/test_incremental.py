@@ -70,6 +70,18 @@ def test_single_column_ignore_raises_error_if_column_type_changes(
         assert_node_failed_with_error(run_result.get_report(), node_id, "BadRequest")
 
 
+# def test_struct_column_sync_all_columns_raises_error_if_nested_field_is_removed(
+#     compiled_project: ProjectContext,
+# ) -> None:
+#     node_id = "model.test_incremental.struct_column_remove_nested_field"
+#     manifest_node = compiled_project.manifest.nodes[node_id]
+#     columns = ["my_struct STRUCT<my_string_1 STRING, my_string_2 STRING>"]
+#     with compiled_project.create_state(manifest_node, columns):
+#         run_result = compiled_project.dry_run()
+#         assert_report_produced(run_result)
+#         assert_node_failed_with_error(run_result.get_report(), node_id, "SchemaChangeException")
+
+
 def test_cli_full_refresh_should_use_the_model_schema(
     compiled_project_full_refresh: ProjectContext,
 ) -> None:

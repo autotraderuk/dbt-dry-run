@@ -31,10 +31,9 @@ class IncrementalRunner(NodeRunner):
         initial_result: DryRunResult,
         target_table: Table,
     ) -> DryRunResult:
-        ## TODO: we don't want to include common_field_names if there are STRUCT fields since merge compatibility for STRUCT fields is more complex and we don't want to block users from using incremental models with STRUCT fields
         if not initial_result.table or sql_has_recursive_ctes(node.compiled_code):
             return initial_result
-        common_field_names = initial_result.table.common_field_names(target_table)
+        common_field_names = initial_result.table.common_non_struct_field_names(target_table)
         if not common_field_names:
             return initial_result
         select_literal = get_sql_literal_from_table(initial_result.table)
@@ -88,7 +87,10 @@ class IncrementalRunner(NodeRunner):
                 on_schema_change = node.config.on_schema_change or OnSchemaChange.IGNORE
                 if result.status == DryRunStatus.SUCCESS:
                     handler = ON_SCHEMA_CHANGE_TABLE_HANDLER[on_schema_change]
-                    result = handler(result, target_table)
+                    try:
+                        result = handler(result, target_table)
+                    except SchemaChangeException as e:
+                        return DryRunResult(node=node, table=None, status=DryRunStatus.FAILURE, exception=e)
 
         if result.status == DryRunStatus.SUCCESS and node.is_time_ingestion_partitioned:
             result = self._replace_partition_with_time_ingestion_column(result)

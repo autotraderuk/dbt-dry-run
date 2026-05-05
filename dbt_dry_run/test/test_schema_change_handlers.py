@@ -8,6 +8,9 @@ from dbt_dry_run.schema_change_handlers import (
     sync_all_columns_handler,
 )
 from dbt_dry_run.test.utils import SimpleNode
+import pytest
+from dbt_dry_run.exception import SchemaChangeException
+
 
 A_NODE = SimpleNode(
     unique_id="node1", depends_on=[], resource_type=ManifestScheduler.MODEL
@@ -22,8 +25,8 @@ def test_append_handler_includes_schema_change_to_nested_field() -> None:
                 name="struct",
                 type=BigQueryFieldType.STRUCT,
                 fields=[
-                    TableField(name="nested_col_1", type=BigQueryFieldType.STRING),
-                    TableField(name="nested_col_2", type=BigQueryFieldType.STRING),
+                    TableField(name="field_1", type=BigQueryFieldType.STRING),
+                    TableField(name="field_2", type=BigQueryFieldType.STRING),
                 ],
             ),
         ]
@@ -40,7 +43,7 @@ def test_append_handler_includes_schema_change_to_nested_field() -> None:
             TableField(
                 name="struct",
                 type=BigQueryFieldType.STRUCT,
-                fields=[TableField(name="nested_col_1", type=BigQueryFieldType.STRING)],
+                fields=[TableField(name="field_1", type=BigQueryFieldType.STRING)],
             ),
         ]
     )
@@ -95,10 +98,10 @@ def test_append_handler_preserves_existing_nested_column_order() -> None:
                         type=BigQueryFieldType.STRUCT,
                         fields=[
                             TableField(
-                                name="nested_col_1", type=BigQueryFieldType.STRING
+                                name="field_1", type=BigQueryFieldType.STRING
                             ),
                             TableField(
-                                name="nested_col_2", type=BigQueryFieldType.STRING
+                                name="field_2", type=BigQueryFieldType.STRING
                             ),
                         ],
                     ),
@@ -124,7 +127,7 @@ def test_append_handler_preserves_existing_nested_column_order() -> None:
                         type=BigQueryFieldType.STRUCT,
                         fields=[
                             TableField(
-                                name="nested_col_2", type=BigQueryFieldType.STRING
+                                name="field_2", type=BigQueryFieldType.STRING
                             )
                         ],
                     ),
@@ -146,10 +149,10 @@ def test_append_handler_preserves_existing_nested_column_order() -> None:
                         type=BigQueryFieldType.STRUCT,
                         fields=[
                             TableField(
-                                name="nested_col_2", type=BigQueryFieldType.STRING
+                                name="field_2", type=BigQueryFieldType.STRING
                             ),
                             TableField(
-                                name="nested_col_1", type=BigQueryFieldType.STRING
+                                name="field_1", type=BigQueryFieldType.STRING
                             ),
                         ],
                     ),
@@ -253,7 +256,7 @@ def test_sync_handler_should_not_remove_nested_fields_from_existing_structs() ->
             TableField(
                 name="struct_col",
                 type=BigQueryFieldType.STRUCT,
-                fields=[TableField(name="nested_col_1", type=BigQueryFieldType.STRING)],
+                fields=[TableField(name="field_1", type=BigQueryFieldType.STRING)],
             )
         ]
     )
@@ -269,26 +272,27 @@ def test_sync_handler_should_not_remove_nested_fields_from_existing_structs() ->
                 name="struct_col",
                 type=BigQueryFieldType.STRUCT,
                 fields=[
-                    TableField(name="nested_col_1", type=BigQueryFieldType.STRING),
-                    TableField(name="nested_col_2", type=BigQueryFieldType.STRING),
+                    TableField(name="field_1", type=BigQueryFieldType.STRING),
+                    TableField(name="field_2", type=BigQueryFieldType.STRING),
                 ],
             )
         ]
     )
 
-    actual_result = sync_all_columns_handler(dry_run_result, target_table)
+    with pytest.raises(SchemaChangeException) as exc_info:
+        sync_all_columns_handler(dry_run_result, target_table)
 
-    assert actual_result.table == target_table
+    assert str(exc_info.value) == "Field 'struct_col.field_2' has been removed from a RECORD field. This is not supported by BigQuery."
 
 
 def test_sync_handler_should_not_remove_nested_fields_from_repeated_structs() -> None:
     model_table = Table(
         fields=[
             TableField(
-                name="items",
+                name="array_col",
                 type=BigQueryFieldType.STRUCT,
                 mode=BigQueryFieldMode.REPEATED,
-                fields=[TableField(name="id", type=BigQueryFieldType.STRING)],
+                fields=[TableField(name="field_1", type=BigQueryFieldType.STRING)],
             )
         ]
     )
@@ -301,20 +305,22 @@ def test_sync_handler_should_not_remove_nested_fields_from_repeated_structs() ->
     target_table = Table(
         fields=[
             TableField(
-                name="items",
+                name="array_col",
                 type=BigQueryFieldType.STRUCT,
                 mode=BigQueryFieldMode.REPEATED,
                 fields=[
-                    TableField(name="id", type=BigQueryFieldType.STRING),
-                    TableField(name="legacy", type=BigQueryFieldType.STRING),
+                    TableField(name="field_1", type=BigQueryFieldType.STRING),
+                    TableField(name="field_2", type=BigQueryFieldType.STRING),
                 ],
             )
         ]
     )
 
-    actual_result = sync_all_columns_handler(dry_run_result, target_table)
+    with pytest.raises(SchemaChangeException) as exc_info:
+        sync_all_columns_handler(dry_run_result, target_table)
 
-    assert actual_result.table == target_table
+    assert str(exc_info.value) == "Field 'array_col.field_2' has been removed from a RECORD field. This is not supported by BigQuery."
+
 
 
 def test_sync_handler_adds_new_nested_fields_inside_repeated_struct() -> None:
