@@ -15,7 +15,7 @@ def sql_has_recursive_ctes(code: str) -> bool:
 def get_merge_sql(
     table_ref: TableRef, common_field_names: Iterable[str], select_statement: str
 ) -> str:
-    values_csv = ",".join(sorted(common_field_names))
+    values_csv = ",".join(sorted(common_field_names)) ## TODO: if common_field_names contain STRUCT then don't verify merge compatibility
     return dedent(
         f"""MERGE {table_ref.bq_literal}
                 USING (

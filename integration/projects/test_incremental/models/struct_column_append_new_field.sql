@@ -5,4 +5,4 @@
     )
 }}
 
-SELECT STRUCT("foo" AS my_string_1, 'bar' AS my_string_2) AS my_struct
+SELECT STRUCT("foo" AS my_string, "bar" AS my_string_2) AS my_struct

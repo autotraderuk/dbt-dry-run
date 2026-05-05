@@ -70,6 +70,12 @@ class Table(BaseModel):
     def field_names(self) -> Set[str]:
         return set(field.name for field in self.fields)
 
+    @property
+    def non_struct_field_names(self) -> Set[str]:
+        return set(
+            field.name for field in self.fields if field.type_ != BigQueryFieldType.RECORD
+        )
+
     @classmethod
     def map_fields(cls, schema: Optional[List[SchemaField]]) -> List[TableField]:
         new_fields = []
@@ -89,4 +95,5 @@ class Table(BaseModel):
         return new_fields
 
     def common_field_names(self, other: "Table") -> Set[str]:
-        return self.field_names.intersection(other.field_names)
+        ## TODO: we don't want to include common_field_names if there are STRUCT fields since merge compatibility for STRUCT fields is more complex and we don't want to block users from using incremental models with STRUCT fields
+        return self.non_struct_field_names.intersection(other.non_struct_field_names)
