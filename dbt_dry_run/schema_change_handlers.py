@@ -4,7 +4,11 @@ from dbt_dry_run.exception import SchemaChangeException
 from dbt_dry_run.models import OnSchemaChange, Table
 from dbt_dry_run.models.dry_run_result import DryRunResult
 from dbt_dry_run.models.report import DryRunStatus
-from dbt_dry_run.nested_schema_change import find_missing_fields, get_updated_schema
+from dbt_dry_run.nested_schema_change import (
+    find_model_fields_missing_in_target,
+    get_updated_schema,
+    ensure_no_removed_nested_fields_from_target,
+)
 
 
 def ignore_handler(dry_run_result: DryRunResult, target_table: Table) -> DryRunResult:
@@ -16,7 +20,10 @@ def append_new_columns_handler(
 ) -> DryRunResult:
     if dry_run_result.table is None:
         return dry_run_result
-    missing_fields = find_missing_fields(
+    missing_fields = find_model_fields_missing_in_target(
+        dry_run_result.table.fields, target_table.fields
+    )
+    ensure_no_removed_nested_fields_from_target(
         dry_run_result.table.fields, target_table.fields
     )
     predicted_fields = get_updated_schema(target_table, missing_fields)
@@ -41,7 +48,12 @@ def sync_all_columns_handler(
         if existing_field.name in predicted_column_names
     ]
     final_field_names = set(field.name for field in existing_columns + new_columns)
-    missing_fields = find_missing_fields(dry_run_result.table.fields, existing_columns)
+    missing_fields = find_model_fields_missing_in_target(
+        dry_run_result.table.fields, existing_columns
+    )
+    ensure_no_removed_nested_fields_from_target(
+        dry_run_result.table.fields, existing_columns
+    )
     final_fields = get_updated_schema(
         target_table=target_table,
         missing_fields=missing_fields,

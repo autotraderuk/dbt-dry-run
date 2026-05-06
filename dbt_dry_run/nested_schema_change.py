@@ -20,7 +20,7 @@ def collect_field_paths(
     return collected
 
 
-def find_missing_fields(
+def find_model_fields_missing_in_target(
     dry_run_fields: list[TableField], target_fields: list[TableField]
 ) -> list[FieldPath]:
     dry_run_fields_with_paths = collect_field_paths(dry_run_fields)
@@ -48,6 +48,27 @@ def find_missing_fields(
                 FieldPath(path=dry_run_field.path, field=dry_run_field.field)
             )
     return missing_fields
+
+
+def ensure_no_removed_nested_fields_from_target(
+    dry_run_fields: list[TableField], target_fields: list[TableField]
+) -> None:
+    dry_run_fields_with_paths = collect_field_paths(dry_run_fields)
+    target_fields_with_paths = collect_field_paths(target_fields)
+
+    target_field_paths = set(
+        target_field.path for target_field in target_fields_with_paths
+    )
+
+    dry_run_field_paths = set(
+        dry_run_field.path for dry_run_field in dry_run_fields_with_paths
+    )
+
+    for target_field in target_field_paths:
+        if target_field not in dry_run_field_paths and len(target_field) > 1:
+            raise SchemaChangeException(
+                f"Field '{'.'.join(target_field)}' has been removed from a RECORD field. This is not supported by BigQuery."
+            )
 
 
 def add_missing_nested_fields(
