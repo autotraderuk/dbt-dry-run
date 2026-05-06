@@ -50,7 +50,7 @@ def find_model_fields_missing_in_target(
     return missing_fields
 
 
-def ensure_no_removed_nested_fields_from_target(
+def assert_no_removed_nested_fields_from_target(
     dry_run_fields: list[TableField], target_fields: list[TableField]
 ) -> None:
     dry_run_fields_with_paths = collect_field_paths(dry_run_fields)
