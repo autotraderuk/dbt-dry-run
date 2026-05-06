@@ -4,9 +4,9 @@ from dbt_dry_run.models import TableField, BigQueryFieldType
 from dbt_dry_run.models.table import FieldPath, Table
 from dbt_dry_run.nested_schema_change import (
     collect_field_paths,
-    find_model_fields_missing_in_target,
+    get_model_fields_not_present_in_target,
     add_new_nested_fields_to_target_table,
-    add_missing_nested_fields,
+    add_field_paths_to_target_struct,
     assert_no_removed_nested_fields_from_target,
 )
 import pytest
@@ -67,7 +67,7 @@ def test_collect_field_paths_should_collect_all_fields_and_their_paths() -> None
     assert actual == expected
 
 
-def test_find_model_fields_missing_in_target_should_find_all_nested_fields_missing_from_target() -> (
+def test_get_model_fields_not_present_in_target_should_find_all_nested_fields_missing_from_target() -> (
     None
 ):
     dry_run_fields = [
@@ -108,7 +108,7 @@ def test_find_model_fields_missing_in_target_should_find_all_nested_fields_missi
         ),
     ]
 
-    actual_missing_fields = find_model_fields_missing_in_target(
+    actual_missing_fields = get_model_fields_not_present_in_target(
         dry_run_fields, target_fields
     )
 
@@ -162,7 +162,7 @@ def test_assert_no_removed_nested_fields_from_target_should_not_raise_exception_
 
     expected_missing_fields: List[TableField] = []
 
-    actual_missing_fields = find_model_fields_missing_in_target(
+    actual_missing_fields = get_model_fields_not_present_in_target(
         dry_run_fields, target_fields
     )
     assert_no_removed_nested_fields_from_target(dry_run_fields, target_fields)
@@ -170,7 +170,7 @@ def test_assert_no_removed_nested_fields_from_target_should_not_raise_exception_
     assert actual_missing_fields == expected_missing_fields
 
 
-def test_add_missing_nested_fields_should_add_missing_fields_to_correct_parent() -> (
+def test_add_field_paths_to_target_struct_should_add_missing_fields_to_correct_parent() -> (
     None
 ):
     target_field = TableField(
@@ -200,12 +200,12 @@ def test_add_missing_nested_fields_should_add_missing_fields_to_correct_parent()
         ],
     )
 
-    actual_field = add_missing_nested_fields(target_field, missing_fields)
+    actual_field = add_field_paths_to_target_struct(target_field, missing_fields)
 
     assert actual_field == expected_field
 
 
-def test_add_missing_nested_fields_should_not_update_field_if_child_field_does_not_belong() -> (
+def test_add_field_paths_to_target_struct_should_not_update_field_if_child_field_does_not_belong() -> (
     None
 ):
     target_field = TableField(
@@ -231,7 +231,7 @@ def test_add_missing_nested_fields_should_not_update_field_if_child_field_does_n
         ],
     )
 
-    actual_field = add_missing_nested_fields(target_field, missing_fields)
+    actual_field = add_field_paths_to_target_struct(target_field, missing_fields)
 
     assert actual_field == expected_field
 

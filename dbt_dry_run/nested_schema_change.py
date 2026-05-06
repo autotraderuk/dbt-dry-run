@@ -20,60 +20,50 @@ def collect_field_paths(
     return collected
 
 
-def find_model_fields_missing_in_target(
-    dry_run_fields: list[TableField], target_fields: list[TableField]
+def get_model_fields_not_present_in_target(
+    model_fields: list[TableField], target_fields: list[TableField]
 ) -> list[FieldPath]:
-    dry_run_fields_with_paths = collect_field_paths(dry_run_fields)
+    model_fields_with_paths = collect_field_paths(model_fields)
     target_fields_with_paths = collect_field_paths(target_fields)
 
     target_field_paths = set(
         target_field.path for target_field in target_fields_with_paths
     )
 
-    dry_run_field_paths = set(
-        dry_run_field.path for dry_run_field in dry_run_fields_with_paths
-    )
+    fields_unique_to_model = []
 
-    missing_fields = []
-
-    for target_field in target_field_paths:
-        if target_field not in dry_run_field_paths and len(target_field) > 1:
-            raise SchemaChangeException(
-                f"Field '{'.'.join(target_field)}' has been removed from a RECORD field. This is not supported by BigQuery."
+    for model_field in model_fields_with_paths:
+        if model_field.path not in target_field_paths:
+            fields_unique_to_model.append(
+                FieldPath(path=model_field.path, field=model_field.field)
             )
-
-    for dry_run_field in dry_run_fields_with_paths:
-        if dry_run_field.path not in target_field_paths:
-            missing_fields.append(
-                FieldPath(path=dry_run_field.path, field=dry_run_field.field)
-            )
-    return missing_fields
+    return fields_unique_to_model
 
 
 def assert_no_removed_nested_fields_from_target(
-    dry_run_fields: list[TableField], target_fields: list[TableField]
+    model_fields: list[TableField], target_fields: list[TableField]
 ) -> None:
-    dry_run_fields_with_paths = collect_field_paths(dry_run_fields)
+    model_fields_with_paths = collect_field_paths(model_fields)
     target_fields_with_paths = collect_field_paths(target_fields)
 
     target_field_paths = set(
         target_field.path for target_field in target_fields_with_paths
     )
 
-    dry_run_field_paths = set(
-        dry_run_field.path for dry_run_field in dry_run_fields_with_paths
+    model_field_paths = set(
+        model_field.path for model_field in model_fields_with_paths
     )
 
     for target_field in target_field_paths:
-        if target_field not in dry_run_field_paths and len(target_field) > 1:
+        if target_field not in model_field_paths and len(target_field) > 1:
             raise SchemaChangeException(
-                f"Field '{'.'.join(target_field)}' has been removed from a RECORD field. This is not supported by BigQuery."
+                f"Field '{'.'.join(target_field)}' has been removed from a nested field"
             )
 
 
-def add_missing_nested_fields(
+def add_field_paths_to_target_struct(
     target_field: TableField,
-    missing_fields: list[FieldPath],
+    field_paths: list[FieldPath],
     current_path: tuple[str, ...] = (),
     current_depth: int = 1,
 ) -> TableField:
@@ -84,8 +74,8 @@ def add_missing_nested_fields(
     if field_copy.fields and current_depth < MAX_SUPPORTED_NESTED_FIELD_DEPTH:
         child_fields = []
         for field in field_copy.fields:
-            updated_child = add_missing_nested_fields(
-                field, missing_fields, path, current_depth + 1
+            updated_child = add_field_paths_to_target_struct(
+                field, field_paths, path, current_depth + 1
             )
             child_fields.append(updated_child)
         field_copy.fields = child_fields
@@ -93,7 +83,7 @@ def add_missing_nested_fields(
         field_copy.fields = field_copy.fields or None
 
     # Add missing fields whose parent lineage matches this field's path.
-    for missing in missing_fields:
+    for missing in field_paths:
         parent_lineage = missing.path[:-1]
         if (
             parent_lineage == path
@@ -122,8 +112,8 @@ def add_new_nested_fields_to_target_table(
             and target_field.name not in included_top_level_field_names
         ):
             continue
-        updated_field = add_missing_nested_fields(target_field, missing_fields)
-        updated_schema.append(updated_field)
+        updated_struct_field = add_field_paths_to_target_struct(target_field, missing_fields)
+        updated_schema.append(updated_struct_field)
 
     # Add any missing top-level fields for sync_all_columns_handler
     top_level_missing = [
