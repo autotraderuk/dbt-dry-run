@@ -17,7 +17,7 @@ def get_merge_sql(
 ) -> str:
     values_csv = ",".join(
         sorted(common_field_names)
-    )  ## TODO: if common_field_names contain STRUCT then don't verify merge compatibility
+    )
     return dedent(
         f"""MERGE {table_ref.bq_literal}
                 USING (

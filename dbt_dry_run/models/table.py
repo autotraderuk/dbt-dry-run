@@ -97,5 +97,4 @@ class Table(BaseModel):
         return new_fields
 
     def common_non_struct_field_names(self, other: "Table") -> Set[str]:
-        ## TODO: we want to exclude STRUCT fields since merge compatibility check doesn't work for STRUCT fields. We don't want to block users from using incremental models with STRUCT fields.
         return self.non_struct_field_names.intersection(other.non_struct_field_names)

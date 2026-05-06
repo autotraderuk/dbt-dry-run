@@ -33,6 +33,7 @@ class IncrementalRunner(NodeRunner):
     ) -> DryRunResult:
         if not initial_result.table or sql_has_recursive_ctes(node.compiled_code):
             return initial_result
+
         common_field_names = initial_result.table.common_non_struct_field_names(
             target_table
         )
