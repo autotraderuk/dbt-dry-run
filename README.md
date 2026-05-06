@@ -281,6 +281,10 @@ There are certain cases where a syntactically valid query can fail due to the da
 2. `NULL` values in `ARRAY_AGG` (See [IGNORE_NULLS bullet point][bq-ignore-nulls])
 3. Bad query performance that makes it too complex/expensive to run
 
+There are certain cases where a syntactically invalid query can pass due to the data in the tables:
+
+1. Queries that change the data type of a nested field within a `RECORD`
+
 [dbt-home]: https://www.getdbt.com/
 
 [bq-dry-run]: https://cloud.google.com/bigquery/docs/dry-run-queries
