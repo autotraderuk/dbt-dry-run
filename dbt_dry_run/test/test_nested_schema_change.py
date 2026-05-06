@@ -13,7 +13,7 @@ import pytest
 from dbt_dry_run.exception import SchemaChangeException
 
 
-def test_collect_field_dicts_should_collect_all_fields_with_lineages() -> None:
+def test_collect_field_paths_should_collect_all_fields_and_their_paths() -> None:
     fields = [
         TableField(name="string_col", type=BigQueryFieldType.STRING),
         TableField(
@@ -67,7 +67,7 @@ def test_collect_field_dicts_should_collect_all_fields_with_lineages() -> None:
     assert actual == expected
 
 
-def test_find_missing_fields_should_find_all_nested_fields_missing_from_target_fields() -> (
+def test_find_model_fields_missing_in_target_should_find_all_nested_fields_missing_from_target() -> (
     None
 ):
     dry_run_fields = [
@@ -115,7 +115,7 @@ def test_find_missing_fields_should_find_all_nested_fields_missing_from_target_f
     assert actual_missing_fields == expected_target_fields
 
 
-def test_find_missing_fields_should_raise_exception_if_field_is_removed_from_struct() -> (
+def test_ensure_no_removed_nested_fields_from_target_should_raise_exception_if_field_is_removed_from_struct() -> (
     None
 ):
     dry_run_fields = [
@@ -148,7 +148,7 @@ def test_find_missing_fields_should_raise_exception_if_field_is_removed_from_str
     )
 
 
-def test_find_missing_fields_should_not_raise_exception_if_field_is_removed_from_top_level() -> (
+def test_ensure_no_removed_nested_fields_from_target_should_not_raise_exception_if_field_is_removed_from_top_level() -> (
     None
 ):
     dry_run_fields = [
@@ -170,7 +170,7 @@ def test_find_missing_fields_should_not_raise_exception_if_field_is_removed_from
     assert actual_missing_fields == expected_missing_fields
 
 
-def test_add_missing_fields_should_add_missing_fields_to_correct_parent() -> None:
+def test_add_missing_nested_fields_should_add_missing_fields_to_correct_parent() -> None:
     target_field = TableField(
         name="struct_col",
         type=BigQueryFieldType.STRUCT,
@@ -203,9 +203,7 @@ def test_add_missing_fields_should_add_missing_fields_to_correct_parent() -> Non
     assert actual_field == expected_field
 
 
-def test_add_missing_fields_should_not_update_field_if_child_field_does_not_belong() -> (
-    None
-):
+def test_add_missing_nested_fields_should_not_update_field_if_child_field_does_not_belong() -> None:
     target_field = TableField(
         name="struct_col",
         type=BigQueryFieldType.STRUCT,
@@ -234,7 +232,7 @@ def test_add_missing_fields_should_not_update_field_if_child_field_does_not_belo
     assert actual_field == expected_field
 
 
-def test_build_predicted_table_correctly_reconstructs_table() -> None:
+def test_get_updated_schema_should_correctly_reconstructs_table() -> None:
     target_table = Table(
         fields=[
             TableField(name="string_col", type=BigQueryFieldType.STRING),
@@ -255,7 +253,7 @@ def test_build_predicted_table_correctly_reconstructs_table() -> None:
         )
     ]
 
-    expected_predicted_fields = [
+    expected_updated_fields = [
         TableField(name="string_col", type=BigQueryFieldType.STRING),
         TableField(
             name="struct_col",
@@ -270,14 +268,12 @@ def test_build_predicted_table_correctly_reconstructs_table() -> None:
         ),
     ]
 
-    actual_predicted_fields = get_updated_schema(target_table, missing_fields)
+    actual_updated_fields = get_updated_schema(target_table, missing_fields)
 
-    assert actual_predicted_fields == expected_predicted_fields
+    assert actual_updated_fields == expected_updated_fields
 
 
-def test_build_predicted_fields_should_filter_top_level_fields_and_preserve_nested_fields() -> (
-    None
-):
+def test_get_updated_schema_should_include_selected_top_level_fields() -> None:
     target_table = Table(
         fields=[
             TableField(name="col_1", type=BigQueryFieldType.STRING),
@@ -300,7 +296,7 @@ def test_build_predicted_fields_should_filter_top_level_fields_and_preserve_nest
         ),
     ]
 
-    expected_predicted_fields = [
+    expected_updated_fields = [
         TableField(
             name="struct_col",
             type=BigQueryFieldType.STRUCT,
@@ -312,10 +308,10 @@ def test_build_predicted_fields_should_filter_top_level_fields_and_preserve_nest
         TableField(name="new_col", type=BigQueryFieldType.STRING),
     ]
 
-    actual_predicted_fields = get_updated_schema(
+    actual_updated_fields = get_updated_schema(
         target_table,
         missing_fields,
         included_top_level_field_names={"struct_col", "new_col"},
     )
 
-    assert actual_predicted_fields == expected_predicted_fields
+    assert actual_updated_fields == expected_updated_fields
