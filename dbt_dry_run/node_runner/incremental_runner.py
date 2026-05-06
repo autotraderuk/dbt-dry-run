@@ -33,7 +33,9 @@ class IncrementalRunner(NodeRunner):
     ) -> DryRunResult:
         if not initial_result.table or sql_has_recursive_ctes(node.compiled_code):
             return initial_result
-        common_field_names = initial_result.table.common_non_struct_field_names(target_table)
+        common_field_names = initial_result.table.common_non_struct_field_names(
+            target_table
+        )
         if not common_field_names:
             return initial_result
         select_literal = get_sql_literal_from_table(initial_result.table)
@@ -90,7 +92,12 @@ class IncrementalRunner(NodeRunner):
                     try:
                         result = handler(result, target_table)
                     except SchemaChangeException as e:
-                        return DryRunResult(node=node, table=None, status=DryRunStatus.FAILURE, exception=e)
+                        return DryRunResult(
+                            node=node,
+                            table=None,
+                            status=DryRunStatus.FAILURE,
+                            exception=e,
+                        )
 
         if result.status == DryRunStatus.SUCCESS and node.is_time_ingestion_partitioned:
             result = self._replace_partition_with_time_ingestion_column(result)

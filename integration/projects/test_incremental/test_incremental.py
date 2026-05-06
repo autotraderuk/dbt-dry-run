@@ -1,5 +1,3 @@
-import pytest
-
 from integration.conftest import ProjectContext
 from integration.utils import (
     assert_report_node_has_columns,
@@ -81,7 +79,9 @@ def test_struct_column_sync_all_columns_raises_error_if_nested_field_is_removed(
     with compiled_project.create_state(manifest_node, columns):
         run_result = compiled_project.dry_run()
         assert_report_produced(run_result)
-        assert_node_failed_with_error(run_result.get_report(), node_id, "SchemaChangeException")
+        assert_node_failed_with_error(
+            run_result.get_report(), node_id, "SchemaChangeException"
+        )
 
 
 def test_cli_full_refresh_should_use_the_model_schema(

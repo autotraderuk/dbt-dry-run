@@ -73,7 +73,9 @@ class Table(BaseModel):
     @property
     def non_struct_field_names(self) -> Set[str]:
         return set(
-            field.name for field in self.fields if field.type_ != BigQueryFieldType.RECORD
+            field.name
+            for field in self.fields
+            if field.type_ != BigQueryFieldType.RECORD
         )
 
     @classmethod

@@ -16,9 +16,7 @@ def collect_field_paths(
         path = prefix + (name,)
         collected.append(FieldPath(path=path, field=field))
         if field.fields and current_depth < MAX_SUPPORTED_NESTED_FIELD_DEPTH:
-            collected.extend(
-                collect_field_paths(field.fields, path, current_depth + 1)
-            )
+            collected.extend(collect_field_paths(field.fields, path, current_depth + 1))
     return collected
 
 
@@ -40,7 +38,9 @@ def find_missing_fields(
 
     for target_field in target_field_paths:
         if target_field not in dry_run_field_paths and len(target_field) > 1:
-            raise SchemaChangeException(f"Field '{'.'.join(target_field)}' has been removed from a RECORD field. This is not supported by BigQuery.")
+            raise SchemaChangeException(
+                f"Field '{'.'.join(target_field)}' has been removed from a RECORD field. This is not supported by BigQuery."
+            )
 
     for dry_run_field in dry_run_fields_with_paths:
         if dry_run_field.path not in target_field_paths:

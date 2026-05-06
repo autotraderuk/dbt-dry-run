@@ -1,3 +1,5 @@
+from typing import List
+
 from dbt_dry_run.models import TableField, BigQueryFieldType
 from dbt_dry_run.models.table import FieldPath, Table
 from dbt_dry_run.nested_schema_change import (
@@ -110,14 +112,15 @@ def test_find_missing_fields_should_find_all_nested_fields_missing_from_target_f
     assert actual_missing_fields == expected_target_fields
 
 
-def test_find_missing_fields_should_raise_exception_if_field_is_removed_from_struct() -> None:
+def test_find_missing_fields_should_raise_exception_if_field_is_removed_from_struct() -> (
+    None
+):
     dry_run_fields = [
         TableField(
             name="struct_col",
             type=BigQueryFieldType.STRUCT,
             fields=[
-                TableField(name="lv2_1", type=BigQueryFieldType.STRING
-                ),
+                TableField(name="lv2_1", type=BigQueryFieldType.STRING),
                 TableField(name="lv2_2", type=BigQueryFieldType.NUMERIC),
             ],
         ),
@@ -136,10 +139,15 @@ def test_find_missing_fields_should_raise_exception_if_field_is_removed_from_str
     with pytest.raises(SchemaChangeException) as exc_info:
         find_missing_fields(target_fields, dry_run_fields)
 
-    assert str(exc_info.value) == "Field 'struct_col.lv2_2' has been removed from a RECORD field. This is not supported by BigQuery."
+    assert (
+        str(exc_info.value)
+        == "Field 'struct_col.lv2_2' has been removed from a RECORD field. This is not supported by BigQuery."
+    )
 
 
-def test_find_missing_fields_should_not_raise_exception_if_field_is_removed_from_top_level() -> None:
+def test_find_missing_fields_should_not_raise_exception_if_field_is_removed_from_top_level() -> (
+    None
+):
     dry_run_fields = [
         TableField(name="string_col", type=BigQueryFieldType.STRING),
     ]
@@ -149,7 +157,7 @@ def test_find_missing_fields_should_not_raise_exception_if_field_is_removed_from
         TableField(name="removed_field", type=BigQueryFieldType.NUMERIC),
     ]
 
-    expected_missing_fields = []
+    expected_missing_fields: List[TableField] = []
 
     actual_missing_fields = find_missing_fields(dry_run_fields, target_fields)
 
