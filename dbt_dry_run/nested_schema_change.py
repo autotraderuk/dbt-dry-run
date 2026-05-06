@@ -7,7 +7,7 @@ from dbt_dry_run.exception import SchemaChangeException
 MAX_SUPPORTED_NESTED_FIELD_DEPTH = 15
 
 
-def collect_field_paths(
+def collect_field_paths_for_table(
     fields: list[TableField], prefix: tuple[str, ...] = (), current_depth: int = 1
 ) -> list[FieldPath]:
     collected: list[FieldPath] = []
@@ -16,15 +16,15 @@ def collect_field_paths(
         path = prefix + (name,)
         collected.append(FieldPath(path=path, field=field))
         if field.fields and current_depth < MAX_SUPPORTED_NESTED_FIELD_DEPTH:
-            collected.extend(collect_field_paths(field.fields, path, current_depth + 1))
+            collected.extend(collect_field_paths_for_table(field.fields, path, current_depth + 1))
     return collected
 
 
 def get_model_fields_not_present_in_target(
     model_fields: list[TableField], target_fields: list[TableField]
 ) -> list[FieldPath]:
-    model_fields_with_paths = collect_field_paths(model_fields)
-    target_fields_with_paths = collect_field_paths(target_fields)
+    model_fields_with_paths = collect_field_paths_for_table(model_fields)
+    target_fields_with_paths = collect_field_paths_for_table(target_fields)
 
     target_field_paths = set(
         target_field.path for target_field in target_fields_with_paths
@@ -43,8 +43,8 @@ def get_model_fields_not_present_in_target(
 def assert_no_removed_nested_fields_from_target(
     model_fields: list[TableField], target_fields: list[TableField]
 ) -> None:
-    model_fields_with_paths = collect_field_paths(model_fields)
-    target_fields_with_paths = collect_field_paths(target_fields)
+    model_fields_with_paths = collect_field_paths_for_table(model_fields)
+    target_fields_with_paths = collect_field_paths_for_table(target_fields)
 
     target_field_paths = set(
         target_field.path for target_field in target_fields_with_paths

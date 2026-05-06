@@ -3,7 +3,7 @@ from typing import List
 from dbt_dry_run.models import TableField, BigQueryFieldType
 from dbt_dry_run.models.table import FieldPath, Table
 from dbt_dry_run.nested_schema_change import (
-    collect_field_paths,
+    collect_field_paths_for_table,
     get_model_fields_not_present_in_target,
     add_new_nested_fields_to_target_table,
     add_field_paths_to_target_struct,
@@ -13,7 +13,7 @@ import pytest
 from dbt_dry_run.exception import SchemaChangeException
 
 
-def test_collect_field_paths_should_collect_all_fields_and_their_paths() -> None:
+def test_collect_field_paths_for_table_should_collect_all_fields_and_their_paths() -> None:
     fields = [
         TableField(name="string_col", type=BigQueryFieldType.STRING),
         TableField(
@@ -62,7 +62,7 @@ def test_collect_field_paths_should_collect_all_fields_and_their_paths() -> None
         ),
     ]
 
-    actual = collect_field_paths(fields)
+    actual = collect_field_paths_for_table(fields)
 
     assert actual == expected
 
