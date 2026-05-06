@@ -274,7 +274,7 @@ def test_sync_handler_should_not_remove_nested_fields_from_existing_structs() ->
 
     assert (
         str(exc_info.value)
-        == "Field 'struct_col.field_2' has been removed from a RECORD field. This is not supported by BigQuery."
+        == "Field 'struct_col.field_2' has been removed from a nested column"
     )
 
 
@@ -314,7 +314,7 @@ def test_sync_handler_should_not_remove_nested_fields_from_repeated_structs() ->
 
     assert (
         str(exc_info.value)
-        == "Field 'array_col.field_2' has been removed from a RECORD field. This is not supported by BigQuery."
+        == "Field 'array_col.field_2' has been removed from a nested column"
     )
 
 

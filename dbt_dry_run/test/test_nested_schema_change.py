@@ -5,15 +5,17 @@ from dbt_dry_run.models.table import FieldPath, Table
 from dbt_dry_run.nested_schema_change import (
     collect_field_paths_for_table,
     get_model_fields_not_present_in_target,
-    add_new_nested_fields_to_target_table,
+    add_new_model_fields_to_target_table,
     add_field_paths_to_target_struct,
-    assert_no_removed_nested_fields_from_target,
+    assert_model_removes_no_nested_fields_from_target,
 )
 import pytest
 from dbt_dry_run.exception import SchemaChangeException
 
 
-def test_collect_field_paths_for_table_should_collect_all_fields_and_their_paths() -> None:
+def test_collect_field_paths_for_table_should_collect_all_fields_and_their_paths() -> (
+    None
+):
     fields = [
         TableField(name="string_col", type=BigQueryFieldType.STRING),
         TableField(
@@ -115,7 +117,7 @@ def test_get_model_fields_not_present_in_target_should_find_all_nested_fields_mi
     assert actual_missing_fields == expected_target_fields
 
 
-def test_assert_no_removed_nested_fields_from_target_should_raise_exception_if_field_is_removed_from_struct() -> (
+def test_assert_model_removes_no_nested_fields_from_target_from_target_should_raise_exception_if_field_is_removed_from_struct() -> (
     None
 ):
     dry_run_fields = [
@@ -140,15 +142,15 @@ def test_assert_no_removed_nested_fields_from_target_should_raise_exception_if_f
     ]
 
     with pytest.raises(SchemaChangeException) as exc_info:
-        assert_no_removed_nested_fields_from_target(target_fields, dry_run_fields)
+        assert_model_removes_no_nested_fields_from_target(target_fields, dry_run_fields)
 
     assert (
         str(exc_info.value)
-        == "Field 'struct_col.lv2_2' has been removed from a RECORD field. This is not supported by BigQuery."
+        == "Field 'struct_col.lv2_2' has been removed from a nested column"
     )
 
 
-def test_assert_no_removed_nested_fields_from_target_should_not_raise_exception_if_field_is_removed_from_top_level() -> (
+def test_assert_model_removes_no_nested_fields_from_target_should_not_raise_exception_if_field_is_removed_from_top_level() -> (
     None
 ):
     dry_run_fields = [
@@ -165,7 +167,7 @@ def test_assert_no_removed_nested_fields_from_target_should_not_raise_exception_
     actual_missing_fields = get_model_fields_not_present_in_target(
         dry_run_fields, target_fields
     )
-    assert_no_removed_nested_fields_from_target(dry_run_fields, target_fields)
+    assert_model_removes_no_nested_fields_from_target(dry_run_fields, target_fields)
 
     assert actual_missing_fields == expected_missing_fields
 
@@ -236,7 +238,9 @@ def test_add_field_paths_to_target_struct_should_not_update_field_if_child_field
     assert actual_field == expected_field
 
 
-def test_add_new_nested_fields_to_target_table_should_correctly_reconstructs_table() -> None:
+def test_add_new_model_fields_to_target_table_should_correctly_reconstructs_table() -> (
+    None
+):
     target_table = Table(
         fields=[
             TableField(name="string_col", type=BigQueryFieldType.STRING),
@@ -272,12 +276,14 @@ def test_add_new_nested_fields_to_target_table_should_correctly_reconstructs_tab
         ),
     ]
 
-    actual_fields = add_new_nested_fields_to_target_table(target_table, missing_fields)
+    actual_fields = add_new_model_fields_to_target_table(target_table, missing_fields)
 
     assert actual_fields == expected_fields
 
 
-def test_add_new_nested_fields_to_target_table_should_include_selected_top_level_fields() -> None:
+def test_add_new_model_fields_to_target_table_should_include_selected_top_level_fields() -> (
+    None
+):
     target_table = Table(
         fields=[
             TableField(name="col_1", type=BigQueryFieldType.STRING),
@@ -312,7 +318,7 @@ def test_add_new_nested_fields_to_target_table_should_include_selected_top_level
         TableField(name="new_col", type=BigQueryFieldType.STRING),
     ]
 
-    actual_fields = add_new_nested_fields_to_target_table(
+    actual_fields = add_new_model_fields_to_target_table(
         target_table,
         missing_fields,
         included_top_level_field_names={"struct_col", "new_col"},

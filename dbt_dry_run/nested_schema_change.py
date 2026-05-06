@@ -16,7 +16,9 @@ def collect_field_paths_for_table(
         path = prefix + (name,)
         collected.append(FieldPath(path=path, field=field))
         if field.fields and current_depth < MAX_SUPPORTED_NESTED_FIELD_DEPTH:
-            collected.extend(collect_field_paths_for_table(field.fields, path, current_depth + 1))
+            collected.extend(
+                collect_field_paths_for_table(field.fields, path, current_depth + 1)
+            )
     return collected
 
 
@@ -40,7 +42,7 @@ def get_model_fields_not_present_in_target(
     return fields_unique_to_model
 
 
-def assert_no_removed_nested_fields_from_target(
+def assert_model_removes_no_nested_fields_from_target(
     model_fields: list[TableField], target_fields: list[TableField]
 ) -> None:
     model_fields_with_paths = collect_field_paths_for_table(model_fields)
@@ -50,14 +52,12 @@ def assert_no_removed_nested_fields_from_target(
         target_field.path for target_field in target_fields_with_paths
     )
 
-    model_field_paths = set(
-        model_field.path for model_field in model_fields_with_paths
-    )
+    model_field_paths = set(model_field.path for model_field in model_fields_with_paths)
 
     for target_field in target_field_paths:
         if target_field not in model_field_paths and len(target_field) > 1:
             raise SchemaChangeException(
-                f"Field '{'.'.join(target_field)}' has been removed from a nested field"
+                f"Field '{'.'.join(target_field)}' has been removed from a nested column"
             )
 
 
@@ -100,9 +100,9 @@ def add_field_paths_to_target_struct(
     return field_copy
 
 
-def add_new_nested_fields_to_target_table(
+def add_new_model_fields_to_target_table(
     target_table: Table,
-    missing_fields: list[FieldPath],
+    new_fields_from_model: list[FieldPath],
     included_top_level_field_names: set[str] | None = None,
 ) -> list[TableField]:
     updated_schema = []
@@ -112,20 +112,22 @@ def add_new_nested_fields_to_target_table(
             and target_field.name not in included_top_level_field_names
         ):
             continue
-        updated_struct_field = add_field_paths_to_target_struct(target_field, missing_fields)
+        updated_struct_field = add_field_paths_to_target_struct(
+            target_field, new_fields_from_model
+        )
         updated_schema.append(updated_struct_field)
 
     # Add any missing top-level fields for sync_all_columns_handler
     top_level_missing = [
-        missing_field
-        for missing_field in missing_fields
-        if missing_field.is_top_level
+        model_field
+        for model_field in new_fields_from_model
+        if model_field.is_top_level
         and (
             included_top_level_field_names is None
-            or missing_field.field.name in included_top_level_field_names
+            or model_field.field.name in included_top_level_field_names
         )
     ]
-    for missing_field in top_level_missing:
-        if not any(f.name == missing_field.field.name for f in updated_schema):
-            updated_schema.append(missing_field.field)
+    for model_field in top_level_missing:
+        if not any(f.name == model_field.field.name for f in updated_schema):
+            updated_schema.append(model_field.field)
     return updated_schema
