@@ -129,7 +129,7 @@ def add_new_nested_fields_to_target_table(
     top_level_missing = [
         missing_field
         for missing_field in missing_fields
-        if len(missing_field.path) == 1
+        if missing_field.is_top_level
         and (
             included_top_level_field_names is None
             or missing_field.field.name in included_top_level_field_names

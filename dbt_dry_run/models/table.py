@@ -56,6 +56,10 @@ class FieldPath(BaseModel):
     path: Tuple[str, ...]
     field: TableField
 
+    @property
+    def is_top_level(self) -> bool:
+        return len(self.path) == 1
+
 
 class Table(BaseModel):
     fields: List[TableField]
