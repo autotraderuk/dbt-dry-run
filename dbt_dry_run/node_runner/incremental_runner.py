@@ -1,4 +1,4 @@
-from dbt_dry_run.exception import UpstreamFailedException
+from dbt_dry_run.exception import UpstreamFailedException, SchemaChangeException
 from dbt_dry_run.models import BigQueryFieldMode, BigQueryFieldType, Table, TableField
 from dbt_dry_run.models.dry_run_result import DryRunResult
 from dbt_dry_run.models.manifest import Node, OnSchemaChange
