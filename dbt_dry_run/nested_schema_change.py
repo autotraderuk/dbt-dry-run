@@ -110,7 +110,7 @@ def add_missing_nested_fields(
     return field_copy
 
 
-def get_updated_schema(
+def add_new_nested_fields_to_target_table(
     target_table: Table,
     missing_fields: list[FieldPath],
     included_top_level_field_names: set[str] | None = None,

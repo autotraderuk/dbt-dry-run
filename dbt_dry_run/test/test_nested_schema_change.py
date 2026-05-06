@@ -5,7 +5,7 @@ from dbt_dry_run.models.table import FieldPath, Table
 from dbt_dry_run.nested_schema_change import (
     collect_field_paths,
     find_model_fields_missing_in_target,
-    get_updated_schema,
+    add_new_nested_fields_to_target_table,
     add_missing_nested_fields,
     ensure_no_removed_nested_fields_from_target,
 )
@@ -236,7 +236,7 @@ def test_add_missing_nested_fields_should_not_update_field_if_child_field_does_n
     assert actual_field == expected_field
 
 
-def test_get_updated_schema_should_correctly_reconstructs_table() -> None:
+def test_add_new_nested_fields_to_target_table_should_correctly_reconstructs_table() -> None:
     target_table = Table(
         fields=[
             TableField(name="string_col", type=BigQueryFieldType.STRING),
@@ -257,7 +257,7 @@ def test_get_updated_schema_should_correctly_reconstructs_table() -> None:
         )
     ]
 
-    expected_updated_fields = [
+    expected_fields = [
         TableField(name="string_col", type=BigQueryFieldType.STRING),
         TableField(
             name="struct_col",
@@ -272,12 +272,12 @@ def test_get_updated_schema_should_correctly_reconstructs_table() -> None:
         ),
     ]
 
-    actual_updated_fields = get_updated_schema(target_table, missing_fields)
+    actual_fields = add_new_nested_fields_to_target_table(target_table, missing_fields)
 
-    assert actual_updated_fields == expected_updated_fields
+    assert actual_fields == expected_fields
 
 
-def test_get_updated_schema_should_include_selected_top_level_fields() -> None:
+def test_add_new_nested_fields_to_target_table_should_include_selected_top_level_fields() -> None:
     target_table = Table(
         fields=[
             TableField(name="col_1", type=BigQueryFieldType.STRING),
@@ -300,7 +300,7 @@ def test_get_updated_schema_should_include_selected_top_level_fields() -> None:
         ),
     ]
 
-    expected_updated_fields = [
+    expected_fields = [
         TableField(
             name="struct_col",
             type=BigQueryFieldType.STRUCT,
@@ -312,10 +312,10 @@ def test_get_updated_schema_should_include_selected_top_level_fields() -> None:
         TableField(name="new_col", type=BigQueryFieldType.STRING),
     ]
 
-    actual_updated_fields = get_updated_schema(
+    actual_fields = add_new_nested_fields_to_target_table(
         target_table,
         missing_fields,
         included_top_level_field_names={"struct_col", "new_col"},
     )
 
-    assert actual_updated_fields == expected_updated_fields
+    assert actual_fields == expected_fields
