@@ -26,8 +26,8 @@ def append_new_columns_handler(
     ensure_no_removed_nested_fields_from_target(
         dry_run_result.table.fields, target_table.fields
     )
-    predicted_fields = get_updated_schema(target_table, missing_fields)
-    return dry_run_result.replace_table(Table(fields=predicted_fields))
+    final_fields = get_updated_schema(target_table, missing_fields)
+    return dry_run_result.replace_table(Table(fields=final_fields))
 
 
 def sync_all_columns_handler(

@@ -170,7 +170,9 @@ def test_ensure_no_removed_nested_fields_from_target_should_not_raise_exception_
     assert actual_missing_fields == expected_missing_fields
 
 
-def test_add_missing_nested_fields_should_add_missing_fields_to_correct_parent() -> None:
+def test_add_missing_nested_fields_should_add_missing_fields_to_correct_parent() -> (
+    None
+):
     target_field = TableField(
         name="struct_col",
         type=BigQueryFieldType.STRUCT,
@@ -203,7 +205,9 @@ def test_add_missing_nested_fields_should_add_missing_fields_to_correct_parent()
     assert actual_field == expected_field
 
 
-def test_add_missing_nested_fields_should_not_update_field_if_child_field_does_not_belong() -> None:
+def test_add_missing_nested_fields_should_not_update_field_if_child_field_does_not_belong() -> (
+    None
+):
     target_field = TableField(
         name="struct_col",
         type=BigQueryFieldType.STRUCT,
