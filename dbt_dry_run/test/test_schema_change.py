@@ -2,7 +2,7 @@ from typing import List
 
 from dbt_dry_run.models import TableField, BigQueryFieldType
 from dbt_dry_run.models.table import FieldPath, Table
-from dbt_dry_run.nested_schema_change import (
+from dbt_dry_run.schema_change import (
     collect_field_paths_for_table,
     get_model_fields_not_present_in_target,
     add_new_fields_to_table,

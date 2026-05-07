@@ -4,7 +4,7 @@ from dbt_dry_run.exception import SchemaChangeException
 from dbt_dry_run.models import OnSchemaChange, Table
 from dbt_dry_run.models.dry_run_result import DryRunResult
 from dbt_dry_run.models.report import DryRunStatus
-from dbt_dry_run.nested_schema_change import (
+from dbt_dry_run.schema_change import (
     get_model_fields_not_present_in_target,
     add_new_fields_to_table,
     assert_model_removes_no_nested_fields_from_target,
