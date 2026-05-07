@@ -42,7 +42,7 @@ def get_model_fields_not_present_in_target(
     return fields_unique_to_model
 
 
-def assert_model_removes_no_nested_fields_from_target(
+def assert_no_nested_fields_removed_from_table(
     model_fields: list[TableField], target_fields: list[TableField]
 ) -> None:
     model_fields_with_paths = collect_field_paths_for_table(model_fields)

@@ -7,7 +7,7 @@ from dbt_dry_run.schema_change import (
     get_model_fields_not_present_in_target,
     add_new_fields_to_table,
     add_field_paths_to_struct,
-    assert_model_removes_no_nested_fields_from_target,
+    assert_no_nested_fields_removed_from_table,
 )
 import pytest
 from dbt_dry_run.exception import SchemaChangeException
@@ -117,7 +117,7 @@ def test_get_model_fields_not_present_in_target_should_find_all_nested_fields_mi
     assert actual_missing_fields == expected_target_fields
 
 
-def test_assert_model_removes_no_nested_fields_from_target_from_target_should_raise_exception_if_field_is_removed_from_struct() -> (
+def test_assert_no_nested_fields_removed_from_table_should_raise_exception_if_field_is_removed_from_struct() -> (
     None
 ):
     dry_run_fields = [
@@ -142,7 +142,7 @@ def test_assert_model_removes_no_nested_fields_from_target_from_target_should_ra
     ]
 
     with pytest.raises(SchemaChangeException) as exc_info:
-        assert_model_removes_no_nested_fields_from_target(target_fields, dry_run_fields)
+        assert_no_nested_fields_removed_from_table(target_fields, dry_run_fields)
 
     assert (
         str(exc_info.value)
@@ -150,7 +150,7 @@ def test_assert_model_removes_no_nested_fields_from_target_from_target_should_ra
     )
 
 
-def test_assert_model_removes_no_nested_fields_from_target_should_not_raise_exception_if_field_is_removed_from_top_level() -> (
+def test_assert_no_nested_fields_removed_from_table_should_not_raise_exception_if_field_is_removed_from_top_level() -> (
     None
 ):
     dry_run_fields = [
@@ -167,7 +167,7 @@ def test_assert_model_removes_no_nested_fields_from_target_should_not_raise_exce
     actual_missing_fields = get_model_fields_not_present_in_target(
         dry_run_fields, target_fields
     )
-    assert_model_removes_no_nested_fields_from_target(dry_run_fields, target_fields)
+    assert_no_nested_fields_removed_from_table(dry_run_fields, target_fields)
 
     assert actual_missing_fields == expected_missing_fields
 
