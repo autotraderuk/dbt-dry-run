@@ -61,20 +61,20 @@ def assert_model_removes_no_nested_fields_from_target(
             )
 
 
-def add_field_paths_to_target_struct(
-    target_field: TableField,
+def add_field_paths_to_struct(
+    struct: TableField,
     field_paths: list[FieldPath],
     current_path: tuple[str, ...] = (),
     current_depth: int = 1,
 ) -> TableField:
-    path = current_path + (target_field.name,)
-    field_copy = deepcopy(target_field)
+    path = current_path + (struct.name,)
+    field_copy = deepcopy(struct)
 
     # Recursively update child fields if they exist and we are below the nesting limit.
     if field_copy.fields and current_depth < MAX_SUPPORTED_NESTED_FIELD_DEPTH:
         child_fields = []
         for field in field_copy.fields:
-            updated_child = add_field_paths_to_target_struct(
+            updated_child = add_field_paths_to_struct(
                 field, field_paths, path, current_depth + 1
             )
             child_fields.append(updated_child)
@@ -83,39 +83,40 @@ def add_field_paths_to_target_struct(
         field_copy.fields = field_copy.fields or None
 
     # Add missing fields whose parent path matches this field's path.
-    for missing in field_paths:
-        parent_path = missing.path[:-1]
+    for missing_field in field_paths:
+        parent_path = missing_field.path[:-1]
         if (
             parent_path == path
             and current_depth < MAX_SUPPORTED_NESTED_FIELD_DEPTH
-            and len(missing.path) <= MAX_SUPPORTED_NESTED_FIELD_DEPTH
+            and len(missing_field.path) <= MAX_SUPPORTED_NESTED_FIELD_DEPTH
         ):
             if field_copy.fields is None:
                 field_copy.fields = []
             if not any(
-                existing_field.name == missing.field.name
+                existing_field.name == missing_field.field.name
                 for existing_field in field_copy.fields
             ):
-                field_copy.fields.append(missing.field)
+                field_copy.fields.append(missing_field.field)
     return field_copy
 
 
-def add_new_model_fields_to_target_table(
-    target_table: Table, new_fields_from_model: list[FieldPath]
+def add_new_fields_to_table(
+    table: Table,
+    new_fields: list[FieldPath]
 ) -> list[TableField]:
     updated_schema = []
-    for target_field in target_table.fields:
-        updated_struct_field = add_field_paths_to_target_struct(
-            target_field, new_fields_from_model
+    for table_field in table.fields:
+        updated_struct_field = add_field_paths_to_struct(
+            table_field, new_fields
         )
         updated_schema.append(updated_struct_field)
 
     # Add any new top-level fields
     top_level_new_field = [
-        new_field for new_field in new_fields_from_model if new_field.is_top_level
+        new_field for new_field in new_fields if new_field.is_top_level
     ]
 
-    for model_field in top_level_new_field:
-        if not any(f.name == model_field.field.name for f in updated_schema):
-            updated_schema.append(model_field.field)
+    for new_field in top_level_new_field:
+        if not any(f.name == new_field.field.name for f in updated_schema):
+            updated_schema.append(new_field.field)
     return updated_schema

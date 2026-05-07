@@ -6,7 +6,7 @@ from dbt_dry_run.models.dry_run_result import DryRunResult
 from dbt_dry_run.models.report import DryRunStatus
 from dbt_dry_run.nested_schema_change import (
     get_model_fields_not_present_in_target,
-    add_new_model_fields_to_target_table,
+    add_new_fields_to_table,
     assert_model_removes_no_nested_fields_from_target,
 )
 
@@ -27,7 +27,7 @@ def append_new_columns_handler(
     assert_model_removes_no_nested_fields_from_target(
         dry_run_result.table.fields, target_table.fields
     )
-    final_fields = add_new_model_fields_to_target_table(target_table, missing_fields)
+    final_fields = add_new_fields_to_table(target_table, missing_fields)
     return dry_run_result.replace_table(Table(fields=final_fields))
 
 
@@ -51,9 +51,9 @@ def sync_all_columns_handler(
     assert_model_removes_no_nested_fields_from_target(
         dry_run_result.table.fields, target_columns_with_removed_columns
     )
-    final_fields = add_new_model_fields_to_target_table(
-        target_table=Table(fields=target_columns_with_removed_columns),
-        new_fields_from_model=model_fields_not_present_in_target,
+    final_fields = add_new_fields_to_table(
+        table=Table(fields=target_columns_with_removed_columns),
+        new_fields=model_fields_not_present_in_target,
     )
 
     return dry_run_result.replace_table(Table(fields=final_fields))

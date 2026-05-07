@@ -5,8 +5,8 @@ from dbt_dry_run.models.table import FieldPath, Table
 from dbt_dry_run.nested_schema_change import (
     collect_field_paths_for_table,
     get_model_fields_not_present_in_target,
-    add_new_model_fields_to_target_table,
-    add_field_paths_to_target_struct,
+    add_new_fields_to_table,
+    add_field_paths_to_struct,
     assert_model_removes_no_nested_fields_from_target,
 )
 import pytest
@@ -172,7 +172,7 @@ def test_assert_model_removes_no_nested_fields_from_target_should_not_raise_exce
     assert actual_missing_fields == expected_missing_fields
 
 
-def test_add_field_paths_to_target_struct_should_add_missing_fields_to_correct_parent() -> (
+def test_add_field_paths_to_struct_should_add_missing_fields_to_correct_parent() -> (
     None
 ):
     target_field = TableField(
@@ -202,12 +202,12 @@ def test_add_field_paths_to_target_struct_should_add_missing_fields_to_correct_p
         ],
     )
 
-    actual_field = add_field_paths_to_target_struct(target_field, missing_fields)
+    actual_field = add_field_paths_to_struct(target_field, missing_fields)
 
     assert actual_field == expected_field
 
 
-def test_add_field_paths_to_target_struct_should_not_update_field_if_child_field_does_not_belong() -> (
+def test_add_field_paths_to_struct_should_not_update_field_if_child_field_does_not_belong() -> (
     None
 ):
     target_field = TableField(
@@ -233,12 +233,12 @@ def test_add_field_paths_to_target_struct_should_not_update_field_if_child_field
         ],
     )
 
-    actual_field = add_field_paths_to_target_struct(target_field, missing_fields)
+    actual_field = add_field_paths_to_struct(target_field, missing_fields)
 
     assert actual_field == expected_field
 
 
-def test_add_new_model_fields_to_target_table_should_correctly_reconstructs_table() -> (
+def test_add_new_fields_to_table_should_correctly_reconstructs_table() -> (
     None
 ):
     target_table = Table(
@@ -276,12 +276,12 @@ def test_add_new_model_fields_to_target_table_should_correctly_reconstructs_tabl
         ),
     ]
 
-    actual_fields = add_new_model_fields_to_target_table(target_table, missing_fields)
+    actual_fields = add_new_fields_to_table(target_table, missing_fields)
 
     assert actual_fields == expected_fields
 
 
-def test_add_new_model_fields_to_target_table_should_include_selected_top_level_fields() -> (
+def test_add_new_fields_to_table_should_include_selected_top_level_fields() -> (
     None
 ):
     target_table = Table(
@@ -319,6 +319,6 @@ def test_add_new_model_fields_to_target_table_should_include_selected_top_level_
         TableField(name="new_col", type=BigQueryFieldType.STRING),
     ]
 
-    actual_fields = add_new_model_fields_to_target_table(target_table, missing_fields)
+    actual_fields = add_new_fields_to_table(target_table, missing_fields)
 
     assert actual_fields == expected_fields
