@@ -7,7 +7,7 @@ from dbt_dry_run.exception import SchemaChangeException
 MAX_SUPPORTED_NESTED_FIELD_DEPTH = 15
 
 
-def collect_field_paths_for_table(
+def _collect_field_paths_for_table(
     fields: list[TableField], prefix: tuple[str, ...] = (), current_depth: int = 1
 ) -> list[FieldPath]:
     collected: list[FieldPath] = []
@@ -17,51 +17,41 @@ def collect_field_paths_for_table(
         collected.append(FieldPath(path=path, field=field))
         if field.fields and current_depth < MAX_SUPPORTED_NESTED_FIELD_DEPTH:
             collected.extend(
-                collect_field_paths_for_table(field.fields, path, current_depth + 1)
+                _collect_field_paths_for_table(field.fields, path, current_depth + 1)
             )
     return collected
 
 
-def get_model_fields_not_present_in_target(
-    model_fields: list[TableField], target_fields: list[TableField]
+def _get_fields_not_present_in_table(
+    new_field_paths: list[FieldPath], table_field_paths: list[FieldPath]
 ) -> list[FieldPath]:
-    model_fields_with_paths = collect_field_paths_for_table(model_fields)
-    target_fields_with_paths = collect_field_paths_for_table(target_fields)
+    fields_not_present_in_table = []
 
-    target_field_paths = set(
-        target_field.path for target_field in target_fields_with_paths
-    )
-
-    fields_unique_to_model = []
-
-    for model_field in model_fields_with_paths:
-        if model_field.path not in target_field_paths:
-            fields_unique_to_model.append(
-                FieldPath(path=model_field.path, field=model_field.field)
+    for new_field_path in new_field_paths:
+        if new_field_path.path not in table_field_paths:
+            fields_not_present_in_table.append(
+                FieldPath(path=new_field_path.path, field=new_field_path.field)
             )
-    return fields_unique_to_model
+    return fields_not_present_in_table
 
 
-def assert_no_nested_fields_removed_from_table(
-    model_fields: list[TableField], target_fields: list[TableField]
+def _assert_no_nested_fields_removed_from_table(
+    new_field_paths: list[FieldPath], existing_table_field_paths: list[FieldPath]
 ) -> None:
-    model_fields_with_paths = collect_field_paths_for_table(model_fields)
-    target_fields_with_paths = collect_field_paths_for_table(target_fields)
-
-    target_field_paths = set(
-        target_field.path for target_field in target_fields_with_paths
+    table_field_paths = set(
+        table_field.path for table_field in existing_table_field_paths
     )
 
-    model_field_paths = set(model_field.path for model_field in model_fields_with_paths)
+    new_field_path_set = set(new_field.path for new_field in new_field_paths)
 
-    for target_field in target_field_paths:
-        if target_field not in model_field_paths and len(target_field) > 1:
+    for table_field in table_field_paths:
+        if table_field not in new_field_path_set and len(table_field) > 1:
             raise SchemaChangeException(
-                f"Field '{'.'.join(target_field)}' has been removed from a nested column"
+                f"Field '{'.'.join(table_field)}' has been removed from a nested column"
             )
 
 
-def add_field_paths_to_struct(
+def _add_field_paths_to_struct(
     struct: TableField,
     field_paths: list[FieldPath],
     current_path: tuple[str, ...] = (),
@@ -74,7 +64,7 @@ def add_field_paths_to_struct(
     if field_copy.fields and current_depth < MAX_SUPPORTED_NESTED_FIELD_DEPTH:
         child_fields = []
         for field in field_copy.fields:
-            updated_child = add_field_paths_to_struct(
+            updated_child = _add_field_paths_to_struct(
                 field, field_paths, path, current_depth + 1
             )
             child_fields.append(updated_child)
@@ -100,13 +90,26 @@ def add_field_paths_to_struct(
     return field_copy
 
 
-def add_new_fields_to_table(
-    table: Table, new_fields: list[FieldPath]
+def update_table_schema(
+    new_table_fields: list[TableField], table: Table
 ) -> list[TableField]:
-    updated_schema = []
-    for table_field in table.fields:
-        updated_struct_field = add_field_paths_to_struct(table_field, new_fields)
-        updated_schema.append(updated_struct_field)
+    existing_table_fields = table.fields
+
+    new_fields_with_paths = _collect_field_paths_for_table(new_table_fields)
+    table_fields_with_paths = _collect_field_paths_for_table(existing_table_fields)
+
+    new_fields = _get_fields_not_present_in_table(
+        new_fields_with_paths, table_fields_with_paths
+    )
+
+    _assert_no_nested_fields_removed_from_table(
+        new_fields_with_paths, table_fields_with_paths
+    )
+
+    updated_table_fields = []
+    for table_field in existing_table_fields:
+        updated_struct_field = _add_field_paths_to_struct(table_field, new_fields)
+        updated_table_fields.append(updated_struct_field)
 
     # Add any new top-level fields
     top_level_new_field = [
@@ -114,6 +117,6 @@ def add_new_fields_to_table(
     ]
 
     for new_field in top_level_new_field:
-        if not any(f.name == new_field.field.name for f in updated_schema):
-            updated_schema.append(new_field.field)
-    return updated_schema
+        if not any(f.name == new_field.field.name for f in updated_table_fields):
+            updated_table_fields.append(new_field.field)
+    return updated_table_fields

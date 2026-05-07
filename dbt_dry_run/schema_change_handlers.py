@@ -5,9 +5,7 @@ from dbt_dry_run.models import OnSchemaChange, Table
 from dbt_dry_run.models.dry_run_result import DryRunResult
 from dbt_dry_run.models.report import DryRunStatus
 from dbt_dry_run.schema_change import (
-    get_model_fields_not_present_in_target,
-    add_new_fields_to_table,
-    assert_no_nested_fields_removed_from_table,
+    update_table_schema,
 )
 
 
@@ -21,14 +19,10 @@ def append_new_columns_handler(
     if dry_run_result.table is None:
         return dry_run_result
 
-    missing_fields = get_model_fields_not_present_in_target(
-        dry_run_result.table.fields, target_table.fields
+    table_fields = update_table_schema(
+        new_table_fields=dry_run_result.table.fields, table=target_table
     )
-    assert_no_nested_fields_removed_from_table(
-        dry_run_result.table.fields, target_table.fields
-    )
-    final_fields = add_new_fields_to_table(target_table, missing_fields)
-    return dry_run_result.replace_table(Table(fields=final_fields))
+    return dry_run_result.replace_table(Table(fields=table_fields))
 
 
 def sync_all_columns_handler(
@@ -43,20 +37,13 @@ def sync_all_columns_handler(
         for existing_field in target_table.fields
         if existing_field.name in dry_run_column_names
     ]
-    model_fields_not_present_in_target = get_model_fields_not_present_in_target(
-        dry_run_result.table.fields, target_columns_with_removed_columns
-    )
 
-    # Should only remove top level columns that are not present in the model
-    assert_no_nested_fields_removed_from_table(
-        dry_run_result.table.fields, target_columns_with_removed_columns
-    )
-    final_fields = add_new_fields_to_table(
+    table_fields = update_table_schema(
+        new_table_fields=dry_run_result.table.fields,
         table=Table(fields=target_columns_with_removed_columns),
-        new_fields=model_fields_not_present_in_target,
     )
 
-    return dry_run_result.replace_table(Table(fields=final_fields))
+    return dry_run_result.replace_table(Table(fields=table_fields))
 
 
 def fail_handler(dry_run_result: DryRunResult, target_table: Table) -> DryRunResult:

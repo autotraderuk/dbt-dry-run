@@ -206,6 +206,38 @@ def test_append_handler_should_return_original_result_when_table_is_none() -> No
     assert actual_result == dry_run_result
 
 
+def test_sync_handler_removes_top_level_columns() -> None:
+    model_table = Table(
+        fields=[
+            TableField(name="col_1", type=BigQueryFieldType.STRING),
+            TableField(name="col_2", type=BigQueryFieldType.STRING),
+        ]
+    )
+    dry_run_result = DryRunResult(
+        node=A_NODE,
+        status=DryRunStatus.SUCCESS,
+        table=model_table,
+        exception=None,
+    )
+    target_table = Table(
+        fields=[
+            TableField(name="col_1", type=BigQueryFieldType.STRING),
+            TableField(name="col_2", type=BigQueryFieldType.STRING),
+            TableField(name="col_3", type=BigQueryFieldType.STRING),
+        ]
+    )
+    actual_result = sync_all_columns_handler(dry_run_result, target_table)
+
+    expected_table = Table(
+        fields=[
+            TableField(name="col_1", type=BigQueryFieldType.STRING),
+            TableField(name="col_2", type=BigQueryFieldType.STRING),
+        ]
+    )
+
+    assert actual_result.table == expected_table
+
+
 def test_sync_handler_adds_new_nested_fields_inside_struct() -> None:
     model_table = Table(
         fields=[
