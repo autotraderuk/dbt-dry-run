@@ -82,21 +82,21 @@ def add_field_paths_to_struct(
     else:
         field_copy.fields = field_copy.fields or None
 
-    # Add missing fields whose parent path matches this field's path.
-    for missing_field in field_paths:
-        parent_path = missing_field.path[:-1]
+    # Add new nested fields whose parent path matches this field's path.
+    for new_field in field_paths:
+        parent_path = new_field.path[:-1]
         if (
             parent_path == path
             and current_depth < MAX_SUPPORTED_NESTED_FIELD_DEPTH
-            and len(missing_field.path) <= MAX_SUPPORTED_NESTED_FIELD_DEPTH
+            and len(new_field.path) <= MAX_SUPPORTED_NESTED_FIELD_DEPTH
         ):
             if field_copy.fields is None:
                 field_copy.fields = []
             if not any(
-                existing_field.name == missing_field.field.name
+                existing_field.name == new_field.field.name
                 for existing_field in field_copy.fields
             ):
-                field_copy.fields.append(missing_field.field)
+                field_copy.fields.append(new_field.field)
     return field_copy
 
 
