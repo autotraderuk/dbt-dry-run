@@ -47,7 +47,7 @@ def sync_all_columns_handler(
         dry_run_result.table.fields, target_columns_with_removed_columns
     )
 
-    ## Should only remove top level columns that are not present in the model
+    # Should only remove top level columns that are not present in the model
     assert_model_removes_no_nested_fields_from_target(
         dry_run_result.table.fields, target_columns_with_removed_columns
     )

@@ -238,9 +238,7 @@ def test_add_field_paths_to_struct_should_not_update_field_if_child_field_does_n
     assert actual_field == expected_field
 
 
-def test_add_new_fields_to_table_should_correctly_reconstructs_table() -> (
-    None
-):
+def test_add_new_fields_to_table_should_correctly_reconstructs_table() -> None:
     target_table = Table(
         fields=[
             TableField(name="string_col", type=BigQueryFieldType.STRING),
@@ -281,9 +279,7 @@ def test_add_new_fields_to_table_should_correctly_reconstructs_table() -> (
     assert actual_fields == expected_fields
 
 
-def test_add_new_fields_to_table_should_include_selected_top_level_fields() -> (
-    None
-):
+def test_add_new_fields_to_table_should_include_selected_top_level_fields() -> None:
     target_table = Table(
         fields=[
             TableField(name="col_1", type=BigQueryFieldType.STRING),

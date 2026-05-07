@@ -101,14 +101,11 @@ def add_field_paths_to_struct(
 
 
 def add_new_fields_to_table(
-    table: Table,
-    new_fields: list[FieldPath]
+    table: Table, new_fields: list[FieldPath]
 ) -> list[TableField]:
     updated_schema = []
     for table_field in table.fields:
-        updated_struct_field = add_field_paths_to_struct(
-            table_field, new_fields
-        )
+        updated_struct_field = add_field_paths_to_struct(table_field, new_fields)
         updated_schema.append(updated_struct_field)
 
     # Add any new top-level fields

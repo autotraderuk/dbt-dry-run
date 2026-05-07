@@ -206,6 +206,76 @@ def test_append_handler_should_return_original_result_when_table_is_none() -> No
     assert actual_result == dry_run_result
 
 
+def test_sync_handler_adds_new_nested_fields_inside_struct() -> None:
+    model_table = Table(
+        fields=[
+            TableField(
+                name="struct_col",
+                type=BigQueryFieldType.STRUCT,
+                fields=[
+                    TableField(name="field_1", type=BigQueryFieldType.STRING),
+                    TableField(name="field_2", type=BigQueryFieldType.STRING),
+                ],
+            )
+        ]
+    )
+    dry_run_result = DryRunResult(
+        node=A_NODE,
+        status=DryRunStatus.SUCCESS,
+        table=model_table,
+        exception=None,
+    )
+    target_table = Table(
+        fields=[
+            TableField(
+                name="struct_col",
+                type=BigQueryFieldType.STRUCT,
+                fields=[TableField(name="field_1", type=BigQueryFieldType.STRING)],
+            )
+        ]
+    )
+
+    actual_result = sync_all_columns_handler(dry_run_result, target_table)
+
+    assert actual_result.table == model_table
+
+
+def test_sync_handler_adds_new_nested_fields_inside_repeated_struct() -> None:
+    model_table = Table(
+        fields=[
+            TableField(
+                name="items",
+                type=BigQueryFieldType.STRUCT,
+                mode=BigQueryFieldMode.REPEATED,
+                fields=[
+                    TableField(name="id", type=BigQueryFieldType.STRING),
+                    TableField(name="score", type=BigQueryFieldType.NUMERIC),
+                ],
+            )
+        ]
+    )
+    dry_run_result = DryRunResult(
+        node=A_NODE,
+        status=DryRunStatus.SUCCESS,
+        table=model_table,
+        exception=None,
+    )
+    target_table = Table(
+        fields=[
+            TableField(
+                name="items",
+                type=BigQueryFieldType.STRUCT,
+                mode=BigQueryFieldMode.REPEATED,
+                fields=[TableField(name="id", type=BigQueryFieldType.STRING)],
+            )
+        ]
+    )
+
+    actual_result = sync_all_columns_handler(dry_run_result, target_table)
+
+    assert actual_result.table == model_table
+
+
 def test_sync_handler_preserves_existing_column_order() -> None:
     model_table = Table(
         fields=[
@@ -316,42 +386,6 @@ def test_sync_handler_should_not_remove_nested_fields_from_repeated_structs() ->
         str(exc_info.value)
         == "Field 'array_col.field_2' has been removed from a nested column"
     )
-
-
-def test_sync_handler_adds_new_nested_fields_inside_repeated_struct() -> None:
-    model_table = Table(
-        fields=[
-            TableField(
-                name="items",
-                type=BigQueryFieldType.STRUCT,
-                mode=BigQueryFieldMode.REPEATED,
-                fields=[
-                    TableField(name="id", type=BigQueryFieldType.STRING),
-                    TableField(name="score", type=BigQueryFieldType.NUMERIC),
-                ],
-            )
-        ]
-    )
-    dry_run_result = DryRunResult(
-        node=A_NODE,
-        status=DryRunStatus.SUCCESS,
-        table=model_table,
-        exception=None,
-    )
-    target_table = Table(
-        fields=[
-            TableField(
-                name="items",
-                type=BigQueryFieldType.STRUCT,
-                mode=BigQueryFieldMode.REPEATED,
-                fields=[TableField(name="id", type=BigQueryFieldType.STRING)],
-            )
-        ]
-    )
-
-    actual_result = sync_all_columns_handler(dry_run_result, target_table)
-
-    assert actual_result.table == model_table
 
 
 def test_sync_handler_should_return_original_result_when_table_is_none() -> None:
