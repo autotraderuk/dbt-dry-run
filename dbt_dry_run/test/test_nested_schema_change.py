@@ -307,6 +307,7 @@ def test_add_new_model_fields_to_target_table_should_include_selected_top_level_
     ]
 
     expected_fields = [
+        TableField(name="col_1", type=BigQueryFieldType.STRING),
         TableField(
             name="struct_col",
             type=BigQueryFieldType.STRUCT,
@@ -318,10 +319,6 @@ def test_add_new_model_fields_to_target_table_should_include_selected_top_level_
         TableField(name="new_col", type=BigQueryFieldType.STRING),
     ]
 
-    actual_fields = add_new_model_fields_to_target_table(
-        target_table,
-        missing_fields,
-        included_top_level_field_names={"struct_col", "new_col"},
-    )
+    actual_fields = add_new_model_fields_to_target_table(target_table, missing_fields)
 
     assert actual_fields == expected_fields

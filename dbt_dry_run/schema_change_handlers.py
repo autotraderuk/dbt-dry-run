@@ -20,6 +20,7 @@ def append_new_columns_handler(
 ) -> DryRunResult:
     if dry_run_result.table is None:
         return dry_run_result
+
     missing_fields = get_model_fields_not_present_in_target(
         dry_run_result.table.fields, target_table.fields
     )
@@ -35,30 +36,26 @@ def sync_all_columns_handler(
 ) -> DryRunResult:
     if dry_run_result.table is None:
         return dry_run_result
-    predicted_column_names = set(field.name for field in dry_run_result.table.fields)
-    target_column_names = set(field.name for field in target_table.fields)
-    new_columns = [
-        new_field
-        for new_field in dry_run_result.table.fields
-        if new_field.name not in target_column_names
-    ]
-    existing_columns = [
+
+    dry_run_column_names = set(field.name for field in dry_run_result.table.fields)
+    target_columns_with_removed_columns = [
         existing_field
         for existing_field in target_table.fields
-        if existing_field.name in predicted_column_names
+        if existing_field.name in dry_run_column_names
     ]
-    final_field_names = set(field.name for field in existing_columns + new_columns)
     model_fields_not_present_in_target = get_model_fields_not_present_in_target(
-        dry_run_result.table.fields, existing_columns
+        dry_run_result.table.fields, target_columns_with_removed_columns
     )
+
+    ## Should only remove top level columns that are not present in the model
     assert_model_removes_no_nested_fields_from_target(
-        dry_run_result.table.fields, existing_columns
+        dry_run_result.table.fields, target_columns_with_removed_columns
     )
     final_fields = add_new_model_fields_to_target_table(
-        target_table=target_table,
+        target_table=Table(fields=target_columns_with_removed_columns),
         new_fields_from_model=model_fields_not_present_in_target,
-        included_top_level_field_names=final_field_names,
     )
+
     return dry_run_result.replace_table(Table(fields=final_fields))
 
 

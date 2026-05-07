@@ -82,11 +82,11 @@ def add_field_paths_to_target_struct(
     else:
         field_copy.fields = field_copy.fields or None
 
-    # Add missing fields whose parent lineage matches this field's path.
+    # Add missing fields whose parent path matches this field's path.
     for missing in field_paths:
-        parent_lineage = missing.path[:-1]
+        parent_path = missing.path[:-1]
         if (
-            parent_lineage == path
+            parent_path == path
             and current_depth < MAX_SUPPORTED_NESTED_FIELD_DEPTH
             and len(missing.path) <= MAX_SUPPORTED_NESTED_FIELD_DEPTH
         ):
@@ -101,33 +101,21 @@ def add_field_paths_to_target_struct(
 
 
 def add_new_model_fields_to_target_table(
-    target_table: Table,
-    new_fields_from_model: list[FieldPath],
-    included_top_level_field_names: set[str] | None = None,
+    target_table: Table, new_fields_from_model: list[FieldPath]
 ) -> list[TableField]:
     updated_schema = []
     for target_field in target_table.fields:
-        if (
-            included_top_level_field_names is not None
-            and target_field.name not in included_top_level_field_names
-        ):
-            continue
         updated_struct_field = add_field_paths_to_target_struct(
             target_field, new_fields_from_model
         )
         updated_schema.append(updated_struct_field)
 
-    # Add any missing top-level fields for sync_all_columns_handler
-    top_level_missing = [
-        model_field
-        for model_field in new_fields_from_model
-        if model_field.is_top_level
-        and (
-            included_top_level_field_names is None
-            or model_field.field.name in included_top_level_field_names
-        )
+    # Add any new top-level fields
+    top_level_new_field = [
+        new_field for new_field in new_fields_from_model if new_field.is_top_level
     ]
-    for model_field in top_level_missing:
+
+    for model_field in top_level_new_field:
         if not any(f.name == model_field.field.name for f in updated_schema):
             updated_schema.append(model_field.field)
     return updated_schema
