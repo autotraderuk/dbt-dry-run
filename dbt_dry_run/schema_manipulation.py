@@ -90,7 +90,7 @@ def _add_field_paths_to_struct(
     return field_copy
 
 
-def update_table_schema(
+def merge_table_fields(
     new_table_fields: list[TableField], table: Table
 ) -> list[TableField]:
     existing_table_fields = table.fields

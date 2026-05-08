@@ -3,8 +3,8 @@ import pytest
 from dbt_dry_run.exception import SchemaChangeException
 from dbt_dry_run.models import TableField, BigQueryFieldType
 from dbt_dry_run.models.table import Table
-from dbt_dry_run.schema_change import (
-    update_table_schema,
+from dbt_dry_run.schema_manipulation import (
+    merge_table_fields,
 )
 
 
@@ -25,7 +25,7 @@ def test_update_table_schema_should_include_new_top_level_fields() -> None:
         TableField(name="new_col", type=BigQueryFieldType.STRING),
     ]
 
-    actual_fields = update_table_schema(
+    actual_fields = merge_table_fields(
         new_table_fields=missing_fields, table=target_table
     )
 
@@ -75,7 +75,7 @@ def test_update_table_schema_should_include_new_nested_fields() -> None:
         TableField(name="new_col", type=BigQueryFieldType.STRING),
     ]
 
-    actual_fields = update_table_schema(
+    actual_fields = merge_table_fields(
         new_table_fields=missing_fields, table=target_table
     )
 
@@ -96,7 +96,7 @@ def test_update_table_schema_should_not_drop_top_level_fields_not_present_in_new
         TableField(name="col_1", type=BigQueryFieldType.STRING),
     ]
 
-    actual_fields = update_table_schema(new_table_fields=new_table_fields, table=table)
+    actual_fields = merge_table_fields(new_table_fields=new_table_fields, table=table)
 
     expected_fields = [
         TableField(name="col_1", type=BigQueryFieldType.STRING),
@@ -135,7 +135,7 @@ def test_update_table_schema_should_not_drop_removed_nested_fields_and_should_ra
     ]
 
     with pytest.raises(SchemaChangeException) as exc_info:
-        update_table_schema(new_table_fields=new_table_fields, table=table)
+        merge_table_fields(new_table_fields=new_table_fields, table=table)
 
     assert (
         str(exc_info.value)

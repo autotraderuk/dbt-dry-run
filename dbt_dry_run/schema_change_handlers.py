@@ -4,8 +4,8 @@ from dbt_dry_run.exception import SchemaChangeException
 from dbt_dry_run.models import OnSchemaChange, Table
 from dbt_dry_run.models.dry_run_result import DryRunResult
 from dbt_dry_run.models.report import DryRunStatus
-from dbt_dry_run.schema_change import (
-    update_table_schema,
+from dbt_dry_run.schema_manipulation import (
+    merge_table_fields, assert_no_nested_fields_removed_from_table
 )
 
 
@@ -19,9 +19,11 @@ def append_new_columns_handler(
     if dry_run_result.table is None:
         return dry_run_result
 
-    table_fields = update_table_schema(
+    table_fields = merge_table_fields(
         new_table_fields=dry_run_result.table.fields, table=target_table
     )
+
+    ## assert_no_nested_fields_removed_from_table
     return dry_run_result.replace_table(Table(fields=table_fields))
 
 
@@ -38,10 +40,12 @@ def sync_all_columns_handler(
         if existing_field.name in dry_run_column_names
     ]
 
-    table_fields = update_table_schema(
+    table_fields = merge_table_fields(
         new_table_fields=dry_run_result.table.fields,
         table=Table(fields=target_columns_with_removed_columns),
     )
+
+    ## assert_no_nested_fields_removed_from_table
 
     return dry_run_result.replace_table(Table(fields=table_fields))
 
@@ -49,6 +53,7 @@ def sync_all_columns_handler(
 def fail_handler(dry_run_result: DryRunResult, target_table: Table) -> DryRunResult:
     if dry_run_result.table is None:
         return dry_run_result
+    ## TODO: scan nested fields
     predicted_table_field_names = set(
         [field.name for field in dry_run_result.table.fields]
     )
