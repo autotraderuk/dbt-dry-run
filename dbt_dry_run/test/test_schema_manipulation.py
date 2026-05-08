@@ -8,14 +8,12 @@ from dbt_dry_run.schema_manipulation import (
 )
 
 
-def test_update_table_schema_should_include_new_top_level_fields() -> None:
-    target_table = Table(
-        fields=[
+def test_merge_table_fields_should_include_new_top_level_fields() -> None:
+    table_1_fields = [
             TableField(name="col_1", type=BigQueryFieldType.STRING),
         ]
-    )
 
-    missing_fields = [
+    table_2_fields = [
         TableField(name="col_1", type=BigQueryFieldType.STRING),
         TableField(name="new_col", type=BigQueryFieldType.STRING),
     ]
@@ -26,15 +24,14 @@ def test_update_table_schema_should_include_new_top_level_fields() -> None:
     ]
 
     actual_fields = merge_table_fields(
-        new_table_fields=missing_fields, table=target_table
+        table_fields_1=table_1_fields, table_fields_2=table_2_fields
     )
 
     assert actual_fields == expected_fields
 
 
-def test_update_table_schema_should_include_new_nested_fields() -> None:
-    target_table = Table(
-        fields=[
+def test_merge_table_fields_should_include_new_nested_fields() -> None:
+    table_fields_1 = [
             TableField(name="col_1", type=BigQueryFieldType.STRING),
             TableField(
                 name="struct_col",
@@ -42,9 +39,8 @@ def test_update_table_schema_should_include_new_nested_fields() -> None:
                 fields=[TableField(name="field_1", type=BigQueryFieldType.STRING)],
             ),
         ]
-    )
 
-    missing_fields = [
+    table_fields_2 = [
         TableField(
             name="struct_col",
             type=BigQueryFieldType.STRUCT,
@@ -76,27 +72,25 @@ def test_update_table_schema_should_include_new_nested_fields() -> None:
     ]
 
     actual_fields = merge_table_fields(
-        table_fields_1=missing_fields, table_fields_2=target_table
+        table_fields_1=table_fields_1, table_fields_2=table_fields_2
     )
 
     assert actual_fields == expected_fields
 
 
-def test_update_table_schema_should_not_drop_top_level_fields_not_present_in_new_table_fields() -> (
+def test_merge_table_fields_should_not_drop_top_level_fields_not_present_in_table_1_fields() -> (
     None
 ):
-    table = Table(
-        fields=[
+    table_fields_1 = [
             TableField(name="col_1", type=BigQueryFieldType.STRING),
             TableField(name="removed_col", type=BigQueryFieldType.STRING),
         ]
-    )
 
-    new_table_fields = [
+    table_fields_2 = [
         TableField(name="col_1", type=BigQueryFieldType.STRING),
     ]
 
-    actual_fields = merge_table_fields(table_fields_1=new_table_fields, table_fields_2=table)
+    actual_fields = merge_table_fields(table_fields_1=table_fields_1, table_fields_2=table_fields_2)
 
     expected_fields = [
         TableField(name="col_1", type=BigQueryFieldType.STRING),
@@ -106,11 +100,10 @@ def test_update_table_schema_should_not_drop_top_level_fields_not_present_in_new
     assert actual_fields == expected_fields
 
 
-def test_update_table_schema_should_not_drop_removed_nested_fields_and_should_raise_schema_change_exception() -> (
+def test_merge_table_fields_should_not_drop_removed_nested_fields() -> (
     None
 ):
-    table = Table(
-        fields=[
+    table_fields_1 = [
             TableField(name="col_1", type=BigQueryFieldType.STRING),
             TableField(
                 name="struct_col",
@@ -121,9 +114,8 @@ def test_update_table_schema_should_not_drop_removed_nested_fields_and_should_ra
                 ],
             ),
         ]
-    )
 
-    new_table_fields = [
+    table_fields_2 = [
         TableField(name="col_1", type=BigQueryFieldType.STRING),
         TableField(
             name="struct_col",
@@ -134,10 +126,19 @@ def test_update_table_schema_should_not_drop_removed_nested_fields_and_should_ra
         ),
     ]
 
-    with pytest.raises(SchemaChangeException) as exc_info:
-        merge_table_fields(table_fields_1=new_table_fields, table_fields_2=table)
+    expected_fields = [
+        TableField(name="col_1", type=BigQueryFieldType.STRING),
+        TableField(
+            name="struct_col",
+            type=BigQueryFieldType.STRUCT,
+            fields=[
+                TableField(name="kept_field", type=BigQueryFieldType.STRING),
+                TableField(name="removed_field", type=BigQueryFieldType.NUMERIC),
+            ],
+        ),
+    ]
 
-    assert (
-        str(exc_info.value)
-        == "Field 'struct_col.removed_field' has been removed from a nested column"
-    )
+    actual_fields = merge_table_fields(table_fields_1=table_fields_1, table_fields_2=table_fields_2)
+
+    assert actual_fields == expected_fields
+

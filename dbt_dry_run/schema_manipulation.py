@@ -98,7 +98,7 @@ def merge_table_fields(
     field_paths_2 = _collect_field_paths_for_table(table_fields_2)
 
     new_fields = _get_fields_not_present_in_table(
-        field_paths_1, field_paths_2
+        field_paths_2, field_paths_1
     )
 
     # _assert_no_nested_fields_removed_from_table(
@@ -106,7 +106,7 @@ def merge_table_fields(
     # )
 
     merged_table_fields = []
-    for table_field in table_fields_2:
+    for table_field in table_fields_1:
         merged_struct_field = _add_field_paths_to_struct(table_field, new_fields)
         merged_table_fields.append(merged_struct_field)
 
