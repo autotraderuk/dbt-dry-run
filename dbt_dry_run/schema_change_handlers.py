@@ -50,8 +50,6 @@ def sync_all_columns_handler(
         new_table_fields=dry_run_result.table.fields,
     )
 
-    ## assert_no_nested_fields_removed_from_table
-
     return dry_run_result.replace_table(Table(fields=table_fields))
 
 

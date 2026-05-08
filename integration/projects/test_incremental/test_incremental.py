@@ -84,6 +84,52 @@ def test_struct_column_sync_all_columns_raises_error_if_nested_field_is_removed(
         )
 
 
+def test_fail_handler_raises_exception_if_top_level_fields_are_removed(
+    compiled_project: ProjectContext,
+) -> None:
+    top_level_node_id = "model.test_incremental.fail_handler_remove_top_level_field"
+    top_level_manifest_node = compiled_project.manifest.nodes[top_level_node_id]
+    top_level_columns = ["my_string STRING", "removed_col STRING"]
+    with compiled_project.create_state(top_level_manifest_node, top_level_columns):
+        top_level_run_result = compiled_project.dry_run()
+        assert_report_produced(top_level_run_result)
+        assert_node_failed_with_error(
+            top_level_run_result.get_report(),
+            top_level_node_id,
+            "SchemaChangeException",
+        )
+        top_level_output = (
+            top_level_run_result.process.stdout.decode("utf-8")
+            + top_level_run_result.process.stderr.decode("utf-8")
+        )
+        assert "Incremental model has changed schemas." in top_level_output
+        assert "Fields removed:" in top_level_output
+        assert "removed_col" in top_level_output
+
+
+def test_fail_handler_raises_exception_if_nested_fields_are_removed(
+        compiled_project: ProjectContext,
+) -> None:
+    nested_node_id = "model.test_incremental.fail_handler_remove_nested_field"
+    nested_manifest_node = compiled_project.manifest.nodes[nested_node_id]
+    nested_columns = ["my_struct STRUCT<kept_field STRING, removed_field STRING>"]
+    with compiled_project.create_state(nested_manifest_node, nested_columns):
+        nested_run_result = compiled_project.dry_run()
+        assert_report_produced(nested_run_result)
+        assert_node_failed_with_error(
+            nested_run_result.get_report(),
+            nested_node_id,
+            "SchemaChangeException",
+        )
+        nested_output = (
+            nested_run_result.process.stdout.decode("utf-8")
+            + nested_run_result.process.stderr.decode("utf-8")
+        )
+        assert "Incremental model has changed schemas." in nested_output
+        assert "Fields removed:" in nested_output
+        assert "my_struct.removed_field" in nested_output
+
+
 def test_cli_full_refresh_should_use_the_model_schema(
     compiled_project_full_refresh: ProjectContext,
 ) -> None:
