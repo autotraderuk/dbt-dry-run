@@ -76,7 +76,7 @@ def test_update_table_schema_should_include_new_nested_fields() -> None:
     ]
 
     actual_fields = merge_table_fields(
-        new_table_fields=missing_fields, table=target_table
+        table_fields_1=missing_fields, table_fields_2=target_table
     )
 
     assert actual_fields == expected_fields
@@ -96,7 +96,7 @@ def test_update_table_schema_should_not_drop_top_level_fields_not_present_in_new
         TableField(name="col_1", type=BigQueryFieldType.STRING),
     ]
 
-    actual_fields = merge_table_fields(new_table_fields=new_table_fields, table=table)
+    actual_fields = merge_table_fields(table_fields_1=new_table_fields, table_fields_2=table)
 
     expected_fields = [
         TableField(name="col_1", type=BigQueryFieldType.STRING),
@@ -135,7 +135,7 @@ def test_update_table_schema_should_not_drop_removed_nested_fields_and_should_ra
     ]
 
     with pytest.raises(SchemaChangeException) as exc_info:
-        merge_table_fields(new_table_fields=new_table_fields, table=table)
+        merge_table_fields(table_fields_1=new_table_fields, table_fields_2=table)
 
     assert (
         str(exc_info.value)

@@ -91,25 +91,24 @@ def _add_field_paths_to_struct(
 
 
 def merge_table_fields(
-    new_table_fields: list[TableField], table: Table
+    table_fields_1: list[TableField], table_fields_2: list[TableField]
 ) -> list[TableField]:
-    existing_table_fields = table.fields
 
-    new_fields_with_paths = _collect_field_paths_for_table(new_table_fields)
-    table_fields_with_paths = _collect_field_paths_for_table(existing_table_fields)
+    field_paths_1 = _collect_field_paths_for_table(table_fields_1)
+    field_paths_2 = _collect_field_paths_for_table(table_fields_2)
 
     new_fields = _get_fields_not_present_in_table(
-        new_fields_with_paths, table_fields_with_paths
+        field_paths_1, field_paths_2
     )
 
-    _assert_no_nested_fields_removed_from_table(
-        new_fields_with_paths, table_fields_with_paths
-    )
+    # _assert_no_nested_fields_removed_from_table(
+    #     table_fields_1_with_paths, table_fields_2_with_paths
+    # )
 
-    updated_table_fields = []
-    for table_field in existing_table_fields:
-        updated_struct_field = _add_field_paths_to_struct(table_field, new_fields)
-        updated_table_fields.append(updated_struct_field)
+    merged_table_fields = []
+    for table_field in table_fields_2:
+        merged_struct_field = _add_field_paths_to_struct(table_field, new_fields)
+        merged_table_fields.append(merged_struct_field)
 
     # Add any new top-level fields
     top_level_new_field = [
@@ -117,6 +116,6 @@ def merge_table_fields(
     ]
 
     for new_field in top_level_new_field:
-        if not any(f.name == new_field.field.name for f in updated_table_fields):
-            updated_table_fields.append(new_field.field)
-    return updated_table_fields
+        if not any(f.name == new_field.field.name for f in merged_table_fields):
+            merged_table_fields.append(new_field.field)
+    return merged_table_fields
