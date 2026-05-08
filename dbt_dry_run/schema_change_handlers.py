@@ -24,8 +24,8 @@ def append_new_columns_handler(
     assert_no_nested_fields_removed(dry_run_result.table.fields, target_table.fields)
 
     table_fields = merge_table_fields(
-        old_table_fields=target_table.fields,
-        new_table_fields=dry_run_result.table.fields,
+        existing_fields=target_table.fields,
+        new_fields=dry_run_result.table.fields,
     )
 
     return dry_run_result.replace_table(Table(fields=table_fields))
@@ -47,8 +47,8 @@ def sync_all_columns_handler(
     assert_no_nested_fields_removed(dry_run_result.table.fields, target_table.fields)
 
     table_fields = merge_table_fields(
-        old_table_fields=target_columns_with_removed_columns,
-        new_table_fields=dry_run_result.table.fields,
+        existing_fields=target_columns_with_removed_columns,
+        new_fields=dry_run_result.table.fields,
     )
 
     return dry_run_result.replace_table(Table(fields=table_fields))
