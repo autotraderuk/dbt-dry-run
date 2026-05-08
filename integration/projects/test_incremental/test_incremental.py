@@ -98,17 +98,16 @@ def test_fail_handler_raises_exception_if_top_level_fields_are_removed(
             top_level_node_id,
             "SchemaChangeException",
         )
-        top_level_output = (
-            top_level_run_result.process.stdout.decode("utf-8")
-            + top_level_run_result.process.stderr.decode("utf-8")
-        )
+        top_level_output = top_level_run_result.process.stdout.decode(
+            "utf-8"
+        ) + top_level_run_result.process.stderr.decode("utf-8")
         assert "Incremental model has changed schemas." in top_level_output
         assert "Fields removed:" in top_level_output
         assert "removed_col" in top_level_output
 
 
 def test_fail_handler_raises_exception_if_nested_fields_are_removed(
-        compiled_project: ProjectContext,
+    compiled_project: ProjectContext,
 ) -> None:
     nested_node_id = "model.test_incremental.fail_handler_remove_nested_field"
     nested_manifest_node = compiled_project.manifest.nodes[nested_node_id]
@@ -121,10 +120,9 @@ def test_fail_handler_raises_exception_if_nested_fields_are_removed(
             nested_node_id,
             "SchemaChangeException",
         )
-        nested_output = (
-            nested_run_result.process.stdout.decode("utf-8")
-            + nested_run_result.process.stderr.decode("utf-8")
-        )
+        nested_output = nested_run_result.process.stdout.decode(
+            "utf-8"
+        ) + nested_run_result.process.stderr.decode("utf-8")
         assert "Incremental model has changed schemas." in nested_output
         assert "Fields removed:" in nested_output
         assert "my_struct.removed_field" in nested_output

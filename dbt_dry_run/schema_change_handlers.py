@@ -1,5 +1,6 @@
 from typing import Callable, Dict, Optional
 
+from dbt_dry_run.columns_metadata import expand_table_fields
 from dbt_dry_run.exception import SchemaChangeException
 from dbt_dry_run.models import OnSchemaChange, Table
 from dbt_dry_run.models.dry_run_result import DryRunResult
@@ -56,11 +57,9 @@ def sync_all_columns_handler(
 def fail_handler(dry_run_result: DryRunResult, target_table: Table) -> DryRunResult:
     if dry_run_result.table is None:
         return dry_run_result
-    ## TODO: scan nested fields
-    predicted_table_field_names = set(
-        [field.name for field in dry_run_result.table.fields]
-    )
-    target_table_field_names = set([field.name for field in target_table.fields])
+
+    predicted_table_field_names = set(expand_table_fields(dry_run_result.table))
+    target_table_field_names = set(expand_table_fields(target_table))
     added_fields = predicted_table_field_names.difference(target_table_field_names)
     removed_fields = target_table_field_names.difference(predicted_table_field_names)
     schema_changed = added_fields or removed_fields
