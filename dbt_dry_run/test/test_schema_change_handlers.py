@@ -206,7 +206,9 @@ def test_append_handler_should_return_original_result_when_table_is_none() -> No
     assert actual_result == dry_run_result
 
 
-def test_append_handler_raises_schema_change_exception_when_nested_field_is_removed() -> None:
+def test_append_handler_raises_schema_change_exception_when_nested_field_is_removed() -> (
+    None
+):
     target_table = Table(
         fields=[
             TableField(
@@ -242,8 +244,8 @@ def test_append_handler_raises_schema_change_exception_when_nested_field_is_remo
         append_new_columns_handler(dry_run_result, target_table)
 
     assert (
-            str(exc_info.value)
-            == "Field 'struct_col.removed_field' has been removed from a nested column"
+        str(exc_info.value)
+        == "Field 'struct_col.removed_field' has been removed from a nested column"
     )
 
 
@@ -348,7 +350,10 @@ def test_sync_handler_adds_new_nested_fields_inside_repeated_struct() -> None:
 
     assert actual_result.table == model_table
 
-def test_sync_handler_raises_schema_change_exception_when_nested_field_is_removed() -> None:
+
+def test_sync_handler_raises_schema_change_exception_when_nested_field_is_removed() -> (
+    None
+):
     target_table = Table(
         fields=[
             TableField(
@@ -384,8 +389,8 @@ def test_sync_handler_raises_schema_change_exception_when_nested_field_is_remove
         sync_all_columns_handler(dry_run_result, target_table)
 
     assert (
-            str(exc_info.value)
-            == "Field 'struct_col.removed_field' has been removed from a nested column"
+        str(exc_info.value)
+        == "Field 'struct_col.removed_field' has been removed from a nested column"
     )
 
 
