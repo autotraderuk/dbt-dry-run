@@ -35,9 +35,13 @@ def _get_fields_not_present_in_table(
     return fields_not_present_in_table
 
 
-def _assert_no_nested_fields_removed_from_table(
-    new_field_paths: list[FieldPath], existing_table_field_paths: list[FieldPath]
+def assert_no_nested_fields_removed_from_table(
+    new_fields: list[TableField], existing_table_fields: list[TableField]
 ) -> None:
+
+    existing_table_field_paths = _collect_field_paths_for_table(existing_table_fields)
+    new_field_paths = _collect_field_paths_for_table(new_fields)
+
     table_field_paths = set(
         table_field.path for table_field in existing_table_field_paths
     )

@@ -19,11 +19,12 @@ def append_new_columns_handler(
     if dry_run_result.table is None:
         return dry_run_result
 
+    assert_no_nested_fields_removed_from_table(dry_run_result.table.fields, target_table.fields)
+
     table_fields = merge_table_fields(
-        table_fields_1=dry_run_result.table.fields, table_fields_2=target_table
+        table_fields_1=target_table.fields, table_fields_2=dry_run_result.table.fields
     )
 
-    ## assert_no_nested_fields_removed_from_table
     return dry_run_result.replace_table(Table(fields=table_fields))
 
 
@@ -40,9 +41,10 @@ def sync_all_columns_handler(
         if existing_field.name in dry_run_column_names
     ]
 
+    assert_no_nested_fields_removed_from_table(dry_run_result.table.fields, target_table.fields)
+
     table_fields = merge_table_fields(
-        table_fields_1=dry_run_result.table.fields,
-        table_fields_2=Table(fields=target_columns_with_removed_columns),
+        table_fields_1=target_columns_with_removed_columns, table_fields_2=dry_run_result.table.fields
     )
 
     ## assert_no_nested_fields_removed_from_table
