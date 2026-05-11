@@ -20,7 +20,7 @@ def test_merge_table_fields_should_include_new_top_level_fields() -> None:
     ]
 
     actual_fields = merge_table_fields(
-        existing_fields=table_1_fields, new_fields=table_2_fields
+        table_2_fields=table_1_fields, table_1_fields=table_2_fields
     )
 
     assert actual_fields == expected_fields
@@ -68,7 +68,7 @@ def test_merge_table_fields_should_include_new_nested_fields() -> None:
     ]
 
     actual_fields = merge_table_fields(
-        existing_fields=table_fields_1, new_fields=table_fields_2
+        table_2_fields=table_fields_1, table_1_fields=table_fields_2
     )
 
     assert actual_fields == expected_fields
@@ -87,7 +87,7 @@ def test_merge_table_fields_should_not_drop_top_level_fields_not_present_in_tabl
     ]
 
     actual_fields = merge_table_fields(
-        existing_fields=table_fields_1, new_fields=table_fields_2
+        table_2_fields=table_fields_1, table_1_fields=table_fields_2
     )
 
     expected_fields = [
@@ -135,7 +135,7 @@ def test_merge_table_fields_should_not_drop_removed_nested_fields() -> None:
     ]
 
     actual_fields = merge_table_fields(
-        existing_fields=table_fields_1, new_fields=table_fields_2
+        table_2_fields=table_fields_1, table_1_fields=table_fields_2
     )
 
     assert actual_fields == expected_fields

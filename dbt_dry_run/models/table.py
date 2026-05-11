@@ -7,6 +7,9 @@ from google.cloud.bigquery.table import Table as BigQueryTable
 from pydantic import Field
 from pydantic.main import BaseModel
 
+# BQ limitation
+MAX_SUPPORTED_NESTED_FIELD_DEPTH = 15
+
 
 class BigQueryFieldMode(str, Enum):
     NULLABLE = "NULLABLE"
@@ -102,7 +105,7 @@ class Table(BaseModel):
         fields: List[TableField],
         prefix: Tuple[str, ...] = (),
         current_depth: int = 1,
-        max_depth: int = 15,
+        max_depth: int = MAX_SUPPORTED_NESTED_FIELD_DEPTH,
     ) -> List[TableField]:
         collected: List[TableField] = []
         for field in fields:
