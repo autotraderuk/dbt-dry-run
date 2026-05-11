@@ -43,22 +43,18 @@ class TableField(BaseModel):
     mode: Optional[BigQueryFieldMode] = None
     fields: Optional[List["TableField"]] = None
     description: Optional[str] = None
+    path: Optional[Tuple[str, ...]] = None
 
     @pydantic.field_validator("type_", mode="before")
     def validate_type_field(cls, field: str) -> BigQueryFieldType:
         return BigQueryFieldType(field)
 
-
-TableField.model_rebuild()
-
-
-class FieldPath(BaseModel):
-    path: Tuple[str, ...]
-    field: TableField
-
     @property
     def is_top_level(self) -> bool:
-        return len(self.path) == 1
+        return self.path is not None and len(self.path) == 1
+
+
+TableField.model_rebuild()
 
 
 class Table(BaseModel):
@@ -99,6 +95,26 @@ class Table(BaseModel):
             )
             new_fields.append(table_field)
         return new_fields
+
+    @classmethod
+    def collect_flattened_field_paths(
+        cls,
+        fields: List[TableField],
+        prefix: Tuple[str, ...] = (),
+        current_depth: int = 1,
+        max_depth: int = 15,
+    ) -> List[TableField]:
+        collected: List[TableField] = []
+        for field in fields:
+            path = prefix + (field.name,)
+            collected.append(field.model_copy(deep=True, update={"path": path}))
+            if field.fields and current_depth < max_depth:
+                collected.extend(
+                    cls.collect_flattened_field_paths(
+                        field.fields, path, current_depth + 1, max_depth
+                    )
+                )
+        return collected
 
     def common_non_struct_field_names(self, other: "Table") -> Set[str]:
         return self.non_struct_field_names.intersection(other.non_struct_field_names)
