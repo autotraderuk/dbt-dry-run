@@ -8,6 +8,7 @@ from dbt_dry_run.models.report import DryRunStatus
 from dbt_dry_run.models.table import MAX_SUPPORTED_NESTED_FIELD_DEPTH
 from dbt_dry_run.schema_manipulation import (
     merge_table_fields,
+    collect_flattened_field_paths,
 )
 
 
@@ -24,8 +25,8 @@ def append_new_columns_handler(
     _assert_no_nested_fields_removed(dry_run_result.table.fields, target_table.fields)
 
     table_fields = merge_table_fields(
-        table_1_fields=dry_run_result.table.fields,
-        table_2_fields=target_table.fields,
+        table_1_fields=target_table.fields,
+        table_2_fields=dry_run_result.table.fields,
     )
 
     return dry_run_result.replace_table(Table(fields=table_fields))
@@ -47,8 +48,8 @@ def sync_all_columns_handler(
     _assert_no_nested_fields_removed(dry_run_result.table.fields, target_table.fields)
 
     table_fields = merge_table_fields(
-        table_1_fields=dry_run_result.table.fields,
-        table_2_fields=target_columns_with_removed_columns,
+        table_1_fields=target_columns_with_removed_columns,
+        table_2_fields=dry_run_result.table.fields,
     )
 
     return dry_run_result.replace_table(Table(fields=table_fields))
@@ -96,10 +97,10 @@ ON_SCHEMA_CHANGE_TABLE_HANDLER: Dict[
 def _assert_no_nested_fields_removed(
     new_fields: list[TableField], existing_fields: list[TableField]
 ) -> None:
-    existing_fields_with_flattened_path = Table.collect_flattened_field_paths(
+    existing_fields_with_flattened_path = collect_flattened_field_paths(
         existing_fields, max_depth=MAX_SUPPORTED_NESTED_FIELD_DEPTH
     )
-    new_fields_with_flattened_path = Table.collect_flattened_field_paths(
+    new_fields_with_flattened_path = collect_flattened_field_paths(
         new_fields, max_depth=MAX_SUPPORTED_NESTED_FIELD_DEPTH
     )
 
