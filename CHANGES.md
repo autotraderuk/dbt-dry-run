@@ -1,5 +1,13 @@
 ## Changelog
 
+# dbt-dry-run v0.9.0
+
+## Improvements
+
+- Allow addition of nested fields to STRUCT columns in incremental tables when schema change config is set to 
+  `append_new_columns` or `sync_new_columns`. This is a feature introduced in dbt v1.11. This means the dry run may 
+  erroneously succeed for earlier versions of dbt.
+
 # dbt-dry-run v0.8.7
 
 ## Improvements
