@@ -1,11 +1,14 @@
 from enum import Enum
-from typing import List, Optional, Set
+from typing import List, Optional, Set, Tuple
 
 import pydantic
 from google.cloud.bigquery import SchemaField
 from google.cloud.bigquery.table import Table as BigQueryTable
 from pydantic import Field
 from pydantic.main import BaseModel
+
+# BQ limitation
+MAX_SUPPORTED_NESTED_FIELD_DEPTH = 15
 
 
 class BigQueryFieldMode(str, Enum):
@@ -52,6 +55,15 @@ class TableField(BaseModel):
 TableField.model_rebuild()
 
 
+class TableFieldWithPath(BaseModel):
+    field: TableField
+    path: Tuple[str, ...]
+
+    @property
+    def is_top_level(self) -> bool:
+        return self.path is not None and len(self.path) == 1
+
+
 class Table(BaseModel):
     fields: List[TableField]
 
@@ -64,6 +76,14 @@ class Table(BaseModel):
     @property
     def field_names(self) -> Set[str]:
         return set(field.name for field in self.fields)
+
+    @property
+    def non_struct_field_names(self) -> Set[str]:
+        return set(
+            field.name
+            for field in self.fields
+            if field.type_ != BigQueryFieldType.RECORD
+        )
 
     @classmethod
     def map_fields(cls, schema: Optional[List[SchemaField]]) -> List[TableField]:
@@ -83,5 +103,5 @@ class Table(BaseModel):
             new_fields.append(table_field)
         return new_fields
 
-    def common_field_names(self, other: "Table") -> Set[str]:
-        return self.field_names.intersection(other.field_names)
+    def common_non_struct_field_names(self, other: "Table") -> Set[str]:
+        return self.non_struct_field_names.intersection(other.non_struct_field_names)

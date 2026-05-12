@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dbt-dry-run"
-version = "0.8.7"
+version = "0.9.0"
 description = "Dry run dbt projects"
 authors = ["Connor Charles <connor.charles@autotrader.co.uk>",
            "Phil hope <philip.hope@autotrader.co.uk>",
@@ -8,6 +8,7 @@ authors = ["Connor Charles <connor.charles@autotrader.co.uk>",
            "Richard Wilmer <richard.wilmer@autotrader.co.uk>",
            "Cat Wates <catherine.wates@autotrader.co.uk>",
            "Shu Wang <shu.wang@autotrader.co.uk>",
+           "Evie Crutchley <evie.crutchley@autotrader.co.uk>",
            "Stevie Woods <steven.woods@autotrader.co.uk>"]
 readme = "README.md"
 license = "Apache-2.0"
