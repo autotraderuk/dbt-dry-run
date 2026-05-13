@@ -293,7 +293,7 @@ In an incremental table, it is not possible to change the data type of a nested 
 
 [blog-post]: https://medium.com/autotrader-engineering/dry-running-our-data-warehouse-using-bigquery-and-dbt-12ccae0209f1
 
-[get-poetry]: https://python-poetry.org/
+[get-uv]: https://docs.astral.sh/uv/
 
 [dbt-external-tables]: https://github.com/dbt-labs/dbt-external-tables
 

@@ -1,9 +1,9 @@
 # Contributing/Running locally
 
-To setup a dev environment you need [poetry][get-poetry], first run `poetry install` to install all dependencies. Then
+To setup a dev environment you need [uv][get-uv], first run `uv sync --all-groups` to install all dependencies. Then
 the `Makefile` contains all the commands needed to run the test suite and linting.
 
-- verify: Formats code with `black`, type checks with `mypy` and then runs the unit tests with coverage.
+- verify: Formats code with `ruff format`, type checks with `mypy` and then runs the unit tests with coverage.
 - integration: Runs the integration tests against BigQuery (See Integration Tests)
 
 There is also a shell script `./run-integration.sh <PROJECT_DIR>` which will run one of the integration tests locally.
@@ -21,6 +21,27 @@ to run the test suite against. The test suite does not currently materialize any
 The integration tests will run on any push to `main` to ensure the package's core functionality is still in place.
 
 __Auto Trader employees can request authorisation to access the `at-dry-run-integration-dev` project for this purpose__
+
+## Running GitHub Actions Locally
+
+You can run the workflow locally with [`act`][get-act].
+Run the main pull request workflow event locally:
+
+```
+make gha-pr
+```
+
+Run the push workflow event locally:
+
+```
+make gha-push
+```
+
+To include integration test secrets in `act`, pass them with `-s`, for example:
+
+```
+act push -s DRY_RUN_SVC_JSON="$(cat /path/to/service-account.json | base64)"
+```
 
 # Preparing for a Release
 
@@ -71,3 +92,6 @@ for releasing should be:
    to production PyPI
    
 5. Verify the package is released
+
+[get-uv]: https://docs.astral.sh/uv/
+[get-act]: https://nektosact.com/installation/index.html
