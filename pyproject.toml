@@ -1,51 +1,51 @@
-[tool.poetry]
+[project]
 name = "dbt-dry-run"
 version = "0.9.0"
 description = "Dry run dbt projects"
-authors = ["Connor Charles <connor.charles@autotrader.co.uk>",
-           "Phil hope <philip.hope@autotrader.co.uk>",
-           "Angelos Georgiadis <angelos.georgiadis@autotrader.co.uk>",
-           "Richard Wilmer <richard.wilmer@autotrader.co.uk>",
-           "Cat Wates <catherine.wates@autotrader.co.uk>",
-           "Shu Wang <shu.wang@autotrader.co.uk>",
-           "Evie Crutchley <evie.crutchley@autotrader.co.uk>",
-           "Stevie Woods <steven.woods@autotrader.co.uk>"]
+authors = [
+  { name = "Connor Charles", email = "connor.charles@autotrader.co.uk" },
+  { name = "Phil hope", email = "philip.hope@autotrader.co.uk" },
+  { name = "Angelos Georgiadis", email = "angelos.georgiadis@autotrader.co.uk" },
+  { name = "Richard Wilmer", email = "richard.wilmer@autotrader.co.uk" },
+  { name = "Cat Wates", email = "catherine.wates@autotrader.co.uk" },
+  { name = "Shu Wang", email = "shu.wang@autotrader.co.uk" },
+  { name = "Evie Crutchley", email = "evie.crutchley@autotrader.co.uk" },
+  { name = "Stevie Woods", email = "steven.woods@autotrader.co.uk" },
+]
 readme = "README.md"
 license = "Apache-2.0"
 repository = "https://github.com/autotraderuk/dbt-dry-run"
+requires-python = ">=3.10,<3.15"
+dependencies = [
+  "agate>=1.7.0,<1.10",
+  "google-cloud-bigquery>=3,<4",
+  "pydantic<3",
+  "tenacity>=8.2,<9",
+  "networkx>=2.3,<4.0",
+  "pyyaml>=6,<7",
+  "typer>=0,<1",
+]
 
-[tool.poetry.scripts]
+[project.scripts]
 dbt-dry-run = "dbt_dry_run.__main__:main"
 
-[tool.poetry.dependencies]
-python = ">=3.10,<3.15"
-agate = ">=1.7.0,<1.10"
-google-cloud-bigquery = "^3"
-pydantic = "<3"
-tenacity = "^8.2"
-networkx = ">=2.3,<4.0"
-pyyaml = "~6"
-typer = "~0"
-
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.11.5"
-pytest = "^9.0.0"
-types-pyyaml = "^6.0.12.20250915"
-pytest-cov = "^4.0.0"
-twine = "^3.8.0"
-pytest-mock = "^3.7.0"
-dbt-bigquery = "~1.11.0"
-numpy = [
-  {version = ">=1.26", python = ">=3.9"},
+[dependency-groups]
+dev = [
+  "ruff>=0.11.5,<0.12",
+  "pytest>=9.0.0,<10",
+  "types-pyyaml>=6.0.12.20250915,<7",
+  "pytest-cov>=4.0.0,<5",
+  "twine>=3.8.0,<4",
+  "pytest-mock>=3.7.0,<4",
+  "dbt-bigquery>=1.11.0,<1.12",
+  "numpy>=1.26; python_version >= '3.9'",
+  "pandas>=2.1.1; python_version >= '3.12'",
+  "mypy>=1.18.2,<2",
 ]
-pandas = [
-  {version = ">=2.1.1", python = ">=3.12"},
-]
-mypy = "^1.18.2"
 
 [build-system]
-requires = ["poetry-core>=1.5.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 testpaths = "dbt_dry_run/test"
