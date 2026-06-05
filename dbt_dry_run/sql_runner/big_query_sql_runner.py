@@ -1,7 +1,7 @@
-from typing import List, Optional, Tuple
+from typing import Any, Callable, List, Optional, Tuple
 
+import agate
 from google.cloud.bigquery import (
-    Client,
     DatasetReference,
     QueryJobConfig,
     SchemaField,
@@ -27,6 +27,20 @@ MAX_ATTEMPT_NUMBER = 5
 QUERY_TIMED_OUT = "Dry run query timed out"
 
 
+class Integer(agate.data_types.DataType):  # type: ignore
+    def cast(self, d: Any) -> Optional[int]:
+        # by default agate will cast none as a Number
+        # but we need to cast it as an Integer to preserve
+        # the type when merging and unioning tables
+        if type(d) == int or d is None:  # noqa [E721]
+            return d
+        else:
+            raise agate.exceptions.CastError('Can not parse value "%s" as Integer.' % d)
+
+    def jsonify(self, d: Optional[int]) -> Optional[int]:
+        return d
+
+
 class BigQuerySQLRunner(SQLRunner):
     JOB_CONFIG = QueryJobConfig(dry_run=True, use_query_cache=False)
 
@@ -37,7 +51,7 @@ class BigQuerySQLRunner(SQLRunner):
         return self.get_node_schema(node) is not None
 
     def get_node_schema(self, node: Node) -> Optional[Table]:
-        client = self.get_client()
+        client = self._project.get_client()
         try:
             dataset = DatasetReference(node.database, node.db_schema)
             table_ref = TableReference(dataset, node.alias)
@@ -46,10 +60,6 @@ class BigQuerySQLRunner(SQLRunner):
             return Table.from_bigquery_table(bigquery_table)
         except NotFound:
             return None
-
-    def get_client(self) -> Client:
-        connection = self._project.get_connection()
-        return connection.handle
 
     @retry(
         retry=retry_if_exception_type(BadRequest),
@@ -61,7 +71,7 @@ class BigQuerySQLRunner(SQLRunner):
     ) -> Tuple[DryRunStatus, Optional[Table], Optional[Exception]]:
         exception = None
         table = None
-        client = self.get_client()
+        client = self._project.get_client()
         try:
             query_job = client.query(sql, job_config=self.JOB_CONFIG)
             table = self.get_schema_from_schema_fields(query_job.schema or [])
@@ -98,3 +108,53 @@ class BigQuerySQLRunner(SQLRunner):
 
         job_fields = list(map(_map_schema_fields_to_table_field, schema_fields))
         return Table(fields=job_fields)
+
+    @classmethod
+    def convert_agate_type(
+        cls, agate_table: agate.Table, col_idx: int
+    ) -> Optional[str]:
+        agate_type = agate_table.column_types[col_idx]
+        conversions: List[Tuple[Any, Callable[..., str]]] = [
+            (Integer, cls.convert_integer_type),
+            (agate.Text, cls.convert_text_type),
+            (agate.Number, cls.convert_number_type),
+            (agate.Boolean, cls.convert_boolean_type),
+            (agate.DateTime, cls.convert_datetime_type),
+            (agate.Date, cls.convert_date_type),
+            (agate.TimeDelta, cls.convert_time_type),
+        ]
+        for agate_cls, func in conversions:
+            if isinstance(agate_type, agate_cls):
+                return func(agate_table, col_idx)
+        return None
+
+    @classmethod
+    def convert_text_type(cls, agate_table: "agate.Table", col_idx: int) -> str:
+        return "string"
+
+    @classmethod
+    def convert_number_type(cls, agate_table: "agate.Table", col_idx: int) -> str:
+        import agate
+
+        decimals = agate_table.aggregate(agate.MaxPrecision(col_idx))
+        return "float64" if decimals else "int64"
+
+    @classmethod
+    def convert_integer_type(cls, agate_table: "agate.Table", col_idx: int) -> str:
+        return "int64"
+
+    @classmethod
+    def convert_boolean_type(cls, agate_table: "agate.Table", col_idx: int) -> str:
+        return "bool"
+
+    @classmethod
+    def convert_datetime_type(cls, agate_table: "agate.Table", col_idx: int) -> str:
+        return "datetime"
+
+    @classmethod
+    def convert_date_type(cls, agate_table: "agate.Table", col_idx: int) -> str:
+        return "date"
+
+    @classmethod
+    def convert_time_type(cls, agate_table: "agate.Table", col_idx: int) -> str:
+        return "time"

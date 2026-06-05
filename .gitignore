@@ -140,3 +140,4 @@ integration-svc.json
 logs
 integration/profiles/.user.yml
 target-full-refresh/
+dbt_internal_packages

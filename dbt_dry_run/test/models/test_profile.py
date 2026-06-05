@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from dbt_dry_run.models.profile import read_profiles
+from dbt_dry_run.adapter.profile import read_profiles
 
 
 def test_as_number_filter() -> None:
