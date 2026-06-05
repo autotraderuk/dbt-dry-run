@@ -28,7 +28,7 @@ class SQLRunner(metaclass=ABCMeta):
         self, sql: str
     ) -> Tuple[DryRunStatus, Optional[Table], Optional[Exception]]: ...
 
+    @classmethod
     def convert_agate_type(
-        self, agate_table: agate.Table, col_idx: int
-    ) -> Optional[str]:
-        return self._project.adapter.convert_agate_type(agate_table, col_idx)
+        cls, agate_table: agate.Table, col_idx: int
+    ) -> Optional[str]: ...

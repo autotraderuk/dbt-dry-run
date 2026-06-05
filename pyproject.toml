@@ -24,6 +24,7 @@ dependencies = [
   "networkx>=2.3,<4.0",
   "pyyaml>=6,<7",
   "typer>=0,<1",
+  "jinja2>=3.1.6",
 ]
 
 [project.scripts]
@@ -37,10 +38,10 @@ dev = [
   "pytest-cov>=4.0.0,<5",
   "twine>=3.8.0,<4",
   "pytest-mock>=3.7.0,<4",
-  "dbt-bigquery>=1.11.0,<1.12",
+  "dbt",
   "numpy>=1.26; python_version >= '3.9'",
   "pandas>=2.1.1; python_version >= '3.12'",
-  "mypy>=1.18.2,<2",
+  "mypy>=1.20.2",
 ]
 
 [build-system]
@@ -98,3 +99,4 @@ disallow_untyped_calls = false
 disallow_untyped_defs = true
 ignore_missing_imports = true
 plugins = ['pydantic.mypy']
+exclude = ["dbt_internal_packages"]

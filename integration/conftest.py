@@ -2,7 +2,7 @@ import os
 import subprocess
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Optional, Iterable, Generator, cast
+from typing import Optional, Iterable, Generator
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -63,7 +63,7 @@ class ProjectContext:
             )
             {partition_by_clause};
         """
-        client: Client = cast(Client, self._project.get_connection().handle)
+        client: Client = self._project.get_client()
         client.query(create_ddl)
         yield
         drop_ddl = f"""
@@ -179,6 +179,8 @@ def _compiled_project(
         target,
         "--target-path",
         target_path,
+        "--static-analysis",
+        "off",
     ]
     if full_refresh:
         dbt_args.append("--full-refresh")

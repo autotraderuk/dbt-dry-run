@@ -20,14 +20,14 @@ def dry_run(
     project_dir: str,
     profiles_dir: str,
     target: Optional[str],
-    target_path: Optional[str],
+    target_path: str = "target",
     verbose: bool = False,
     report_path: Optional[str] = None,
     cli_vars: str = "{}",
     skip_not_compiled: bool = False,
     full_refresh: bool = False,
     extra_check_columns_metadata_key: Optional[str] = None,
-    threads: Optional[int] = None,
+    threads: int = 8,
 ) -> int:
     cli_vars_parsed = json.loads(cli_vars)
     set_flags(
@@ -118,14 +118,14 @@ def run(
         project_dir,
         profiles_dir,
         target,
-        target_path,
+        target_path or "target",
         verbose,
         report_path,
         vars,
         skip_not_compiled,
         full_refresh,
         extra_check_columns_metadata_key,
-        threads,
+        threads or 8,
     )
     if exit_code > 0:
         raise typer.Exit(exit_code)
