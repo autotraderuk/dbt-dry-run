@@ -57,7 +57,10 @@ class IncrementalRunner(NodeRunner):
         if not dry_run_result.table:
             return dry_run_result
 
-        if not dry_run_result.node.config.partition_by:
+        if (
+            not dry_run_result.node.config.partition_by
+            or dry_run_result.node.config.partition_by.field.lower() == "_partitiontime"
+        ):
             return dry_run_result
 
         new_partition_field = TableField(
