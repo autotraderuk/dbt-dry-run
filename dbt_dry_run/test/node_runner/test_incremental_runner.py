@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, call
 from dbt_dry_run import flags
 from dbt_dry_run.exception import SchemaChangeException
 from dbt_dry_run.models import BigQueryFieldType, Table, TableField
+from dbt_dry_run.models.dry_run_result import DryRunResult
 from dbt_dry_run.models.manifest import NodeConfig, PartitionBy
 from dbt_dry_run.models.report import DryRunStatus
 from dbt_dry_run.node_runner.incremental_runner import IncrementalRunner
@@ -91,6 +92,46 @@ def test_partitioned_incremental_model_declares_dbt_max_partition_variable() -> 
     executed_sql = get_executed_sql(mock_sql_runner)
     assert executed_sql.startswith(dbt_max_partition_declaration)
     assert node.compiled_code in executed_sql
+
+
+def test_partitioned_incremental_model_does_not_add_partitiontime_column_when_field_is_partitiontime() -> None:
+    mock_sql_runner = MagicMock()
+    node = SimpleNode(
+        unique_id="node1",
+        depends_on=[],
+        resource_type=ManifestScheduler.MODEL,
+        table_config=NodeConfig(
+            materialized="incremental",
+            partition_by=PartitionBy(
+                field="_PARTITIONTIME",
+                data_type="timestamp",
+                time_ingestion_partitioning=True,
+            ),
+        ),
+    ).to_node()
+    node.depends_on.deep_nodes = []
+
+    result = DryRunResult(
+        node=node,
+        table=Table(
+            fields=[
+                TableField(name="_PARTITIONTIME", type=BigQueryFieldType.TIMESTAMP),
+                TableField(name="a", type=BigQueryFieldType.STRING),
+            ]
+        ),
+        status=DryRunStatus.SUCCESS,
+        exception=None,
+    )
+
+    updated_result = IncrementalRunner(mock_sql_runner, Results())._replace_partition_with_time_ingestion_column(
+        result
+    )
+
+    assert updated_result.table is not None
+    assert set([field.name for field in updated_result.table.fields]) == {
+        "a",
+        "_PARTITIONTIME",
+    }
 
 
 def test_incremental_model_that_does_not_exist_returns_dry_run_schema() -> None:
