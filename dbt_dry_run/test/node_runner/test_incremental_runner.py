@@ -4,7 +4,6 @@ from unittest.mock import MagicMock, call, patch
 from dbt_dry_run import flags
 from dbt_dry_run.exception import SchemaChangeException
 from dbt_dry_run.models import BigQueryFieldType, Table, TableField
-from dbt_dry_run.models.dry_run_result import DryRunResult
 from dbt_dry_run.models.manifest import NodeConfig, PartitionBy
 from dbt_dry_run.models.report import DryRunStatus
 from dbt_dry_run.node_runner.incremental_runner import IncrementalRunner
