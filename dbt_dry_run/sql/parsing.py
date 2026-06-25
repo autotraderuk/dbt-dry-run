@@ -12,10 +12,14 @@ def sql_has_recursive_ctes(code: str) -> bool:
     return False
 
 
+def get_quoted_field_names(field_names: Iterable[str]) -> Iterable[str]:
+    return [f"`{field_name}`" for field_name in field_names]
+
+
 def get_merge_sql(
     table_ref: TableRef, common_field_names: Iterable[str], select_statement: str
 ) -> str:
-    values_csv = ",".join(sorted(common_field_names))
+    values_csv = ",".join(sorted(get_quoted_field_names(common_field_names)))
     return dedent(
         f"""MERGE {table_ref.bq_literal}
                 USING (
