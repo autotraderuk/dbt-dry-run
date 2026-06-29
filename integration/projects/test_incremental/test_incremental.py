@@ -292,3 +292,21 @@ def test_partition_by_time_ingestion(
         assert_report_node_has_columns_in_order(
             report_node, ["executed_at", "col_1", "col_2", "_PARTITIONTIME"]
         )
+
+
+def test_partition_by_partitiontime_does_not_add_partitiontime_column(
+    compiled_project: ProjectContext,
+) -> None:
+    node_id = "model.test_incremental.partition_by_partitiontime"
+    manifest_node = compiled_project.manifest.nodes[node_id]
+    columns = ["_PARTITIONTIME TIMESTAMP", "col_1 STRING", "col_2 STRING"]
+    with compiled_project.create_state(manifest_node, columns, "_PARTITIONTIME", False):
+        run_result = compiled_project.dry_run()
+        assert_report_produced(run_result)
+        report_node = get_report_node_by_id(
+            run_result.get_report(),
+            node_id,
+        )
+        assert_report_node_has_columns_in_order(
+            report_node, ["_PARTITIONTIME", "col_1", "col_2"]
+        )

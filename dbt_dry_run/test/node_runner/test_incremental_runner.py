@@ -1,5 +1,5 @@
 from typing import List, Optional
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock, call, patch
 
 from dbt_dry_run import flags
 from dbt_dry_run.exception import SchemaChangeException
@@ -91,6 +91,48 @@ def test_partitioned_incremental_model_declares_dbt_max_partition_variable() -> 
     executed_sql = get_executed_sql(mock_sql_runner)
     assert executed_sql.startswith(dbt_max_partition_declaration)
     assert node.compiled_code in executed_sql
+
+
+def test_partitioned_incremental_model_does_not_add_partitiontime_column_when_field_already_exist() -> (
+    None
+):
+    mock_sql_runner = MagicMock()
+    mock_sql_runner.query.return_value = (
+        DryRunStatus.SUCCESS,
+        Table(fields=[TableField(name="a", type=BigQueryFieldType.STRING)]),
+        None,
+    )
+    mock_sql_runner.get_node_schema.return_value = None
+
+    node = SimpleNode(
+        unique_id="node1",
+        depends_on=[],
+        resource_type=ManifestScheduler.MODEL,
+        table_config=NodeConfig(
+            materialized="incremental",
+            partition_by=PartitionBy(
+                field="_PARTITIONTIME",
+                data_type="timestamp",
+                time_ingestion_partitioning=True,
+            ),
+        ),
+    ).to_node()
+    node.depends_on.deep_nodes = []
+
+    model_runner = IncrementalRunner(mock_sql_runner, Results())
+    with patch.object(
+        model_runner,
+        "_replace_partition_with_time_ingestion_column",
+        wraps=model_runner._replace_partition_with_time_ingestion_column,
+    ) as replace_partition_mock:
+        updated_result = model_runner.run(node)
+
+    assert replace_partition_mock.called
+    assert updated_result.table is not None
+    assert set([field.name for field in updated_result.table.fields]) == {
+        "a",
+        "_PARTITIONTIME",
+    }
 
 
 def test_incremental_model_that_does_not_exist_returns_dry_run_schema() -> None:

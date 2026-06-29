@@ -60,6 +60,12 @@ class IncrementalRunner(NodeRunner):
         if not dry_run_result.node.config.partition_by:
             return dry_run_result
 
+        existing_field_names = {
+            field.name.upper() for field in dry_run_result.table.fields
+        }
+        if "_PARTITIONTIME" in existing_field_names:
+            return dry_run_result
+
         new_partition_field = TableField(
             name="_PARTITIONTIME",
             type=BigQueryFieldType.TIMESTAMP,
