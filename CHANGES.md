@@ -1,5 +1,11 @@
 ## Changelog
 
+# dbt-dry-run v0.9.1
+
+## Bugfixes
+
+- Fix issue where `_PARTITIONTIME` was duplicated in the predicted schema [@ni-tami]
+
 # dbt-dry-run v0.9.0
 
 ## Improvements
