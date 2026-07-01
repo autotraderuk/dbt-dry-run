@@ -614,7 +614,7 @@ wheels = [
 
 [[package]]
 name = "dbt-dry-run"
-version = "0.9.0"
+version = "0.9.1"
 source = { editable = "." }
 dependencies = [
     { name = "agate" },
