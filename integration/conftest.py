@@ -191,10 +191,12 @@ def _compiled_project(
     test_display_name = f"{request.node.name}/{request.node.name}"
 
     dbt_stdout = run_dbt.stdout.decode("utf-8")
+    dbt_stderr = run_dbt.stderr.decode("utf-8")
     if run_dbt.returncode != 0:
         raise RuntimeError(
             f"dbt has failed to compile for test '{test_display_name}' due to:\n"
             f" {dbt_stdout}\n"
+            f" {dbt_stderr}\n"
             f"Fix dbt compilation error to run test suite!",
             run_dbt.returncode,
         )

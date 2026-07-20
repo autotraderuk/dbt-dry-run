@@ -16,7 +16,7 @@ authors = [
 readme = "README.md"
 license = "Apache-2.0"
 repository = "https://github.com/autotraderuk/dbt-dry-run"
-requires-python = ">=3.10,<3.15"
+requires-python = ">=3.11,<3.15"
 dependencies = [
   "agate>=1.7.0,<1.10",
   "google-cloud-bigquery>=3,<4",
@@ -39,7 +39,7 @@ dev = [
   "pytest-cov>=4.0.0,<5",
   "twine>=3.8.0,<4",
   "pytest-mock>=3.7.0,<4",
-  "dbt",
+  "dbt==2.0.0rc196",
   "numpy>=1.26; python_version >= '3.9'",
   "pandas>=2.1.1; python_version >= '3.12'",
   "mypy>=1.20.2",

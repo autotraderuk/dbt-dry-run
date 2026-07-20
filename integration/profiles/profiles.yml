@@ -1,11 +1,3 @@
-
-# For more information on how to configure this file, please see:
-# https://github.com/fishtown-analytics/dbt/blob/master/sample.profiles.yml
-config:
-    send_anonymous_usage_stats: False
-    use_colors: True
-    printer_width: 180
-
 default:
   target: integration-local
 
