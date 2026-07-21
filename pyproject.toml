@@ -1,6 +1,6 @@
 [project]
 name = "dbt-dry-run"
-version = "0.10.1"
+version = "0.10.2"
 description = "Dry run dbt projects"
 authors = [
   { name = "Connor Charles", email = "connor.charles@autotrader.co.uk" },

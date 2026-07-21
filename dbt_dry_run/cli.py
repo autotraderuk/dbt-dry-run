@@ -1,8 +1,8 @@
-import json
 import os
 from typing import Optional
 
 import typer
+import yaml
 from typer import Option
 
 from dbt_dry_run.adapter.service import DbtArgs, ProjectService
@@ -29,7 +29,7 @@ def dry_run(
     extra_check_columns_metadata_key: Optional[str] = None,
     threads: int = 8,
 ) -> int:
-    cli_vars_parsed = json.loads(cli_vars)
+    cli_vars_parsed = yaml.safe_load(cli_vars)
     set_flags(
         Flags(
             skip_not_compiled=skip_not_compiled,
