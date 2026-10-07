@@ -52,6 +52,18 @@ def test_runnable_filter() -> None:
     assert_node_order([{"A"}, {"B"}], manifest)
 
 
+def test_fusion_seed_without_materialized_config_is_scheduled() -> None:
+    seed = SimpleNode(
+        unique_id="seed",
+        depends_on=[],
+        resource_type="seed",
+        table_config=NodeConfig(),
+    )
+    model = SimpleNode(unique_id="model", depends_on=[seed])
+
+    assert_node_order([{"seed"}, {"model"}], build_manifest([seed, model]))
+
+
 def test_ephemeral_lineage() -> None:
     A = SimpleNode(unique_id="A", depends_on=[])
     B = SimpleNode(unique_id="B", depends_on=[A])

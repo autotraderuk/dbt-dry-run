@@ -33,6 +33,8 @@ RUNNERS: Dict[RunnerKey, Type[NodeRunner]] = {
 
 
 def _get_node_runner_key(node: Node) -> RunnerKey:
+    if node.is_seed:
+        return RunnerKey("seed", "seed")
     return RunnerKey(node.resource_type, node.config.materialized)
 
 

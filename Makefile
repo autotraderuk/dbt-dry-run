@@ -20,7 +20,7 @@ mypy:
 
 .PHONY: lint
 lint:
-	uv run ruff check
+	uv run ruff check --fix
 
 .PHONY: format
 format:

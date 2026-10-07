@@ -2,7 +2,7 @@ import os
 import subprocess
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Optional, Iterable, Generator, cast
+from typing import Optional, Iterable, Generator
 
 import pytest
 from _pytest.fixtures import FixtureRequest
@@ -50,8 +50,11 @@ class ProjectContext:
     ) -> Generator[None, None, None]:
         node_name = node.table_ref.bq_literal
         schema_csv = ",\n".join(columns)
+        partition_expression = (
+            "_PARTITIONDATE" if partition_by == "_PARTITIONTIME" else partition_by
+        )
         partition_by_clause = f"""
-        PARTITION BY {partition_by}
+        PARTITION BY {partition_expression}
         OPTIONS (require_partition_filter = {require_partition_by})
         """
         if not partition_by:
@@ -63,13 +66,15 @@ class ProjectContext:
             )
             {partition_by_clause};
         """
-        client: Client = cast(Client, self._project.get_connection().handle)
+        client: Client = self._project.get_client()
         client.query(create_ddl)
-        yield
-        drop_ddl = f"""
-            DROP TABLE {node_name};
-        """
-        client.query(drop_ddl)
+        try:
+            yield
+        finally:
+            drop_ddl = f"""
+                DROP TABLE {node_name};
+            """
+            client.query(drop_ddl)
 
     @property
     def manifest(self) -> Manifest:
@@ -179,6 +184,8 @@ def _compiled_project(
         target,
         "--target-path",
         target_path,
+        "--static-analysis",
+        "off",
     ]
     if full_refresh:
         dbt_args.append("--full-refresh")
@@ -189,10 +196,12 @@ def _compiled_project(
     test_display_name = f"{request.node.name}/{request.node.name}"
 
     dbt_stdout = run_dbt.stdout.decode("utf-8")
+    dbt_stderr = run_dbt.stderr.decode("utf-8")
     if run_dbt.returncode != 0:
         raise RuntimeError(
             f"dbt has failed to compile for test '{test_display_name}' due to:\n"
             f" {dbt_stdout}\n"
+            f" {dbt_stderr}\n"
             f"Fix dbt compilation error to run test suite!",
             run_dbt.returncode,
         )

@@ -1,11 +1,18 @@
-import os
+from pathlib import Path
 
 import pytest
 
-from dbt_dry_run.models.profile import read_profiles
+from dbt_dry_run.adapter.profile import load_selected_output
+from dbt_dry_run.models.profile import Output
 
 
-def test_as_number_filter() -> None:
+def selected_output(profile_string: str, tmp_path: Path) -> Output:
+    (tmp_path / "dbt_project.yml").write_text("profile: default\n")
+    (tmp_path / "profiles.yml").write_text(profile_string)
+    return load_selected_output(str(tmp_path), str(tmp_path))
+
+
+def test_as_number_filter(tmp_path: Path) -> None:
     profile_string = """
     default:
         target: test-output
@@ -21,13 +28,12 @@ def test_as_number_filter() -> None:
               timeout_seconds: 300
     """
 
-    profiles = read_profiles(profile_string)
-    assert profiles["default"].outputs["test-output"].threads == 8
+    assert selected_output(profile_string, tmp_path).threads == 8
 
 
-def test_env_var_filter() -> None:
+def test_env_var_filter(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     expected_location = "LOCATION_TEST"
-    os.environ["DBT_DRY_RUN_TEST_LOCATION"] = expected_location
+    monkeypatch.setenv("DBT_DRY_RUN_TEST_LOCATION", expected_location)
     profile_string = """
     default:
         target: test-output
@@ -43,11 +49,10 @@ def test_env_var_filter() -> None:
               timeout_seconds: 300
     """
 
-    profiles = read_profiles(profile_string)
-    assert profiles["default"].outputs["test-output"].location == expected_location
+    assert selected_output(profile_string, tmp_path).location == expected_location
 
 
-def test_dataset_schema_alias() -> None:
+def test_dataset_schema_alias(tmp_path: Path) -> None:
     profile_string = """
     default:
         target: test-output
@@ -58,13 +63,12 @@ def test_dataset_schema_alias() -> None:
               method: oauth
               project:  my_project
               schema: dry_run_schema
-              location: "{{ env_var('DBT_DRY_RUN_TEST_LOCATION') }}"
+              location: EU
               threads: 4
               timeout_seconds: 300
     """
 
-    profiles = read_profiles(profile_string)
-    assert profiles["default"].outputs["test-output"].dataset == "dry_run_schema"
+    assert selected_output(profile_string, tmp_path).dataset == "dry_run_schema"
 
     profile_string = """
     default:
@@ -76,13 +80,12 @@ def test_dataset_schema_alias() -> None:
               method: oauth
               project:  my_project
               dataset: dry_run_dataset
-              location: "{{ env_var('DBT_DRY_RUN_TEST_LOCATION') }}"
+              location: EU
               threads: 4
               timeout_seconds: 300
     """
 
-    profiles = read_profiles(profile_string)
-    assert profiles["default"].outputs["test-output"].dataset == "dry_run_dataset"
+    assert selected_output(profile_string, tmp_path).dataset == "dry_run_dataset"
 
     profile_string = """
     default:
@@ -95,10 +98,10 @@ def test_dataset_schema_alias() -> None:
               project:  my_project
               dataset: dry_run_dataset
               schema: dry_run_schema
-              location: "{{ env_var('DBT_DRY_RUN_TEST_LOCATION') }}"
+              location: EU
               threads: 4
               timeout_seconds: 300
     """
 
     with pytest.raises(ValueError):
-        read_profiles(profile_string)
+        selected_output(profile_string, tmp_path)

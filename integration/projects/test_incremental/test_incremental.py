@@ -263,7 +263,7 @@ def test_sql_header_and_max_partition(
 ) -> None:
     node_id = "model.test_incremental.with_sql_header_and_dbt_max_partition"
     manifest_node = compiled_project.manifest.nodes[node_id]
-    columns = ["snapshot_date", "my_string STRING", "my_func_output STRING"]
+    columns = ["snapshot_date DATE", "my_string STRING", "my_func_output STRING"]
     with compiled_project.create_state(manifest_node, columns, "snapshot_date", True):
         run_result = compiled_project.dry_run()
         assert_report_produced(run_result)
@@ -281,7 +281,7 @@ def test_partition_by_time_ingestion(
 ) -> None:
     node_id = "model.test_incremental.partition_by_time_ingestion"
     manifest_node = compiled_project.manifest.nodes[node_id]
-    columns = ["executed_at", "col_1 STRING", "col_2 STRING"]
+    columns = ["executed_at DATE", "col_1 STRING", "col_2 STRING"]
     with compiled_project.create_state(manifest_node, columns, "_PARTITIONTIME", False):
         run_result = compiled_project.dry_run()
         assert_report_produced(run_result)
@@ -299,7 +299,7 @@ def test_partition_by_partitiontime_does_not_add_partitiontime_column(
 ) -> None:
     node_id = "model.test_incremental.partition_by_partitiontime"
     manifest_node = compiled_project.manifest.nodes[node_id]
-    columns = ["_PARTITIONTIME TIMESTAMP", "col_1 STRING", "col_2 STRING"]
+    columns = ["col_1 STRING", "col_2 STRING"]
     with compiled_project.create_state(manifest_node, columns, "_PARTITIONTIME", False):
         run_result = compiled_project.dry_run()
         assert_report_produced(run_result)
@@ -308,5 +308,5 @@ def test_partition_by_partitiontime_does_not_add_partitiontime_column(
             node_id,
         )
         assert_report_node_has_columns_in_order(
-            report_node, ["_PARTITIONTIME", "col_1", "col_2"]
+            report_node, ["col_1", "col_2", "_PARTITIONTIME"]
         )

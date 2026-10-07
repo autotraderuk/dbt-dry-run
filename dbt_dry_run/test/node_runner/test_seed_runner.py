@@ -4,8 +4,9 @@ from unittest.mock import MagicMock
 
 from dbt_dry_run.exception import UnknownSchemaException
 from dbt_dry_run.models.dry_run_result import DryRunResult
-from dbt_dry_run.models.manifest import Node
+from dbt_dry_run.models.manifest import Node, NodeConfig
 from dbt_dry_run.models.report import DryRunStatus
+from dbt_dry_run.node_dispatch import RunnerKey, _get_node_runner_key
 from dbt_dry_run.node_runner.seed_runner import SeedRunner
 from dbt_dry_run.scheduler import ManifestScheduler
 from dbt_dry_run.test.utils import SimpleNode
@@ -46,6 +47,17 @@ def test_seed_runner_loads_file(tmp_path: Path) -> None:
     ).to_node()
     expected_columns = set(csv_content.splitlines()[0].split(","))
     assert_success_and_columns_equal(node, expected_columns)
+
+
+def test_fusion_seed_without_materialized_config_uses_seed_runner() -> None:
+    node = SimpleNode(
+        unique_id="seed",
+        depends_on=[],
+        resource_type=ManifestScheduler.SEED,
+        table_config=NodeConfig(),
+    ).to_node()
+
+    assert _get_node_runner_key(node) == RunnerKey("seed", "seed")
 
 
 def test_seed_runner_loads_file_with_custom_delimiter(tmp_path: Path) -> None:

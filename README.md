@@ -1,9 +1,10 @@
 # dbt-dry-run
 
-[dbt][dbt-home] is a tool that helps manage data transformations using templated SQL queries. These SQL queries are
-executed against a target data warehouse. It doesn't check the validity of SQL queries before it executes your project.
-This dry runner uses BigQuery's [dry run][bq-dry-run] capability to allow you to check that SQL queries are valid before
-trying to execute them.
+[dbt][dbt-home] is a tool that helps manage data transformations using templated SQL queries. dbt Fusion can check SQL
+using static analysis, but it cannot verify the current tables and permissions in your BigQuery project. This dry runner
+uses BigQuery's [dry run][bq-dry-run] capability to check your compiled dbt project against the actual warehouse without
+executing the queries. Run it in CI/CD to catch incompatible schema changes, permission errors and other errors reported
+by BigQuery before deploying your project.
 
 See the [blog post][blog-post] for more information on how the dry runner works.
 
@@ -21,8 +22,8 @@ pip install dbt-dry-run
 
 ### Running
 
-The dry runner has a single command called `dbt-dry-run` in order for it to run you must first compile a dbt manifest
-using `dbt compile`. 
+The dry runner has a single command called `dbt-dry-run`. In order for it to run you must first compile a dbt manifest
+using `dbt compile`.
 
 <details>
   <summary>How much of the project should I compile?</summary>
@@ -33,8 +34,8 @@ using `dbt compile`.
       `NotCompiledException` in the dry run output.
 </details>
 
-Then on the same machine (So that the dry runner has access to your dbt project source and the
-`manifest.yml`) you can run the dry-runner in the same directory as our `dbt_project.yml`:
+Then on the same machine (so that the dry runner has access to your dbt project source and the
+`target/manifest.json`) you can run the dry runner in the same directory as your `dbt_project.yml`:
 
 ```
 dbt-dry-run
@@ -44,8 +45,12 @@ Like dbt it will search for `profiles.yml` in `~/.dbt/` and use the default targ
 you can override these defaults:
 
 ```
-dbt-dry-run default --project-dir /my_org_dbt/ --profiles-dir /my_org_dbt/profiles/ --target local
+dbt-dry-run --project-dir /my_org_dbt/ --profiles-dir /my_org_dbt/profiles/ --target local
 ```
+
+The dry runner configures its BigQuery client from `profiles.yml` to match dbt's internal connection behavior.
+In CI/CD, use the same target and credentials as your deployment job so the dry run checks access to the warehouse
+objects used by your queries. A failed dry run returns exit code 1, so it can stop a deployment before dbt runs.
 
 The full CLI help is shown below, anything prefixed with [dbt] can be used in the same way as a normal dbt parameter:
 
@@ -211,7 +216,7 @@ you may get false positive/negative results from the dry run.
 
 ### Report Artefact
 
-If you specify `---report-path` a JSON file will be outputted regardless of dry run success/failure with detailed
+If you specify `--report-path` a JSON file will be outputted regardless of dry run success/failure with detailed
 information of each node's predicted schema or error message if it has failed:
 
 ```json
@@ -260,17 +265,17 @@ information of each node's predicted schema or error message if it has failed:
 
 ### Things this can catch
 
-The dry run can catch anything the BigQuery planner can identify before the query has run. Which includes:
+The dry run checks your compiled SQL against BigQuery and can catch errors the BigQuery planner identifies before the
+query has run. This includes:
 
-1. Typos in SQL keywords:  `selec` instead of `select`
-2. Typos in columns names: `orders.produts` instead of `orders.products`
-3. Problems with incompatible data types: Trying to execute "4" + 4
-4. Incompatible schema changes to models: Removing a column from a view that is referenced by a downstream model
+1. Incompatible schema changes to models: Removing a column from a view that is referenced by a downstream model
    explicitly
-5. Incompatible schema changes to sources: Third party modifies schema of source tables without your knowledge
-6. Permission errors: The dry runner should run under the same service account your production job runs under. This
-   allows you to catch problems with table/project permissions as dry run queries need table read permissions just like
-   the real query
+2. Incompatible schema changes to sources: Third party modifies schema of source tables without your knowledge
+3. Permission errors: Running under the same credentials as your production job can catch problems accessing tables and
+   projects that the dry run queries reference
+4. Typos in SQL keywords: `selec` instead of `select`
+5. Typos in column names: `orders.produts` instead of `orders.products`
+6. Problems with incompatible data types: Trying to execute "4" + 4
 7. Incorrect configuration of snapshots: For example a typo in the `unique_key` config. Or `check_cols` which do not
    exist in the snapshot
 
