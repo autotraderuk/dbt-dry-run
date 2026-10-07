@@ -50,8 +50,11 @@ class ProjectContext:
     ) -> Generator[None, None, None]:
         node_name = node.table_ref.bq_literal
         schema_csv = ",\n".join(columns)
+        partition_expression = (
+            "_PARTITIONDATE" if partition_by == "_PARTITIONTIME" else partition_by
+        )
         partition_by_clause = f"""
-        PARTITION BY {partition_by}
+        PARTITION BY {partition_expression}
         OPTIONS (require_partition_filter = {require_partition_by})
         """
         if not partition_by:
@@ -64,12 +67,14 @@ class ProjectContext:
             {partition_by_clause};
         """
         client: Client = cast(Client, self._project.get_connection().handle)
-        client.query(create_ddl)
-        yield
-        drop_ddl = f"""
-            DROP TABLE {node_name};
-        """
-        client.query(drop_ddl)
+        client.query(create_ddl).result()
+        try:
+            yield
+        finally:
+            drop_ddl = f"""
+                DROP TABLE {node_name};
+            """
+            client.query(drop_ddl).result()
 
     @property
     def manifest(self) -> Manifest:

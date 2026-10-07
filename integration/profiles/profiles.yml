@@ -1,10 +1,9 @@
-
 # For more information on how to configure this file, please see:
 # https://github.com/fishtown-analytics/dbt/blob/master/sample.profiles.yml
 config:
-    send_anonymous_usage_stats: False
-    use_colors: True
-    printer_width: 180
+  send_anonymous_usage_stats: False
+  use_colors: True
+  printer_width: 180
 
 default:
   target: integration-local
@@ -13,7 +12,7 @@ default:
     integration-local:
       type: bigquery
       method: oauth
-      project:  "{{ env_var('DBT_PROJECT', 'at-dry-run-integration-dev') }}"
+      project: "{{ env_var('DBT_PROJECT', 'at-dry-run-integration-dev') }}"
       schema: dry_run
       location: EU
       threads: 8
